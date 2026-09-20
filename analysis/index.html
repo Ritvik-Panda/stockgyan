@@ -1,8 +1,120 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Stock Analysis | StockGyan</title><link rel="stylesheet" href="/styles.css"></head><body>
-<header class="site-header"><div class="container nav-wrap"><a href="/" class="brand"><img src="/assets/stockgyan-brand-logo.png" alt="StockGyan"></a><nav><a href="/">Home</a><a href="/#learn">Learn</a><a href="/#stocks">Stocks</a><a href="/#mutual-funds">Mutual Funds</a><a href="/#strategies">Strategies</a></nav></div></header>
-<main class="section"><div class="container"><article id="content"><p>Loading analysis…</p></article></div></main>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="StockGyan stock analysis and educational insights on listed companies.">
+  <title>Stock Analysis | StockGyan</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="container nav-wrap">
+    <a href="/" class="brand"><img src="/assets/stockgyan-brand-logo.png" alt="StockGyan"></a>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/#learn">Learn</a>
+      <a href="/analysis/">Stock Analysis</a>
+      <a href="/#mutual-funds">Mutual Funds</a>
+      <a href="/#strategies">Strategies</a>
+    </nav>
+  </div>
+</header>
+
+<main class="section">
+  <div class="container">
+    <div id="content"><p>Loading stock analysis…</p></div>
+  </div>
+</main>
+
 <script>
-const slug=decodeURIComponent(location.pathname.split('/').filter(Boolean).pop()||'');
-const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
-(async()=>{const el=document.getElementById('content');try{const r=await fetch('/api/content?slug='+encodeURIComponent(slug));if(!r.ok)throw 0;const x=await r.json();document.title=x.title+' | StockGyan';el.innerHTML=`<span class="eyebrow">STOCK ANALYSIS</span><h1>${esc(x.title)}</h1><p>${esc(x.summary||'')}</p>${x.image_url?`<img src="${esc(x.image_url)}" alt="${esc(x.title)}" style="width:100%;max-width:900px;border-radius:18px;margin:20px 0">`:''}<div style="white-space:pre-wrap;line-height:1.8">${esc(x.body||'')}</div><div class="tags" style="margin-top:24px">${(x.tags||'').split(',').filter(Boolean).map(t=>`<span>${esc(t.trim())}</span>`).join('')}</div><p style="margin-top:32px"><a class="btn btn-primary" href="/">← Back to StockGyan</a></p>`}catch(e){el.innerHTML='<h1>Analysis not found</h1><p>This published analysis could not be loaded.</p>'}})();
-</script></body></html>
+const esc = v => String(v ?? '').replace(/[&<>'"]/g, c => ({
+  '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'
+}[c]));
+
+const cleanText = v => String(v ?? '').replace(/<[^>]*>/g, '').trim();
+
+function renderTags(tags) {
+  return String(tags || '')
+    .split(',')
+    .map(t => t.trim())
+    .filter(Boolean)
+    .map(t => `<span>${esc(t)}</span>`)
+    .join('');
+}
+
+function renderList(items) {
+  const el = document.getElementById('content');
+  document.title = 'Stock Analysis | StockGyan';
+
+  if (!Array.isArray(items) || !items.length) {
+    el.innerHTML = `
+      <div class="analysis-label">STOCK ANALYSIS</div>
+      <h1>Stock Analysis</h1>
+      <p>No published stock analyses are available yet.</p>`;
+    return;
+  }
+
+  el.innerHTML = `
+    <div class="analysis-label">STOCK ANALYSIS</div>
+    <h1>Stock Analysis</h1>
+    <p>Educational analysis covering business fundamentals, growth drivers, risks and factors to track.</p>
+    <div class="analysis-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px;margin-top:28px">
+      ${items.map(item => `
+        <article class="content-card" style="padding:22px;border-radius:18px">
+          ${item.image_url ? `<img src="${esc(item.image_url)}" alt="${esc(item.title)}" style="width:100%;height:190px;object-fit:cover;border-radius:14px;margin-bottom:16px">` : ''}
+          <div class="analysis-label">STOCK ANALYSIS</div>
+          <h2 style="margin:8px 0 10px">${esc(item.title)}</h2>
+          <p>${esc(item.summary || cleanText(item.body).slice(0,220))}</p>
+          <div class="tags" style="margin:14px 0">${renderTags(item.tags)}</div>
+          <a class="text-link" href="/analysis/?slug=${encodeURIComponent(item.slug)}">Read full analysis →</a>
+        </article>
+      `).join('')}
+    </div>
+    <p style="margin-top:36px"><a class="btn btn-primary" href="/">← Back to StockGyan</a></p>`;
+}
+
+function renderDetail(item) {
+  const el = document.getElementById('content');
+  if (!item || !item.title) throw new Error('Analysis not found');
+  document.title = `${item.title} | StockGyan`;
+  el.innerHTML = `
+    <div class="analysis-label">STOCK ANALYSIS</div>
+    <h1>${esc(item.title)}</h1>
+    <p>${esc(item.summary || '')}</p>
+    ${item.image_url ? `<img src="${esc(item.image_url)}" alt="${esc(item.title)}" style="width:100%;max-width:900px;border-radius:18px;margin:20px 0">` : ''}
+    <div style="white-space:pre-wrap;line-height:1.8">${esc(item.body || '')}</div>
+    <div class="tags" style="margin-top:24px">${renderTags(item.tags)}</div>
+    <p style="margin-top:32px"><a class="btn btn-primary" href="/analysis/">← All Stock Analyses</a></p>
+    <p style="font-size:.88rem;opacity:.78;margin-top:24px">Educational information only. This content is not investment advice or a recommendation to buy or sell any security.</p>`;
+}
+
+(async () => {
+  const el = document.getElementById('content');
+  try {
+    const params = new URLSearchParams(location.search);
+    const slug = params.get('slug');
+
+    if (slug) {
+      const r = await fetch('/api/content?slug=' + encodeURIComponent(slug), {headers:{'Accept':'application/json'}});
+      if (!r.ok) throw new Error('Analysis not found');
+      const item = await r.json();
+      renderDetail(item);
+      return;
+    }
+
+    const r = await fetch('/api/content?type=stock&limit=50', {headers:{'Accept':'application/json'}});
+    if (!r.ok) throw new Error('API request failed');
+    const items = await r.json();
+    renderList(items);
+  } catch (e) {
+    el.innerHTML = `
+      <div class="analysis-label">STOCK ANALYSIS</div>
+      <h1>Stock Analysis</h1>
+      <p>We could not load the published analyses right now. Please try again shortly.</p>
+      <p style="margin-top:24px"><a class="btn btn-primary" href="/">← Back to StockGyan</a></p>`;
+  }
+})();
+</script>
+</body>
+</html>
