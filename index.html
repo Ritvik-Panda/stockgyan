@@ -194,6 +194,37 @@
     <div class="container copyright">© 2026 StockGyan.in. All rights reserved.</div>
   </footer>
 
-  <script src="script.js"></script>
+  <script src="script.js?v=2"></script>
+  <script>
+    // Homepage fallback: load the latest published StockGyan stock analysis directly from D1.
+    (async function () {
+      const box = document.getElementById("featured-stock-analysis");
+      if (!box) return;
+      try {
+        const response = await fetch("/api/content?type=stock&limit=1", {
+          method: "GET",
+          headers: { "Accept": "application/json" },
+          cache: "no-store"
+        });
+        if (!response.ok) throw new Error("API status " + response.status);
+        const data = await response.json();
+        const items = Array.isArray(data) ? data : (Array.isArray(data.results) ? data.results : (data.id ? [data] : []));
+        if (!items.length) return;
+        const item = items[0];
+        const esc = (v) => String(v ?? "").replace(/[&<>\"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'\"':"&quot;","'":"&#39;"}[c]));
+        const summary = item.summary || String(item.body || "").replace(/<[^>]*>/g, "").slice(0, 220);
+        const tags = String(item.tags || "Fundamentals, Technical, Risk").split(",").map(x => x.trim()).filter(Boolean).slice(0, 4);
+        box.innerHTML = `
+          <div class="analysis-label">FEATURED STOCK ANALYSIS</div>
+          ${item.image_url ? `<img src="${esc(item.image_url)}" alt="${esc(item.title)}" style="width:100%;border-radius:18px;display:block;margin-bottom:18px;object-fit:cover;max-height:260px">` : `<div class="placeholder-chart"><span>StockGyan analysis</span><div class="chart-line"></div></div>`}
+          <h3>${esc(item.title)}</h3>
+          <p>${esc(summary)}</p>
+          <div class="tags">${tags.map(t => `<span>${esc(t)}</span>`).join("")}</div>
+          <a class="text-link" href="/analysis/${encodeURIComponent(item.slug)}">Read full analysis →</a>`;
+      } catch (error) {
+        console.warn("StockGyan analysis load failed:", error);
+      }
+    })();
+  </script>
 </body>
 </html>
