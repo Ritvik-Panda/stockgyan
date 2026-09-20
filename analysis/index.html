@@ -1,0 +1,8 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Stock Analysis | StockGyan</title><link rel="stylesheet" href="/styles.css"></head><body>
+<header class="site-header"><div class="container nav-wrap"><a href="/" class="brand"><img src="/assets/stockgyan-brand-logo.png" alt="StockGyan"></a><nav><a href="/">Home</a><a href="/#learn">Learn</a><a href="/#stocks">Stocks</a><a href="/#mutual-funds">Mutual Funds</a><a href="/#strategies">Strategies</a></nav></div></header>
+<main class="section"><div class="container"><article id="content"><p>Loading analysis…</p></article></div></main>
+<script>
+const slug=decodeURIComponent(location.pathname.split('/').filter(Boolean).pop()||'');
+const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+(async()=>{const el=document.getElementById('content');try{const r=await fetch('/api/content?slug='+encodeURIComponent(slug));if(!r.ok)throw 0;const x=await r.json();document.title=x.title+' | StockGyan';el.innerHTML=`<span class="eyebrow">STOCK ANALYSIS</span><h1>${esc(x.title)}</h1><p>${esc(x.summary||'')}</p>${x.image_url?`<img src="${esc(x.image_url)}" alt="${esc(x.title)}" style="width:100%;max-width:900px;border-radius:18px;margin:20px 0">`:''}<div style="white-space:pre-wrap;line-height:1.8">${esc(x.body||'')}</div><div class="tags" style="margin-top:24px">${(x.tags||'').split(',').filter(Boolean).map(t=>`<span>${esc(t.trim())}</span>`).join('')}</div><p style="margin-top:32px"><a class="btn btn-primary" href="/">← Back to StockGyan</a></p>`}catch(e){el.innerHTML='<h1>Analysis not found</h1><p>This published analysis could not be loaded.</p>'}})();
+</script></body></html>
