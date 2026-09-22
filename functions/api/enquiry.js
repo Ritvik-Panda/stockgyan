@@ -1,38 +1,39 @@
-export async function onRequestPost(context) {
+export async function onRequestGet(context) {
   try {
-    const data = await context.request.json();
+    const cookie = context.request.headers.get("Cookie") || "";
 
-    const name = String(data.name || "").trim();
-    const phone = String(data.phone || "").trim();
-    const enquiryType = String(data.enquiry_type || "").trim();
-    const message = String(data.message || "").trim();
-
-    if (!name || !phone) {
+    // Admin session cookie must exist
+    if (!cookie.includes("sg_admin=")) {
       return Response.json(
-        { ok: false, error: "Name and phone are required." },
-        { status: 400 }
+        { error: "Unauthorized" },
+        { status: 401 }
       );
     }
 
     const result = await context.env.DB
       .prepare(`
-        INSERT INTO enquiries
-        (name, phone, enquiry_type, message)
-        VALUES (?, ?, ?, ?)
+        SELECT
+          id,
+          name,
+          phone,
+          enquiry_type,
+          message,
+          status,
+          created_at
+        FROM enquiries
+        ORDER BY id DESC
+        LIMIT 200
       `)
-      .bind(name, phone, enquiryType, message)
-      .run();
+      .all();
 
     return Response.json({
-      ok: true,
-      id: result.meta.last_row_id
+      enquiries: result.results || []
     });
 
   } catch (error) {
     return Response.json(
       {
-        ok: false,
-        error: "Unable to save enquiry."
+        error: "Unable to load enquiries."
       },
       { status: 500 }
     );
