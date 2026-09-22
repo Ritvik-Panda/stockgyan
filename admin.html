@@ -1,26 +1,1256 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>StockGyan Admin</title><link rel="icon" href="/assets/stockgyan-brand-logo.png"><style>
-:root{--navy:#082a63;--green:#159447;--orange:#f28c28;--bg:#f4f7fb;--ink:#13233a;--muted:#66758a;--line:#dce4ee}*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Inter,Arial,sans-serif;color:var(--ink)}button,input,textarea,select{font:inherit}.hidden{display:none!important}.login{min-height:100vh;display:grid;place-items:center;padding:24px;background:linear-gradient(135deg,#eef6ff,#f6fff9)}.login-card,.panel{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 12px 35px #082a6312}.login-card{width:min(430px,100%);padding:30px}.logo{width:220px;max-width:100%;display:block;margin:0 auto 20px}.login h1{font-size:25px;text-align:center;margin:0 0 7px}.muted{color:var(--muted)}.center{text-align:center}.field{margin:15px 0}.field label{display:block;font-weight:700;font-size:13px;margin-bottom:7px}.field input,.field textarea,.field select{width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:10px;outline:none;background:#fff}.field textarea{min-height:150px;resize:vertical}.btn{border:0;border-radius:10px;padding:11px 16px;font-weight:800;cursor:pointer}.primary{background:var(--navy);color:#fff}.green{background:var(--green);color:#fff}.light{background:#eef3f8;color:var(--ink)}.danger{background:#fff0f0;color:#b42318}.app{min-height:100vh}.top{background:var(--navy);color:#fff;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:15px}.top strong{font-size:19px}.wrap{max-width:1250px;margin:auto;padding:22px}.grid{display:grid;grid-template-columns:220px 1fr;gap:20px}.sidebar{padding:15px;height:max-content}.nav button{width:100%;text-align:left;margin:4px 0;background:transparent;border:0;padding:11px;border-radius:9px;cursor:pointer}.nav button.active,.nav button:hover{background:#edf4ff;color:var(--navy);font-weight:800}.content{padding:22px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}.stat{padding:17px;border:1px solid var(--line);border-radius:14px}.stat b{display:block;font-size:25px;margin-top:4px}.toolbar{display:flex;gap:9px;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap}.toolbar .left{display:flex;gap:8px;flex-wrap:wrap}.tablewrap{overflow:auto}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:12px 9px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;font-size:14px}.badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px;font-weight:800}.pub{background:#e8f7ed;color:#08763a}.draft{background:#f0f2f5;color:#596575}.editor{display:grid;grid-template-columns:1.3fr .7fr;gap:18px}.actions{display:flex;gap:8px;flex-wrap:wrap}.toast{position:fixed;right:20px;bottom:20px;background:#13233a;color:#fff;padding:12px 15px;border-radius:10px;box-shadow:0 8px 25px #0003}.small{font-size:12px}.notice{padding:12px 14px;border-radius:10px;background:#fff8e9;border:1px solid #f5d28b;margin-bottom:15px}
-@media(max-width:850px){.grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.editor{grid-template-columns:1fr}.sidebar{padding:10px}.nav{display:grid;grid-template-columns:repeat(2,1fr)}}@media(max-width:520px){.wrap{padding:12px}.content{padding:15px}.stats{grid-template-columns:1fr 1fr}.top{padding:12px}.top .muted{display:none}}
-</style></head><body>
-<section id="login" class="login"><div class="login-card"><img class="logo" src="/assets/stockgyan-brand-logo.png"><h1>StockGyan Admin</h1><p class="muted center">Secure content management</p><form id="loginForm"><div class="field"><label>Admin PIN</label><input id="pin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="Enter your PIN" required></div><button class="btn primary" style="width:100%">Login</button><p id="loginErr" class="center" style="color:#b42318"></p></form></div></section>
-<section id="app" class="app hidden"><header class="top"><strong>StockGyan Admin</strong><div class="actions"><a href="/" target="_blank" class="btn light">View Website</a><button id="logout" class="btn light">Logout</button></div></header><div class="wrap"><div class="grid"><aside class="panel sidebar"><nav class="nav"><button data-page="dashboard" class="active">📊 Dashboard</button><button data-page="content">📝 Content</button><button data-page="add">➕ Add Content</button></nav></aside><main id="main" class="panel content"></main></div></div></section><div id="toast" class="toast hidden"></div>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>StockGyan Admin</title>
+<link rel="icon" href="/assets/stockgyan-brand-logo.png">
+
+<style>
+:root{
+  --navy:#082a63;
+  --green:#159447;
+  --orange:#f28c28;
+  --bg:#f4f7fb;
+  --ink:#13233a;
+  --muted:#66758a;
+  --line:#dce4ee
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--bg);
+  font-family:Inter,Arial,sans-serif;
+  color:var(--ink)
+}
+button,input,textarea,select{font:inherit}
+.hidden{display:none!important}
+
+.login{
+  min-height:100vh;
+  display:grid;
+  place-items:center;
+  padding:24px;
+  background:linear-gradient(135deg,#eef6ff,#f6fff9)
+}
+.login-card,.panel{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:18px;
+  box-shadow:0 12px 35px #082a6312
+}
+.login-card{
+  width:min(430px,100%);
+  padding:30px
+}
+.logo{
+  width:220px;
+  max-width:100%;
+  display:block;
+  margin:0 auto 20px
+}
+.login h1{
+  font-size:25px;
+  text-align:center;
+  margin:0 0 7px
+}
+.muted{color:var(--muted)}
+.center{text-align:center}
+
+.field{margin:15px 0}
+.field label{
+  display:block;
+  font-weight:700;
+  font-size:13px;
+  margin-bottom:7px
+}
+.field input,.field textarea,.field select{
+  width:100%;
+  padding:12px 13px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  outline:none;
+  background:#fff
+}
+.field textarea{
+  min-height:150px;
+  resize:vertical
+}
+
+.btn{
+  border:0;
+  border-radius:10px;
+  padding:11px 16px;
+  font-weight:800;
+  cursor:pointer;
+  text-decoration:none;
+  display:inline-block
+}
+.primary{background:var(--navy);color:#fff}
+.green{background:var(--green);color:#fff}
+.light{background:#eef3f8;color:var(--ink)}
+.danger{background:#fff0f0;color:#b42318}
+
+.app{min-height:100vh}
+
+.top{
+  background:var(--navy);
+  color:#fff;
+  padding:14px 22px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px
+}
+.top strong{font-size:19px}
+
+.wrap{
+  max-width:1250px;
+  margin:auto;
+  padding:22px
+}
+.grid{
+  display:grid;
+  grid-template-columns:220px 1fr;
+  gap:20px
+}
+.sidebar{
+  padding:15px;
+  height:max-content
+}
+.nav button{
+  width:100%;
+  text-align:left;
+  margin:4px 0;
+  background:transparent;
+  border:0;
+  padding:11px;
+  border-radius:9px;
+  cursor:pointer
+}
+.nav button.active,.nav button:hover{
+  background:#edf4ff;
+  color:var(--navy);
+  font-weight:800
+}
+
+.content{padding:22px}
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
+  margin-bottom:18px
+}
+.stat{
+  padding:17px;
+  border:1px solid var(--line);
+  border-radius:14px
+}
+.stat b{
+  display:block;
+  font-size:25px;
+  margin-top:4px
+}
+
+.toolbar{
+  display:flex;
+  gap:9px;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:16px;
+  flex-wrap:wrap
+}
+.toolbar .left{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap
+}
+
+.tablewrap{overflow:auto}
+.table{
+  width:100%;
+  border-collapse:collapse
+}
+.table th,.table td{
+  padding:12px 9px;
+  border-bottom:1px solid var(--line);
+  text-align:left;
+  vertical-align:top;
+  font-size:14px
+}
+
+.badge{
+  display:inline-block;
+  padding:4px 8px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:800
+}
+.pub{background:#e8f7ed;color:#08763a}
+.draft{background:#f0f2f5;color:#596575}
+.newbadge{background:#fff4df;color:#a15c00}
+
+.editor{
+  display:grid;
+  grid-template-columns:1.3fr .7fr;
+  gap:18px
+}
+
+.actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap
+}
+
+.toast{
+  position:fixed;
+  right:20px;
+  bottom:20px;
+  background:#13233a;
+  color:#fff;
+  padding:12px 15px;
+  border-radius:10px;
+  box-shadow:0 8px 25px #0003
+}
+
+.small{font-size:12px}
+
+.notice{
+  padding:12px 14px;
+  border-radius:10px;
+  background:#fff8e9;
+  border:1px solid #f5d28b;
+  margin-bottom:15px
+}
+
+.enquiry-new{
+  background:#fffaf0
+}
+
+.phone-link{
+  color:var(--navy);
+  font-weight:800;
+  text-decoration:none
+}
+
+.whatsapp{
+  background:#e8f7ed;
+  color:#08763a
+}
+
+@media(max-width:850px){
+  .grid{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .editor{grid-template-columns:1fr}
+  .sidebar{padding:10px}
+  .nav{
+    display:grid;
+    grid-template-columns:repeat(2,1fr)
+  }
+}
+
+@media(max-width:520px){
+  .wrap{padding:12px}
+  .content{padding:15px}
+  .stats{grid-template-columns:1fr 1fr}
+  .top{padding:12px}
+  .top .muted{display:none}
+}
+</style>
+</head>
+
+<body>
+
+<section id="login" class="login">
+  <div class="login-card">
+    <img class="logo" src="/assets/stockgyan-brand-logo.png">
+    <h1>StockGyan Admin</h1>
+    <p class="muted center">Secure content management</p>
+
+    <form id="loginForm">
+      <div class="field">
+        <label>Admin PIN</label>
+        <input
+          id="pin"
+          type="password"
+          inputmode="numeric"
+          autocomplete="current-password"
+          placeholder="Enter your PIN"
+          required
+        >
+      </div>
+
+      <button class="btn primary" style="width:100%">
+        Login
+      </button>
+
+      <p id="loginErr" class="center" style="color:#b42318"></p>
+    </form>
+  </div>
+</section>
+
+
+<section id="app" class="app hidden">
+
+<header class="top">
+  <strong>StockGyan Admin</strong>
+
+  <div class="actions">
+    <a href="/" target="_blank" class="btn light">
+      View Website
+    </a>
+
+    <button id="logout" class="btn light">
+      Logout
+    </button>
+  </div>
+</header>
+
+
+<div class="wrap">
+
+<div class="grid">
+
+<aside class="panel sidebar">
+
+<nav class="nav">
+
+<button data-page="dashboard" class="active">
+📊 Dashboard
+</button>
+
+<button data-page="content">
+📝 Content
+</button>
+
+<button data-page="add">
+➕ Add Content
+</button>
+
+<button data-page="enquiries">
+📩 Enquiries
+</button>
+
+</nav>
+
+</aside>
+
+
+<main id="main" class="panel content"></main>
+
+</div>
+</div>
+
+</section>
+
+
+<div id="toast" class="toast hidden"></div>
+
+
 <script>
-const TYPES={article:'Article',stock:'Stock Analysis',mutual_fund:'Mutual Fund',sip:'SIP',ipo:'IPO',nfo:'NFO',strategy:'Strategy',video:'Video',pdf:'PDF'};let items=[];let editing=null;
-const $=s=>document.querySelector(s); const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-function toast(m){$('#toast').textContent=m;$('#toast').classList.remove('hidden');setTimeout(()=>$('#toast').classList.add('hidden'),2500)}
-async function api(url,opt={}){const r=await fetch(url,{credentials:'same-origin',...opt,headers:{'Content-Type':'application/json',...(opt.headers||{})}});const d=await r.json().catch(()=>({}));if(r.status===401){showLogin();throw Error('Unauthorized')}if(!r.ok)throw Error(d.error||'Request failed');return d}
-function showLogin(){editing=null;$('#app').classList.add('hidden');$('#login').classList.remove('hidden')}
-function showApp(){ $('#login').classList.add('hidden');$('#app').classList.remove('hidden'); loadPage('dashboard') }
-$('#loginForm').onsubmit=async e=>{e.preventDefault();$('#loginErr').textContent='';try{await api('/api/admin/login',{method:'POST',body:JSON.stringify({pin:$('#pin').value})});$('#pin').value='';showApp()}catch(err){$('#loginErr').textContent=err.message}}
-$('#logout').onclick=async()=>{await api('/api/admin/logout',{method:'POST'});showLogin()};
-document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));b.classList.add('active');loadPage(b.dataset.page)});
-async function loadItems(){items=await api('/api/admin/content');return items}
-async function loadPage(page){if(page==='dashboard')return dashboard();if(page==='add'){editing=null;return editor()}return contentList()}
-async function dashboard(){const a=await loadItems();const counts={};Object.keys(TYPES).forEach(k=>counts[k]=a.filter(x=>x.type===k).length);$('#main').innerHTML=`<h2>Dashboard</h2><p class="muted">Manage StockGyan content from one place.</p><div class="stats"><div class="stat">Total content<b>${a.length}</b></div><div class="stat">Published<b>${a.filter(x=>x.status==='published').length}</b></div><div class="stat">Drafts<b>${a.filter(x=>x.status==='draft').length}</b></div><div class="stat">Stock analyses<b>${counts.stock}</b></div></div><div class="notice"><b>Next infrastructure step:</b> connect a Cloudflare D1 database and set your admin secrets. This panel is designed for that backend.</div><h3>Content by type</h3><div class="stats">${Object.entries(TYPES).map(([k,v])=>`<div class="stat"><span>${v}</span><b>${counts[k]}</b></div>`).join('')}</div>`}
-async function contentList(){const a=await loadItems();$('#main').innerHTML=`<div class="toolbar"><div><h2 style="margin:0">Content</h2><span class="muted small">Articles, stock analysis, IPO/NFO, mutual funds, strategies and more.</span></div><div class="left"><select id="filter" class="btn light"><option value="">All types</option>${Object.entries(TYPES).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select><button id="addBtn" class="btn green">+ Add Content</button></div></div><div class="tablewrap"><table class="table"><thead><tr><th>Title</th><th>Type</th><th>Status</th><th>Updated</th><th>Actions</th></tr></thead><tbody id="rows"></tbody></table></div>`;const render=()=>{const f=$('#filter').value;const data=f?a.filter(x=>x.type===f):a;$('#rows').innerHTML=data.map(x=>`<tr><td><b>${esc(x.title)}</b><div class="muted small">/${esc(x.slug)}</div></td><td>${TYPES[x.type]}</td><td><span class="badge ${x.status==='published'?'pub':'draft'}">${x.status}</span></td><td>${esc(x.updated_at||'')}</td><td><div class="actions"><button class="btn light" onclick="edit(${x.id})">Edit</button><button class="btn danger" onclick="del(${x.id})">Delete</button></div></td></tr>`).join('')||'<tr><td colspan="5" class="muted">No content yet.</td></tr>'};$('#filter').onchange=render;$('#addBtn').onclick=()=>{editing=null;editor()};render()}
-window.edit=async id=>{editing=items.find(x=>x.id===id)|| (await loadItems()).find(x=>x.id===id);editor()};window.del=async id=>{if(!confirm('Delete this content?'))return;await api('/api/admin/content',{method:'DELETE',body:JSON.stringify({id})});toast('Deleted');contentList()};
-function editor(){const x=editing||{type:'article',title:'',slug:'',summary:'',body:'',image_url:'',tags:'',status:'draft'};$('#main').innerHTML=`<div class="toolbar"><div><h2 style="margin:0">${editing?'Edit Content':'Add Content'}</h2><span class="muted small">Create once, publish when ready.</span></div><button class="btn light" id="back">Back</button></div><div class="editor"><div><div class="field"><label>Title</label><input id="f_title" value="${esc(x.title)}"></div><div class="field"><label>Slug</label><input id="f_slug" value="${esc(x.slug)}" placeholder="auto-generated if blank"></div><div class="field"><label>Summary</label><textarea id="f_summary" style="min-height:100px">${esc(x.summary)}</textarea></div><div class="field"><label>Body</label><textarea id="f_body" placeholder="Write your analysis/article here...">${esc(x.body)}</textarea></div></div><div><div class="field"><label>Content type</label><select id="f_type">${Object.entries(TYPES).map(([k,v])=>`<option value="${k}" ${x.type===k?'selected':''}>${v}</option>`).join('')}</select></div><div class="field"><label>Image URL</label><input id="f_image" value="${esc(x.image_url)}" placeholder="Later: R2 upload integration"></div><div class="field"><label>Tags</label><input id="f_tags" value="${esc(x.tags)}" placeholder="Nifty, Banking, SIP"></div><div class="field"><label>Status</label><select id="f_status"><option value="draft" ${x.status==='draft'?'selected':''}>Draft</option><option value="published" ${x.status==='published'?'selected':''}>Published</option></select></div><button class="btn green" id="save" style="width:100%">${editing?'Update':'Save'} Content</button></div></div>`;$('#back').onclick=contentList;$('#save').onclick=save}
-async function save(){const data={id:editing?.id,type:$('#f_type').value,title:$('#f_title').value,slug:$('#f_slug').value,summary:$('#f_summary').value,body:$('#f_body').value,image_url:$('#f_image').value,tags:$('#f_tags').value,status:$('#f_status').value};try{await api('/api/admin/content',{method:editing?'PUT':'POST',body:JSON.stringify(data)});toast(editing?'Updated':'Saved');editing=null;contentList()}catch(e){toast(e.message)}}
-(async()=>{try{const me=await api('/api/admin/me');if(me.authenticated)showApp();else showLogin()}catch{showLogin()}})();
-</script></body></html>
+
+const TYPES={
+  article:'Article',
+  stock:'Stock Analysis',
+  mutual_fund:'Mutual Fund',
+  sip:'SIP',
+  ipo:'IPO',
+  nfo:'NFO',
+  strategy:'Strategy',
+  video:'Video',
+  pdf:'PDF'
+};
+
+let items=[];
+let editing=null;
+
+const $=s=>document.querySelector(s);
+
+const esc=s=>String(s??'').replace(
+  /[&<>"']/g,
+  m=>({
+    '&':'&amp;',
+    '<':'&lt;',
+    '>':'&gt;',
+    '"':'&quot;',
+    "'":'&#39;'
+  }[m])
+);
+
+
+function toast(m){
+  $('#toast').textContent=m;
+  $('#toast').classList.remove('hidden');
+
+  setTimeout(
+    ()=>$('#toast').classList.add('hidden'),
+    2500
+  );
+}
+
+
+async function api(url,opt={}){
+
+  const r=await fetch(
+    url,
+    {
+      credentials:'same-origin',
+      ...opt,
+      headers:{
+        'Content-Type':'application/json',
+        ...(opt.headers||{})
+      }
+    }
+  );
+
+  const d=await r.json().catch(()=>({}));
+
+  if(r.status===401){
+    showLogin();
+    throw Error('Unauthorized');
+  }
+
+  if(!r.ok){
+    throw Error(d.error||'Request failed');
+  }
+
+  return d;
+}
+
+
+function showLogin(){
+  editing=null;
+  $('#app').classList.add('hidden');
+  $('#login').classList.remove('hidden');
+}
+
+
+function showApp(){
+  $('#login').classList.add('hidden');
+  $('#app').classList.remove('hidden');
+  loadPage('dashboard');
+}
+
+
+$('#loginForm').onsubmit=async e=>{
+
+  e.preventDefault();
+
+  $('#loginErr').textContent='';
+
+  try{
+
+    await api(
+      '/api/admin/login',
+      {
+        method:'POST',
+        body:JSON.stringify({
+          pin:$('#pin').value
+        })
+      }
+    );
+
+    $('#pin').value='';
+
+    showApp();
+
+  }catch(err){
+
+    $('#loginErr').textContent=err.message;
+
+  }
+
+};
+
+
+$('#logout').onclick=async()=>{
+
+  await api(
+    '/api/admin/logout',
+    {
+      method:'POST'
+    }
+  );
+
+  showLogin();
+
+};
+
+
+document.querySelectorAll('.nav button').forEach(b=>{
+
+  b.onclick=()=>{
+
+    document
+      .querySelectorAll('.nav button')
+      .forEach(x=>x.classList.remove('active'));
+
+    b.classList.add('active');
+
+    loadPage(b.dataset.page);
+
+  };
+
+});
+
+
+async function loadItems(){
+
+  items=await api('/api/admin/content');
+
+  return items;
+}
+
+
+async function loadPage(page){
+
+  if(page==='dashboard')
+    return dashboard();
+
+  if(page==='add'){
+    editing=null;
+    return editor();
+  }
+
+  if(page==='enquiries')
+    return enquiriesPage();
+
+  return contentList();
+}
+
+
+async function dashboard(){
+
+  const a=await loadItems();
+
+  const counts={};
+
+  Object.keys(TYPES).forEach(
+    k=>counts[k]=a.filter(x=>x.type===k).length
+  );
+
+  let enquiryCount=0;
+
+  try{
+
+    const e=await api('/api/admin/enquiries');
+
+    enquiryCount=(e.enquiries||[]).filter(
+      x=>x.status==='new'
+    ).length;
+
+  }catch(e){
+
+    enquiryCount=0;
+
+  }
+
+
+  $('#main').innerHTML=`
+
+    <h2>Dashboard</h2>
+
+    <p class="muted">
+      Manage StockGyan content and enquiries from one place.
+    </p>
+
+    <div class="stats">
+
+      <div class="stat">
+        Total content
+        <b>${a.length}</b>
+      </div>
+
+      <div class="stat">
+        Published
+        <b>${a.filter(x=>x.status==='published').length}</b>
+      </div>
+
+      <div class="stat">
+        Drafts
+        <b>${a.filter(x=>x.status==='draft').length}</b>
+      </div>
+
+      <div class="stat">
+        📨 New enquiries
+        <b>${enquiryCount}</b>
+      </div>
+
+    </div>
+
+    <h3>Content by type</h3>
+
+    <div class="stats">
+
+      ${Object.entries(TYPES).map(
+        ([k,v])=>`
+          <div class="stat">
+            <span>${v}</span>
+            <b>${counts[k]}</b>
+          </div>
+        `
+      ).join('')}
+
+    </div>
+
+    <div class="notice">
+      <b>StockGyan:</b>
+      Use the Content section to publish educational material.
+      Use Enquiries to follow up with website visitors.
+    </div>
+  `;
+}
+
+
+async function contentList(){
+
+  const a=await loadItems();
+
+  $('#main').innerHTML=`
+
+    <div class="toolbar">
+
+      <div>
+        <h2 style="margin:0">
+          Content
+        </h2>
+
+        <span class="muted small">
+          Articles, stock analysis, IPO/NFO,
+          mutual funds, strategies and more.
+        </span>
+      </div>
+
+      <div class="left">
+
+        <select id="filter" class="btn light">
+
+          <option value="">
+            All types
+          </option>
+
+          ${Object.entries(TYPES).map(
+            ([k,v])=>
+              <option value="${k}">${v}</option>
+          ).join('')}
+
+        </select>
+
+        <button id="addBtn" class="btn green">
+          + Add Content
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div class="tablewrap">
+
+      <table class="table">
+
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Updated</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody id="rows"></tbody>
+
+      </table>
+
+    </div>
+  `;
+
+
+  const render=()=>{
+
+    const f=$('#filter').value;
+
+    const data=f
+      ? a.filter(x=>x.type===f)
+      : a;
+
+
+    $('#rows').innerHTML=
+
+      data.map(x=>`
+
+        <tr>
+
+          <td>
+            <b>${esc(x.title)}</b>
+
+            <div class="muted small">
+              /${esc(x.slug)}
+            </div>
+          </td>
+
+          <td>
+            ${TYPES[x.type]}
+          </td>
+
+          <td>
+            <span class="badge ${
+              x.status==='published'
+              ?'pub'
+              :'draft'
+            }">
+              ${x.status}
+            </span>
+          </td>
+
+          <td>
+            ${esc(x.updated_at||'')}
+          </td>
+
+          <td>
+
+            <div class="actions">
+
+              <button
+                class="btn light"
+                onclick="edit(${x.id})"
+              >
+                Edit
+              </button>
+
+              <button
+                class="btn danger"
+                onclick="del(${x.id})"
+              >
+                Delete
+              </button>
+
+            </div>
+
+          </td>
+
+        </tr>
+
+      `).join('')
+
+      ||
+
+      `<tr>
+        <td colspan="5" class="muted">
+          No content yet.
+        </td>
+      </tr>`;
+
+  };
+
+
+  $('#filter').onchange=render;
+
+  $('#addBtn').onclick=()=>{
+    editing=null;
+    editor();
+  };
+
+  render();
+}
+
+
+window.edit=async id=>{
+
+  editing=
+    items.find(x=>x.id===id)
+    ||
+    (await loadItems()).find(x=>x.id===id);
+
+  editor();
+
+};
+
+
+window.del=async id=>{
+
+  if(!confirm('Delete this content?'))
+    return;
+
+  await api(
+    '/api/admin/content',
+    {
+      method:'DELETE',
+      body:JSON.stringify({id})
+    }
+  );
+
+  toast('Deleted');
+
+  contentList();
+
+};
+
+
+function editor(){
+
+  const x=editing||{
+    type:'article',
+    title:'',
+    slug:'',
+    summary:'',
+    body:'',
+    image_url:'',
+    tags:'',
+    status:'draft'
+  };
+
+
+  $('#main').innerHTML=`
+
+    <div class="toolbar">
+
+      <div>
+
+        <h2 style="margin:0">
+          ${editing?'Edit Content':'Add Content'}
+        </h2>
+
+        <span class="muted small">
+          Create once, publish when ready.
+        </span>
+
+      </div>
+
+      <button class="btn light" id="back">
+        Back
+      </button>
+
+    </div>
+
+
+    <div class="editor">
+
+      <div>
+
+        <div class="field">
+          <label>Title</label>
+          <input
+            id="f_title"
+            value="${esc(x.title)}"
+          >
+        </div>
+
+
+        <div class="field">
+          <label>Slug</label>
+          <input
+            id="f_slug"
+            value="${esc(x.slug)}"
+            placeholder="auto-generated if blank"
+          >
+        </div>
+
+
+        <div class="field">
+          <label>Summary</label>
+          <textarea
+            id="f_summary"
+            style="min-height:100px"
+          >${esc(x.summary)}</textarea>
+        </div>
+
+
+        <div class="field">
+          <label>Body</label>
+          <textarea
+            id="f_body"
+            placeholder="Write your analysis/article here..."
+          >${esc(x.body)}</textarea>
+        </div>
+
+      </div>
+
+
+      <div>
+
+        <div class="field">
+
+          <label>Content type</label>
+
+          <select id="f_type">
+
+            ${Object.entries(TYPES).map(
+              ([k,v])=>`
+                <option
+                  value="${k}"
+                  ${x.type===k?'selected':''}
+                >
+                  ${v}
+                </option>
+              `
+            ).join('')}
+
+          </select>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>Image URL</label>
+
+          <input
+            id="f_image"
+            value="${esc(x.image_url)}"
+            placeholder="Later: R2 upload integration"
+          >
+
+        </div>
+
+
+        <div class="field">
+
+          <label>Tags</label>
+
+          <input
+            id="f_tags"
+            value="${esc(x.tags)}"
+            placeholder="Nifty, Banking, SIP"
+          >
+
+        </div>
+
+
+        <div class="field">
+
+          <label>Status</label>
+
+          <select id="f_status">
+
+            <option
+              value="draft"
+              ${x.status==='draft'?'selected':''}
+            >
+              Draft
+            </option>
+
+            <option
+              value="published"
+              ${x.status==='published'?'selected':''}
+            >
+              Published
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <button
+          class="btn green"
+          id="save"
+          style="width:100%"
+        >
+          ${editing?'Update':'Save'} Content
+        </button>
+
+      </div>
+
+    </div>
+  `;
+
+
+  $('#back').onclick=contentList;
+
+  $('#save').onclick=save;
+}
+
+
+async function save(){
+
+  const data={
+
+    id:editing?.id,
+
+    type:$('#f_type').value,
+
+    title:$('#f_title').value,
+
+    slug:$('#f_slug').value,
+
+    summary:$('#f_summary').value,
+
+    body:$('#f_body').value,
+
+    image_url:$('#f_image').value,
+
+    tags:$('#f_tags').value,
+
+    status:$('#f_status').value
+
+  };
+
+
+  try{
+
+    await api(
+      '/api/admin/content',
+      {
+        method:editing?'PUT':'POST',
+        body:JSON.stringify(data)
+      }
+    );
+
+    toast(
+      editing
+      ?'Updated'
+      :'Saved'
+    );
+
+    editing=null;
+
+    contentList();
+
+  }catch(e){
+
+    toast(e.message);
+
+  }
+}
+
+
+/* =========================
+   ENQUIRIES
+========================= */
+
+async function enquiriesPage(){
+
+  $('#main').innerHTML=`
+
+    <div class="toolbar">
+
+      <div>
+
+        <h2 style="margin:0">
+          📩 Enquiries
+        </h2>
+
+        <span class="muted small">
+          Website enquiries submitted through StockGyan.
+        </span>
+
+      </div>
+
+      <button
+        class="btn light"
+        onclick="enquiriesPage()"
+      >
+        🔄 Refresh
+      </button>
+
+    </div>
+
+    <div id="enquiriesBox">
+      <p class="muted">
+        Loading enquiries...
+      </p>
+    </div>
+  `;
+
+
+  try{
+
+    const data=await api('/api/admin/enquiries');
+
+    const enquiries=data.enquiries||[];
+
+    if(!enquiries.length){
+
+      $('#enquiriesBox').innerHTML=`
+
+        <div class="notice">
+          <b>No enquiries yet.</b>
+          Website enquiries will appear here automatically.
+        </div>
+
+      `;
+
+      return;
+    }
+
+
+    $('#enquiriesBox').innerHTML=`
+
+      <div class="tablewrap">
+
+        <table class="table">
+
+          <thead>
+
+            <tr>
+              <th>Name</th>
+              <th>Mobile</th>
+              <th>Interested In</th>
+              <th>Message</th>
+              <th>Date / Time</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            ${enquiries.map(x=>{
+
+              const phone=
+                String(x.phone||'')
+                .replace(/\D/g,'');
+
+              const whatsapp=
+                phone.length===10
+                ?'91'+phone
+                :phone;
+
+              const message=
+                Hello ${x.name||''}, thank you for your enquiry with StockGyan.;
+
+              return `
+
+                <tr class="${
+                  x.status==='new'
+                  ?'enquiry-new'
+                  :''
+                }">
+
+                  <td>
+                    <b>${esc(x.name)}</b>
+                  </td>
+
+
+                  <td>
+
+                    <a
+                      class="phone-link"
+                      href="tel:${esc(x.phone)}"
+                    >
+                      ${esc(x.phone)}
+                    </a>
+
+                  </td>
+
+
+                  <td>
+                    ${esc(x.enquiry_type||'-')}
+                  </td>
+
+
+                  <td>
+                    ${esc(x.message||'-')}
+                  </td>
+
+
+                  <td>
+                    ${esc(x.created_at||'')}
+                  </td>
+
+
+                  <td>
+
+                    <span class="badge ${
+                      x.status==='new'
+                      ?'newbadge'
+                      :'draft'
+                    }">
+
+                      ${esc(x.status||'new')}
+
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="actions">
+
+                      <a
+                        class="btn light"
+                        href="tel:${esc(x.phone)}"
+                      >
+                        📞 Call
+                      </a>
+
+                      <a
+                        class="btn whatsapp"
+                        target="_blank"
+                        rel="noopener"
+                        href="https://wa.me/${whatsapp}?text=${encodeURIComponent(message)}"
+                      >
+                        💬 WhatsApp
+                      </a>
+
+                    </div>
+
+                  </td>
+
+                </tr>
+
+              `;
+
+            }).join('')}
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    `;
+
+  }catch(error){
+
+    $('#enquiriesBox').innerHTML=`
+
+      <div class="notice">
+
+        <b>Unable to load enquiries.</b>
+
+        <br><br>
+
+        ${esc(error.message)}
+
+      </div>
+
+    `;
+
+  }
+
+}
+
+
+/* =========================
+   INITIAL AUTH CHECK
+========================= */
+
+(async()=>{
+
+  try{
+
+    const me=await api('/api/admin/me');
+
+    if(me.authenticated)
+      showApp();
+    else
+      showLogin();
+
+  }catch{
+
+    showLogin();
+
+  }
+
+})();
+
+</script>
+
+</body>
+</html>
