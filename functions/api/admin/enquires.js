@@ -36,8 +36,14 @@ export async function onRequestGet(context) {
 
   } catch (error) {
     return Response.json(
-      { error: "Unable to load enquiries." },
-      { status: 500 }
+      {
+        error: "Unable to load enquiries."
+      },
+      {
+        status: 500
+      }
     );
   }
 }
+
+// StockGyan enquiries API - deployment refresh
