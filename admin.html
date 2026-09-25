@@ -131,7 +131,7 @@ async function loadPage(page){
 async function dashboardPage(){
  main.innerHTML='<div class="page-title"><h1>Dashboard</h1></div><div class="cards"><div class="stat"><div class="muted">New Enquiries</div><div class="num" id="newCount">—</div></div><div class="stat"><div class="muted">Total Enquiries</div><div class="num" id="totalCount">—</div></div><div class="stat"><div class="muted">Status</div><div class="num">Online</div></div></div><div class="panel"><h3>StockGyan Admin</h3><p class="muted">Manage enquiries and educational content from this dashboard.</p></div>';
  try{
-   const d=await api('/api/admin/enquiries');
+   const d=await api('/api/admin/enquires');
    const rows=Array.isArray(d.enquiries)?d.enquiries:[];
    $('totalCount').textContent=rows.length;
    $('newCount').textContent=rows.filter(x=>(x.status||'new').toLowerCase()==='new').length;
