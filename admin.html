@@ -154,7 +154,7 @@ async function loadEnquiries(){
  const body=$('enqBody'); if(!body)return;
  body.innerHTML='<tr><td colspan="7">Loading…</td></tr>';
  try{
-   const data=await api('/api/admin/enquiries?ts='+Date.now());
+   const data=await api('/api/admin/enquires?ts='+Date.now());
    const rows=Array.isArray(data.enquiries)?data.enquiries:[];
    if(!rows.length){
      body.innerHTML='<tr><td colspan="7"><b>No enquiries returned by API.</b><br><span class="muted">The API responded successfully, but returned an empty enquiries array.</span></td></tr>';
