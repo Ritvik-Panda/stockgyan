@@ -64,6 +64,27 @@ button,input{font:inherit}
 #unchangedBar{background:#94a3b8;width:0}
 #declineBar{background:var(--red);width:0}
 .breadth-note{padding:13px 18px 18px;color:var(--muted);font-size:12px;text-align:center}
+
+/* StockGyan Market Heatmap */
+.heatmap-card{margin-top:18px;overflow:hidden}
+.heatmap-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:0 18px 14px}
+.heatmap-legend{display:flex;gap:12px;align-items:center;color:var(--muted);font-size:11px;font-weight:800}
+.hm-dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:4px}
+.hm-green{background:#159447}.hm-red{background:#d64545}.hm-grey{background:#94a3b8}
+.heatmap{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;padding:0 18px 18px}
+.hm-tile{border-radius:10px;min-height:74px;padding:10px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;border:1px solid rgba(0,0,0,.05);transition:transform .12s ease,filter .12s ease}
+.hm-tile:hover{transform:translateY(-2px);filter:brightness(.98)}
+.hm-tile.up{background:rgba(21,148,71,.13);border-color:rgba(21,148,71,.24)}
+.hm-tile.down{background:rgba(214,69,69,.12);border-color:rgba(214,69,69,.23)}
+.hm-tile.flat{background:#f1f4f8}
+.hm-symbol{font-size:12px;font-weight:900}
+.hm-name{font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hm-change{font-size:15px;font-weight:950}
+.hm-tile.up .hm-change{color:#087b37}.hm-tile.down .hm-change{color:#c03434}.hm-tile.flat .hm-change{color:#64748b}
+.hm-size-1{min-height:68px}.hm-size-2{min-height:82px}.hm-size-3{min-height:96px}
+@media(max-width:1100px){.heatmap{grid-template-columns:repeat(5,minmax(0,1fr))}}
+@media(max-width:800px){.heatmap{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:600px){.heatmap{grid-template-columns:repeat(3,minmax(0,1fr));padding:0 12px 12px}.heatmap-toolbar{padding:0 12px 12px}.heatmap-legend{gap:7px;font-size:10px}}
 @media(max-width:1000px){
 .movers-grid{grid-template-columns:1fr}
 .main{grid-template-columns:1fr}.tickers{grid-template-columns:repeat(2,1fr)}.side{display:grid;grid-template-columns:1fr 1fr}}
@@ -180,6 +201,24 @@ button,input{font:inherit}
         <span id="advanceBar"></span><span id="unchangedBar"></span><span id="declineBar"></span>
       </div>
       <div id="breadthNote" class="breadth-note">Calculating…</div><div class="breadth-note" style="padding-top:0">On weekends and market holidays, Movers and Breadth use the latest available trading session.</div>
+    </div>
+  </div>
+
+  <div class="card heatmap-card">
+    <div class="section-title">
+      <h2>🗺️ StockGyan Market Heatmap</h2>
+      <span id="heatmapStatus" class="section-meta">Loading…</span>
+    </div>
+    <div class="heatmap-toolbar">
+      <div class="section-meta">Large-cap basket • tile size reflects relative basket weight</div>
+      <div class="heatmap-legend">
+        <span><i class="hm-dot hm-green"></i>Gainer</span>
+        <span><i class="hm-dot hm-red"></i>Loser</span>
+        <span><i class="hm-dot hm-grey"></i>Flat</span>
+      </div>
+    </div>
+    <div id="heatmap" class="heatmap">
+      <div class="empty">Loading heatmap…</div>
     </div>
   </div>
 
@@ -429,6 +468,59 @@ function renderMovers(rows){
     : "Breadth unavailable";
 }
 
+
+function renderHeatmap(rows){
+  const valid=rows
+    .map(r=>{
+      const q=r.q||{};
+      const p=Number(q.last_price);
+      const prev=Number(q.prev_close);
+      const chg=Number.isFinite(Number(q.change))
+        ? Number(q.change)
+        : (Number.isFinite(p)&&Number.isFinite(prev)?p-prev:NaN);
+      const pct=Number.isFinite(prev)&&prev?chg/prev*100:NaN;
+      return {...r,p,chg,pct};
+    })
+    .filter(r=>Number.isFinite(r.pct));
+
+  // Keep a stable order so the heatmap doesn't jump around on every refresh.
+  const weight = name => {
+    const weights = {
+      RELIANCE:6,HDFCBANK:6,ICICIBANK:5,BHARTIARTL:5,INFY:4,TCS:4,
+      SBIN:4,LT:4,AXISBANK:3,KOTAKBANK:3,M&M:3,ITC:3,HINDUNILVR:3,
+      BAJFINANCE:3,SUNPHARMA:3,NTPC:3,TATASTEEL:2,POWERGRID:2,HCLTECH:2,
+      MARUTI:2,TITAN:2,BAJAJFINSV:2,ADANIPORTS:2,ULTRACEMCO:2,ONGC:2,
+      COALINDIA:2,JSWSTEEL:2,HINDALCO:2,BEL:2,WIPRO:2
+    };
+    return weights[name]||1;
+  };
+
+  valid.sort((a,b)=>weight(b.name)-weight(a.name));
+
+  const tile = r => {
+    const cls=r.pct>0?"up":r.pct<0?"down":"flat";
+    const size=weight(r.name)>=5?"hm-size-3":weight(r.name)>=3?"hm-size-2":"hm-size-1";
+    const sign=r.pct>0?"+":"";
+    return `<div class="hm-tile ${cls} ${size}" data-key="${esc(r.key)}" data-name="${esc(r.name)}" title="${esc(r.name)} ${sign}${r.pct.toFixed(2)}%">
+      <div>
+        <div class="hm-symbol">${esc(r.name)}</div>
+        <div class="hm-name">${esc(r.name)}</div>
+      </div>
+      <div class="hm-change">${sign}${r.pct.toFixed(2)}%</div>
+    </div>`;
+  };
+
+  $("heatmap").innerHTML=valid.length
+    ? valid.map(tile).join("")
+    : '<div class="empty">Heatmap unavailable.</div>';
+
+  document.querySelectorAll(".hm-tile").forEach(el=>{
+    el.addEventListener("click",()=>selectStock(el.dataset.key,el.dataset.name));
+  });
+
+  $("heatmapStatus").textContent=`${valid.length} stocks`;
+}
+
 async function loadMovers(){
   $("moversStatus").textContent="Updating…";
   try{
@@ -456,6 +548,7 @@ async function loadMovers(){
     }
 
     renderMovers(rows);
+    renderHeatmap(rows);
     const fallbackUsed = rows.some(r => r.q?._source === "ohlc-fallback");
     $("moversStatus").textContent = fallbackUsed
       ? `${rows.length}/${moverUniverse.length} • Last session`
@@ -477,6 +570,8 @@ async function loadMovers(){
     $("moversStatus").textContent="Unavailable";
     $("gainers").innerHTML='<div class="empty">Unable to load movers.</div>';
     $("losers").innerHTML='<div class="empty">Unable to load movers.</div>';
+    $("heatmap").innerHTML='<div class="empty">Heatmap unavailable.</div>';
+    $("heatmapStatus").textContent="Unavailable";
     $("breadthNote").textContent="Breadth unavailable";
   }
 }
