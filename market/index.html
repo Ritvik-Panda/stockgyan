@@ -43,8 +43,32 @@ button,input{font:inherit}
 .section-title{display:flex;justify-content:space-between;align-items:center;padding:17px 18px}.section-title h2{margin:0;font-size:18px}
 .footer-note{text-align:center;color:var(--muted);font-size:12px;padding:25px}
 .empty{padding:28px;color:var(--muted);text-align:center}
-@media(max-width:1000px){.main{grid-template-columns:1fr}.tickers{grid-template-columns:repeat(2,1fr)}.side{display:grid;grid-template-columns:1fr 1fr}}
-@media(max-width:650px){.nav{padding:10px 12px;flex-wrap:wrap}.logo{width:100%}.search{order:3;flex-basis:100%;max-width:none}.status{display:none}.container{padding:12px}.tickers{grid-template-columns:1fr 1fr}.stock-head{display:block}.price{text-align:left;margin-top:12px}.change{text-align:left}.stats{grid-template-columns:1fr 1fr}#chart{height:360px}.side{display:block}.side .card{margin-bottom:14px}}
+
+.movers-grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(300px,.8fr);gap:18px;margin-top:18px}
+.section-meta{color:var(--muted);font-size:12px}
+.movers-columns{display:grid;grid-template-columns:1fr 1fr;gap:18px;padding:0 18px 18px}
+.mover-heading{font-size:12px;font-weight:900;letter-spacing:.5px;padding:10px 0;border-bottom:1px solid var(--border)}
+.mover-list{min-height:190px}
+.mover-item{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;padding:11px 2px;border-bottom:1px solid var(--border);cursor:pointer}
+.mover-item:hover{background:#f8fbff}
+.mover-symbol{font-weight:800;font-size:13px}
+.mover-ltp{font-size:13px;font-weight:700}
+.mover-pct{font-size:13px;font-weight:900;text-align:right}
+.breadth-card{overflow:hidden}
+.breadth-wrap{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:5px 18px 18px}
+.breadth-number{text-align:center;border:1px solid var(--border);border-radius:10px;padding:13px 5px}
+.breadth-number b{display:block;font-size:27px}
+.breadth-number span{display:block;color:var(--muted);font-size:11px;font-weight:800;margin-top:4px}
+.breadth-bar{display:flex;height:12px;margin:0 18px;border-radius:20px;overflow:hidden;background:#eef2f7}
+#advanceBar{background:var(--green);width:0}
+#unchangedBar{background:#94a3b8;width:0}
+#declineBar{background:var(--red);width:0}
+.breadth-note{padding:13px 18px 18px;color:var(--muted);font-size:12px;text-align:center}
+@media(max-width:1000px){
+.movers-grid{grid-template-columns:1fr}
+.main{grid-template-columns:1fr}.tickers{grid-template-columns:repeat(2,1fr)}.side{display:grid;grid-template-columns:1fr 1fr}}
+@media(max-width:650px){
+.movers-columns{grid-template-columns:1fr}.breadth-wrap{grid-template-columns:repeat(3,1fr)}.nav{padding:10px 12px;flex-wrap:wrap}.logo{width:100%}.search{order:3;flex-basis:100%;max-width:none}.status{display:none}.container{padding:12px}.tickers{grid-template-columns:1fr 1fr}.stock-head{display:block}.price{text-align:left;margin-top:12px}.change{text-align:left}.stats{grid-template-columns:1fr 1fr}#chart{height:360px}.side{display:block}.side .card{margin-bottom:14px}}
 </style>
 </head>
 <body>
@@ -124,6 +148,41 @@ button,input{font:inherit}
     </aside>
   </div>
 
+  <div class="movers-grid">
+    <div class="card movers-card">
+      <div class="section-title">
+        <h2>📈 StockGyan Movers</h2>
+        <span id="moversStatus" class="section-meta">Loading…</span>
+      </div>
+      <div class="movers-columns">
+        <div>
+          <div class="mover-heading up">Top Gainers</div>
+          <div id="gainers" class="mover-list"><div class="empty">Loading…</div></div>
+        </div>
+        <div>
+          <div class="mover-heading down">Top Losers</div>
+          <div id="losers" class="mover-list"><div class="empty">Loading…</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card breadth-card">
+      <div class="section-title">
+        <h2>📊 Market Breadth</h2>
+        <span class="section-meta">StockGyan Basket</span>
+      </div>
+      <div class="breadth-wrap">
+        <div class="breadth-number"><b id="advanceCount">—</b><span>Advances</span></div>
+        <div class="breadth-number"><b id="declineCount">—</b><span>Declines</span></div>
+        <div class="breadth-number"><b id="unchangedCount">—</b><span>Unchanged</span></div>
+      </div>
+      <div class="breadth-bar">
+        <span id="advanceBar"></span><span id="unchangedBar"></span><span id="declineBar"></span>
+      </div>
+      <div id="breadthNote" class="breadth-note">Calculating…</div>
+    </div>
+  </div>
+
   <div class="card" style="margin-top:18px">
     <div class="section-title">
       <h2>StockGyan Market Terminal</h2>
@@ -139,6 +198,7 @@ button,input{font:inherit}
 const API="/api/market/quote";
 const OHLC="/api/market/ohlc";
 const SEARCH="/api/market/search";
+const BATCH="/api/market/batch";
 
 const instruments={
   "RELIANCE":"NSE_EQ|INE002A01018",
@@ -151,6 +211,41 @@ const instruments={
 const watchItems=[
   ["RELIANCE","NSE_EQ|INE002A01018"],
   ["NHPC","NSE_EQ|INE848E01016"]
+];
+
+// Defined StockGyan large-cap basket used for Movers and Breadth.
+// This is NOT the entire NSE market breadth.
+const moverUniverse=[
+  ["RELIANCE","NSE_EQ|INE002A01018"],
+  ["HDFCBANK","NSE_EQ|INE040A01034"],
+  ["ICICIBANK","NSE_EQ|INE090A01021"],
+  ["BHARTIARTL","NSE_EQ|INE397D01024"],
+  ["INFY","NSE_EQ|INE009A01021"],
+  ["TCS","NSE_EQ|INE467B01029"],
+  ["SBIN","NSE_EQ|INE062A01020"],
+  ["LT","NSE_EQ|INE018A01030"],
+  ["AXISBANK","NSE_EQ|INE238A01034"],
+  ["KOTAKBANK","NSE_EQ|INE237A01028"],
+  ["M&M","NSE_EQ|INE101A01026"],
+  ["ITC","NSE_EQ|INE154A01025"],
+  ["HINDUNILVR","NSE_EQ|INE030A01027"],
+  ["BAJFINANCE","NSE_EQ|INE296A01024"],
+  ["SUNPHARMA","NSE_EQ|INE044A01036"],
+  ["NTPC","NSE_EQ|INE733E01010"],
+  ["TATASTEEL","NSE_EQ|INE081A01020"],
+  ["POWERGRID","NSE_EQ|INE752E01010"],
+  ["HCLTECH","NSE_EQ|INE860A01027"],
+  ["MARUTI","NSE_EQ|INE585B01010"],
+  ["TITAN","NSE_EQ|INE280A01028"],
+  ["BAJAJFINSV","NSE_EQ|INE918I01026"],
+  ["ADANIPORTS","NSE_EQ|INE742F01042"],
+  ["ULTRACEMCO","NSE_EQ|INE481G01011"],
+  ["ONGC","NSE_EQ|INE213A01029"],
+  ["COALINDIA","NSE_EQ|INE522F01014"],
+  ["JSWSTEEL","NSE_EQ|INE019A01038"],
+  ["HINDALCO","NSE_EQ|INE038A01020"],
+  ["BEL","NSE_EQ|INE263A01024"],
+  ["WIPRO","NSE_EQ|INE075A01022"]
 ];
 
 let selectedKey=instruments.RELIANCE;
@@ -271,6 +366,80 @@ async function loadWatch(){
   body.querySelectorAll("tr").forEach(tr=>tr.addEventListener("click",()=>selectStock(tr.dataset.key,tr.dataset.name)));
 }
 
+
+function renderMovers(rows){
+  const valid=rows
+    .map(r=>{
+      const q=r.q;
+      const p=Number(q?.last_price);
+      const prev=Number(q?.prev_close);
+      const chg=Number.isFinite(Number(q?.change))?Number(q.change):(p-prev);
+      const pct=Number.isFinite(prev)&&prev?chg/prev*100:NaN;
+      return {...r,p,chg,pct};
+    })
+    .filter(r=>Number.isFinite(r.pct));
+
+  const gainers=[...valid].filter(r=>r.pct>0).sort((a,b)=>b.pct-a.pct).slice(0,5);
+  const losers=[...valid].filter(r=>r.pct<0).sort((a,b)=>a.pct-b.pct).slice(0,5);
+
+  const item=(r)=>`<div class="mover-item" data-key="${esc(r.key)}" data-name="${esc(r.name)}">
+    <div class="mover-symbol">${esc(r.name)}</div>
+    <div class="mover-ltp">${money(r.p)}</div>
+    <div class="mover-pct ${r.chg>=0?"up":"down"}">${r.chg>=0?"+":""}${r.pct.toFixed(2)}%</div>
+  </div>`;
+
+  $("gainers").innerHTML=gainers.length?gainers.map(item).join(""):'<div class="empty">No gainers available.</div>';
+  $("losers").innerHTML=losers.length?losers.map(item).join(""):'<div class="empty">No losers available.</div>';
+
+  document.querySelectorAll(".mover-item").forEach(el=>{
+    el.addEventListener("click",()=>selectStock(el.dataset.key,el.dataset.name));
+  });
+
+  const advances=valid.filter(r=>r.pct>0).length;
+  const declines=valid.filter(r=>r.pct<0).length;
+  const unchanged=valid.filter(r=>r.pct===0).length;
+  const total=advances+declines+unchanged;
+
+  $("advanceCount").textContent=advances;
+  $("declineCount").textContent=declines;
+  $("unchangedCount").textContent=unchanged;
+
+  const a=total?advances/total*100:0;
+  const u=total?unchanged/total*100:0;
+  const d=total?declines/total*100:0;
+  $("advanceBar").style.width=a+"%";
+  $("unchangedBar").style.width=u+"%";
+  $("declineBar").style.width=d+"%";
+  $("breadthNote").textContent=total
+    ? `${advances} advancing • ${declines} declining • ${unchanged} unchanged • ${total} stocks checked`
+    : "Breadth unavailable";
+}
+
+async function loadMovers(){
+  $("moversStatus").textContent="Updating…";
+  try{
+    const keys=moverUniverse.map(x=>x[1]).join(",");
+    const res=await fetch(BATCH+"?instrument_keys="+encodeURIComponent(keys),{cache:"no-store"});
+    const data=await res.json();
+    if(!res.ok)throw new Error(data?.message||"Batch quote failed");
+
+    const rows=[];
+    for(const [name,key] of moverUniverse){
+      const q=data?.data?.[key];
+      if(q)rows.push({name,key,q});
+    }
+
+    renderMovers(rows);
+    $("moversStatus").textContent=`${rows.length}/${moverUniverse.length} stocks`;
+  }catch(e){
+    console.error(e);
+    $("moversStatus").textContent="Unavailable";
+    $("gainers").innerHTML='<div class="empty">Unable to load movers.</div>';
+    $("losers").innerHTML='<div class="empty">Unable to load movers.</div>';
+    $("breadthNote").textContent="Breadth unavailable";
+  }
+}
+
 function createChart(){
   const el=$("chart");
   chart=LightweightCharts.createChart(el,{
@@ -362,9 +531,9 @@ document.querySelectorAll(".chart-tools button").forEach(b=>b.addEventListener("
   createChart();
   $("searchInput").value="RELIANCE";
   await quote(selectedKey,"RELIANCE");
-  await Promise.all([loadIndices(),loadWatch()]);
+  await Promise.all([loadIndices(),loadWatch(),loadMovers()]);
   await loadChart();
-  setInterval(async()=>{await quote(selectedKey,selectedName);await loadIndices();await loadWatch()},30000);
+  setInterval(async()=>{await quote(selectedKey,selectedName);await loadIndices();await loadWatch();await loadMovers()},30000);
 })();
 </script>
 </body>
