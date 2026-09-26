@@ -30,13 +30,23 @@ export async function onRequestGet(context) {
       );
     }
 
-    const allowedIntervals = [
-      "1d",
-      "1m",
-      "30m"
-    ];
+    let unit;
+    let value;
+    let daysBack;
 
-    if (!allowedIntervals.includes(interval)) {
+    if (interval === "1d") {
+      unit = "days";
+      value = "1";
+      daysBack = 365;
+    } else if (interval === "1m") {
+      unit = "minutes";
+      value = "1";
+      daysBack = 30;
+    } else if (interval === "30m") {
+      unit = "minutes";
+      value = "30";
+      daysBack = 90;
+    } else {
       return Response.json(
         {
           status: "error",
@@ -46,10 +56,26 @@ export async function onRequestGet(context) {
       );
     }
 
-    const encodedKey = encodeURIComponent(instrumentKey);
+    const today = new Date();
+
+    const toDate =
+      today.toISOString().slice(0, 10);
+
+    const from = new Date(today);
+
+    from.setDate(
+      from.getDate() - daysBack
+    );
+
+    const fromDate =
+      from.toISOString().slice(0, 10);
+
+    const encodedKey =
+      encodeURIComponent(instrumentKey);
 
     const upstoxUrl =
-      `https://api.upstox.com/v3/historical-candle/${encodedKey}/${interval}`;
+      `https://api.upstox.com/v3/historical-candle/` +
+      `${encodedKey}/${unit}/${value}/${toDate}/${fromDate}`;
 
     const response = await fetch(upstoxUrl, {
       method: "GET",
