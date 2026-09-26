@@ -13,7 +13,6 @@ export async function onRequestGet(context) {
     }
 
     const requestUrl = new URL(context.request.url);
-
     const keysParam =
       requestUrl.searchParams.get("instrument_keys");
 
@@ -54,7 +53,6 @@ export async function onRequestGet(context) {
 
     const encodedKeys = keys.map(encodeURIComponent).join(",");
 
-    // First try the full live quote endpoint.
     const quoteUrl =
       "https://api.upstox.com/v3/market-quote/quotes?instrument_key=" +
       encodedKeys;
@@ -69,79 +67,184 @@ export async function onRequestGet(context) {
 
     const quoteData = await quoteResponse.json();
 
-    const result = {
-      status: quoteData?.status || "success",
-      data: {
-        ...(quoteData?.data || {})
-      }
-    };
-
-    // On weekends/holidays the full quote endpoint may return no rows.
-    // Fill missing instruments from V3 daily OHLC, which provides the
-    // current/most recent session and previous trading session OHLC.
-    const missingKeys = keys.filter(key => !result.data[key.replace("|", ":")]);
-
-    if (missingKeys.length) {
-      const ohlcUrl =
-        "https://api.upstox.com/v3/market-quote/ohlc?instrument_key=" +
-        missingKeys.map(encodeURIComponent).join(",") +
-        "&interval=1d";
-
-      const ohlcResponse = await fetch(ohlcUrl, {
-        method: "GET",
+    if (!quoteResponse.ok) {
+      return Response.json(quoteData, {
+        status: quoteResponse.status,
         headers: {
-          Accept: "application/json",
-          Authorization: `Bearer ${token}`
+          "Cache-Control": "no-store"
         }
       });
+    }
 
-      const ohlcData = await ohlcResponse.json();
+    const liveData = quoteData?.data || {};
 
-      for (const [symbolKey, item] of Object.entries(ohlcData?.data || {})) {
-        const live = item?.live_ohlc || {};
-        const previous = item?.prev_ohlc || {};
+    // Convert a timestamp into the current India date.
+    function istDate(value) {
+      if (value === undefined || value === null || value === "") {
+        return "";
+      }
 
-        const lastPrice =
-          Number.isFinite(Number(live.close))
-            ? Number(live.close)
-            : Number(previous.close);
+      const n = Number(value);
+      const date = Number.isFinite(n)
+        ? new Date(n < 100000000000 ? n * 1000 : n)
+        : new Date(value);
 
-        const prevClose =
-          Number.isFinite(Number(previous.close))
-            ? Number(previous.close)
-            : lastPrice;
+      if (Number.isNaN(date.getTime())) {
+        return "";
+      }
 
-        const change = lastPrice - prevClose;
+      return new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Kolkata",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+      }).format(date);
+    }
 
-        result.data[symbolKey] = {
-          last_price: lastPrice,
-          change,
-          prev_close: prevClose,
-          prev_close_price: prevClose,
-          ohlc: {
-            open: Number.isFinite(Number(live.open))
-              ? Number(live.open)
-              : Number(previous.open),
-            high: Number.isFinite(Number(live.high))
-              ? Number(live.high)
-              : Number(previous.high),
-            low: Number.isFinite(Number(live.low))
-              ? Number(live.low)
-              : Number(previous.low),
-            close: lastPrice
-          },
-          volume: Number(live.volume ?? previous.volume ?? 0),
-          last_trade_time:
-            live.ts || previous.ts || null,
-          instrument_token: item?.instrument_token || null,
-          symbol: item?.symbol || symbolKey.split(":").pop(),
-          _source: "ohlc-fallback"
-        };
+    const todayIst = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Kolkata",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).format(new Date());
+
+    // The quote API can still return Friday's last quote on a Saturday,
+    // Sunday or exchange holiday. In that situation the current last price
+    // and previous close can be identical, so calculate the last-session
+    // move from historical daily candles instead.
+    const liveRows = Object.values(liveData);
+
+    const hasTodayQuote = liveRows.some(item => {
+      return istDate(item?.last_trade_time) === todayIst ||
+             istDate(item?.timestamp) === todayIst ||
+             istDate(item?.ohlc?.ts) === todayIst;
+    });
+
+    const dayName = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Kolkata",
+      weekday: "short"
+    }).format(new Date());
+
+    const weekend = dayName === "Sat" || dayName === "Sun";
+
+    const useHistoricalSession = weekend || !hasTodayQuote;
+
+    if (!useHistoricalSession) {
+      return Response.json(quoteData, {
+        status: quoteResponse.status,
+        headers: {
+          "Cache-Control": "no-store"
+        }
+      });
+    }
+
+    // Closed-market fallback:
+    // Historical V3 daily candles provide the latest trading session and the
+    // preceding trading session. This is the correct source for session-over-
+    // session gain/loss when the exchange is closed.
+    const fromDateObj = new Date();
+    fromDateObj.setUTCDate(fromDateObj.getUTCDate() - 7);
+
+    const fromDate = fromDateObj.toISOString().slice(0, 10);
+    const toDate = todayIst;
+
+    const historicalResults = await Promise.all(
+      keys.map(async key => {
+        try {
+          const historicalUrl =
+            "https://api.upstox.com/v3/historical-candle/" +
+            `${encodeURIComponent(key)}/days/1/${toDate}/${fromDate}`;
+
+          const response = await fetch(historicalUrl, {
+            method: "GET",
+            headers: {
+              Accept: "application/json",
+              Authorization: `Bearer ${token}`
+            }
+          });
+
+          if (!response.ok) {
+            return { key, data: null };
+          }
+
+          const data = await response.json();
+          return { key, data };
+        } catch {
+          return { key, data: null };
+        }
+      })
+    );
+
+    const result = {
+      status: "success",
+      data: {}
+    };
+
+    for (const item of historicalResults) {
+      const candles = item.data?.data?.candles || [];
+
+      if (!candles.length) {
+        continue;
+      }
+
+      const sorted = [...candles].sort(
+        (a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime()
+      );
+
+      const latest = sorted[sorted.length - 1];
+      const previous = sorted.length >= 2
+        ? sorted[sorted.length - 2]
+        : null;
+
+      const latestClose = Number(latest[4]);
+      const previousClose = previous
+        ? Number(previous[4])
+        : latestClose;
+
+      if (!Number.isFinite(latestClose)) {
+        continue;
+      }
+
+      const change = Number.isFinite(previousClose)
+        ? latestClose - previousClose
+        : 0;
+
+      const symbol = item.key.includes("|")
+        ? item.key.split("|")[1]
+        : item.key;
+
+      result.data[item.key.replace("|", ":")] = {
+        last_price: latestClose,
+        change,
+        net_change: change,
+        prev_close: previousClose,
+        prev_close_price: previousClose,
+        ohlc: {
+          open: Number(latest[1]),
+          high: Number(latest[2]),
+          low: Number(latest[3]),
+          close: latestClose,
+          volume: Number(latest[5] || 0),
+          ts: latest[0]
+        },
+        volume: Number(latest[5] || 0),
+        last_trade_time: latest[0],
+        instrument_token: item.key,
+        symbol,
+        _source: "historical-fallback"
+      };
+    }
+
+    // If historical data was unavailable for some instrument, retain the
+    // live quote so the rest of the terminal can still display it.
+    for (const [returnedKey, quote] of Object.entries(liveData)) {
+      if (!result.data[returnedKey]) {
+        result.data[returnedKey] = quote;
       }
     }
 
     return Response.json(result, {
-      status: quoteResponse.ok ? 200 : quoteResponse.status,
+      status: 200,
       headers: {
         "Cache-Control": "no-store"
       }
