@@ -3,481 +3,369 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>StockGyan Market</title>
-<meta name="description" content="StockGyan live market terminal for stocks and indices.">
+<title>StockGyan Market Terminal</title>
+<meta name="description" content="StockGyan live market terminal with Upstox market data.">
+<script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
 <style>
 :root{
-  --navy:#082a63;
-  --navy2:#061d45;
-  --green:#159447;
-  --orange:#f28c28;
-  --bg:#f4f7fb;
-  --card:#ffffff;
-  --line:#e3e8f0;
-  --text:#14213d;
-  --muted:#718096;
-  --red:#d64545;
-  --shadow:0 8px 25px rgba(8,42,99,.08);
+  --navy:#082a63;--navy2:#061c43;--green:#159447;--orange:#f28c28;
+  --bg:#f4f7fb;--card:#fff;--text:#17233b;--muted:#6f7b90;--border:#e5eaf2;
+  --red:#d94b4b;--shadow:0 10px 30px rgba(8,42,99,.08)
 }
 *{box-sizing:border-box}
-body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text)}
-header{
-  height:68px;background:linear-gradient(135deg,var(--navy2),var(--navy));
-  color:#fff;display:flex;align-items:center;gap:22px;padding:0 24px;
-  position:sticky;top:0;z-index:100;box-shadow:0 4px 18px rgba(0,0,0,.12)
-}
-.logo{font-size:24px;font-weight:800;letter-spacing:-.5px;white-space:nowrap}
-.logo span{color:var(--orange)}
-.search-wrap{position:relative;flex:1;max-width:650px}
-.search{
-  width:100%;height:42px;border:1px solid rgba(255,255,255,.22);
-  border-radius:10px;background:rgba(255,255,255,.12);color:#fff;
-  padding:0 16px;font-size:15px;outline:none
-}
-.search::placeholder{color:#d8e2f2}
-.search:focus{background:#fff;color:var(--text)}
-.search-results{
-  display:none;position:absolute;top:48px;left:0;right:0;background:#fff;
-  border:1px solid var(--line);border-radius:12px;box-shadow:0 14px 35px rgba(0,0,0,.18);
-  overflow:hidden;color:var(--text);max-height:360px;overflow-y:auto
-}
-.search-results.show{display:block}
-.result{
-  padding:12px 15px;border-bottom:1px solid #edf0f5;cursor:pointer;
-  display:flex;justify-content:space-between;gap:12px
-}
-.result:hover{background:#f5f8fc}
-.result-name{font-weight:700}
-.result-meta{font-size:12px;color:var(--muted);margin-top:3px}
-.result-badge{font-size:11px;font-weight:700;padding:4px 7px;border-radius:5px;background:#eef4ff;color:var(--navy);height:max-content}
-nav{display:flex;gap:18px;font-size:14px;white-space:nowrap}
-nav a{color:#fff;text-decoration:none;opacity:.9}
-nav a:hover{opacity:1}
-.status{font-size:12px;color:#d8e2f2;display:flex;align-items:center;gap:7px;white-space:nowrap}
-.dot{width:8px;height:8px;border-radius:50%;background:#31c878}
-.dot.off{background:var(--orange)}
-main{max-width:1450px;margin:auto;padding:22px}
-.section-title{display:flex;justify-content:space-between;align-items:center;margin:20px 0 12px}
-.section-title h2{font-size:18px;margin:0}
-.section-title span{font-size:12px;color:var(--muted)}
-.index-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
-.card,.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
-.index-card{padding:18px}
-.index-name{font-size:13px;color:var(--muted);font-weight:700}
-.price{font-size:25px;font-weight:800;margin-top:8px}
-.change{font-size:13px;font-weight:700;margin-top:4px}
-.up{color:var(--green)}
-.down{color:var(--red)}
-.neutral{color:var(--muted)}
-.grid-2{display:grid;grid-template-columns:1.25fr .75fr;gap:16px}
-.panel{padding:18px}
-.table-wrap{overflow:auto}
-table{width:100%;border-collapse:collapse;min-width:680px}
-th,td{text-align:left;padding:12px 10px;border-bottom:1px solid #edf0f5;font-size:13px}
-th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
-tbody tr{cursor:pointer}
-tbody tr:hover{background:#f8fafc}
-.stock-name{font-weight:800}
-.small{font-size:11px;color:var(--muted)}
-.watch-add{font-size:12px;color:var(--navy);font-weight:700;cursor:pointer}
-.detail-head{display:flex;justify-content:space-between;align-items:flex-start;gap:15px}
-.detail-symbol{font-size:22px;font-weight:800}
-.detail-price{font-size:30px;font-weight:800;margin-top:4px}
-.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
-.metric{padding:11px;border:1px solid var(--line);border-radius:9px;background:#fafbfd}
-.metric label{display:block;color:var(--muted);font-size:11px;margin-bottom:5px}
-.metric b{font-size:14px}
-.depth{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px}
-.depth-box{border:1px solid var(--line);border-radius:10px;padding:12px}
-.depth-title{font-size:12px;font-weight:800;margin-bottom:8px}
-.depth-row{display:flex;justify-content:space-between;padding:5px 0;font-size:12px;border-bottom:1px dashed #edf0f5}
-.empty{padding:30px;text-align:center;color:var(--muted);font-size:13px}
-.movers{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.mover{padding:13px;border:1px solid var(--line);border-radius:10px;cursor:pointer}
-.mover:hover{background:#fafcff}
-footer{padding:28px 22px;text-align:center;color:var(--muted);font-size:12px}
-.loading{opacity:.55}
-@media(max-width:1000px){
-  .index-grid{grid-template-columns:repeat(2,1fr)}
-  .grid-2{grid-template-columns:1fr}
-  nav{display:none}
-}
-@media(max-width:620px){
-  header{padding:0 12px;gap:10px}
-  .logo{font-size:20px}
-  .status{display:none}
-  main{padding:12px}
-  .index-grid{grid-template-columns:1fr 1fr;gap:8px}
-  .index-card{padding:13px}
-  .price{font-size:21px}
-  .metrics{grid-template-columns:1fr 1fr}
-}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif}
+button,input{font:inherit}
+.header{position:sticky;top:0;z-index:20;background:linear-gradient(100deg,var(--navy2),var(--navy));color:#fff;box-shadow:0 5px 18px rgba(0,0,0,.15)}
+.nav{max-width:1440px;margin:auto;display:flex;align-items:center;gap:18px;padding:13px 22px}
+.logo{font-size:25px;font-weight:900;letter-spacing:-1px;margin-right:8px}.logo span{color:var(--orange)}
+.search{position:relative;flex:1;max-width:520px}.search input{width:100%;border:1px solid rgba(255,255,255,.18);background:#fff;color:#17233b;border-radius:10px;padding:11px 14px;outline:none}
+.results{position:absolute;left:0;right:0;top:48px;background:#fff;color:#17233b;border-radius:10px;box-shadow:0 18px 40px rgba(0,0,0,.22);overflow:hidden;display:none;z-index:30}
+.result{padding:12px 14px;border-bottom:1px solid var(--border);cursor:pointer}.result:hover{background:#f3f7fc}
+.result b{display:block}.result small{color:var(--muted)}
+.status{font-size:13px;white-space:nowrap}.dot{display:inline-block;width:8px;height:8px;background:#35c879;border-radius:50%;margin-right:7px}
+.nav a{color:#fff;text-decoration:none;font-size:14px;margin-left:auto}
+.container{max-width:1440px;margin:auto;padding:20px}
+.tickers{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow)}
+.ticker{padding:17px}.ticker small{display:block;color:var(--muted);font-weight:700}.ticker strong{display:block;font-size:25px;margin:7px 0 3px}.up{color:var(--green)}.down{color:var(--red)}
+.main{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:18px}
+.stock-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;padding:20px 22px;border-bottom:1px solid var(--border)}
+.stock-name h1{margin:0;font-size:27px}.stock-name small{color:var(--muted)}.price{font-size:31px;font-weight:900;text-align:right}.change{text-align:right;font-weight:800;margin-top:4px}
+.chart-tools{display:flex;gap:7px;align-items:center;padding:13px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.chart-tools button{border:1px solid var(--border);background:#fff;color:var(--navy);padding:7px 12px;border-radius:8px;cursor:pointer;font-weight:700}
+.chart-tools button.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.chart-status{margin-left:auto;color:var(--muted);font-size:12px}
+#chart{height:470px;width:100%}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:16px}
+.stat{border:1px solid var(--border);border-radius:10px;padding:13px}.stat small{display:block;color:var(--muted);font-size:11px;font-weight:800}.stat b{display:block;margin-top:5px;font-size:16px}
+.side{display:flex;flex-direction:column;gap:18px}.side .card{padding:18px}.side h3{margin:0 0 15px}.depth-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;margin-bottom:8px}.depth-head{color:var(--muted);font-weight:800}.depth-cell{padding:9px;background:#f7f9fc;border-radius:8px}
+.watch{overflow:hidden}.watch table{width:100%;border-collapse:collapse}.watch th,.watch td{text-align:left;padding:11px 13px;border-bottom:1px solid var(--border);font-size:13px}.watch th{background:#f7f9fc;color:var(--muted);font-size:11px}.watch tr{cursor:pointer}.watch tr:hover{background:#f8fbff}
+.section-title{display:flex;justify-content:space-between;align-items:center;padding:17px 18px}.section-title h2{margin:0;font-size:18px}
+.footer-note{text-align:center;color:var(--muted);font-size:12px;padding:25px}
+.empty{padding:28px;color:var(--muted);text-align:center}
+@media(max-width:1000px){.main{grid-template-columns:1fr}.tickers{grid-template-columns:repeat(2,1fr)}.side{display:grid;grid-template-columns:1fr 1fr}}
+@media(max-width:650px){.nav{padding:10px 12px;flex-wrap:wrap}.logo{width:100%}.search{order:3;flex-basis:100%;max-width:none}.status{display:none}.container{padding:12px}.tickers{grid-template-columns:1fr 1fr}.stock-head{display:block}.price{text-align:left;margin-top:12px}.change{text-align:left}.stats{grid-template-columns:1fr 1fr}#chart{height:360px}.side{display:block}.side .card{margin-bottom:14px}}
 </style>
 </head>
 <body>
-
-<header>
-  <div class="logo">Stock<span>Gyan</span></div>
-
-  <div class="search-wrap">
-    <input id="searchInput" class="search" type="search"
-      placeholder="Search stocks, indices or companies..." autocomplete="off">
-    <div id="searchResults" class="search-results"></div>
-  </div>
-
-  <div class="status"><span id="statusDot" class="dot"></span><span id="statusText">Market data connected</span></div>
-
-  <nav>
+<header class="header">
+  <div class="nav">
+    <div class="logo">Stock<span>Gyan</span></div>
+    <div class="search">
+      <input id="searchInput" autocomplete="off" placeholder="Search stocks, e.g. RELIANCE, TCS, HDFC BANK">
+      <div id="results" class="results"></div>
+    </div>
+    <div class="status"><span class="dot"></span>Market data connected</div>
     <a href="/">Home</a>
     <a href="/market/">Market</a>
-  </nav>
+  </div>
 </header>
 
-<main>
-  <div class="section-title">
-    <h2>Market Indices</h2>
-    <span id="lastUpdated">Updating...</span>
+<div class="container">
+  <div class="tickers">
+    <div class="card ticker"><small>NIFTY 50</small><strong id="niftyPrice">—</strong><span id="niftyChange">Loading...</span></div>
+    <div class="card ticker"><small>BANK NIFTY</small><strong id="bankPrice">—</strong><span id="bankChange">Loading...</span></div>
+    <div class="card ticker"><small>INDIA VIX</small><strong id="vixPrice">—</strong><span id="vixChange">Loading...</span></div>
+    <div class="card ticker"><small>SENSEX</small><strong id="sensexPrice">—</strong><span id="sensexChange">Loading...</span></div>
   </div>
 
-  <section class="index-grid">
-    <div class="card index-card">
-      <div class="index-name">NIFTY 50</div>
-      <div id="nifty-price" class="price">—</div>
-      <div id="nifty-change" class="change neutral">Loading...</div>
-    </div>
-    <div class="card index-card">
-      <div class="index-name">BANK NIFTY</div>
-      <div id="bank-price" class="price">—</div>
-      <div id="bank-change" class="change neutral">Loading...</div>
-    </div>
-    <div class="card index-card">
-      <div class="index-name">INDIA VIX</div>
-      <div class="price" id="vix-price">—</div>
-      <div id="vix-change" class="change neutral">Loading...</div>
-    </div>
-    <div class="card index-card">
-      <div class="index-name">SENSEX</div>
-      <div class="price" id="sensex-price">—</div>
-      <div id="sensex-change" class="change neutral">Loading...</div>
-    </div>
-  </section>
-
-  <div class="section-title">
-    <h2>Market Watch</h2>
-    <span>Click a stock for full details</span>
-  </div>
-
-  <section class="panel">
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Instrument</th><th>LTP</th><th>Change</th><th>Open</th>
-            <th>High</th><th>Low</th><th>Volume</th>
-          </tr>
-        </thead>
-        <tbody id="watchBody"></tbody>
-      </table>
-    </div>
-  </section>
-
-  <div class="section-title">
-    <h2>Market Overview</h2>
-    <span>StockGyan market terminal</span>
-  </div>
-
-  <section class="grid-2">
-    <div class="panel">
-      <div class="section-title" style="margin-top:0">
-        <h2>StockGyan Market Watch</h2>
-        <span>Selected instruments</span>
+  <div class="main">
+    <section class="card">
+      <div class="stock-head">
+        <div class="stock-name">
+          <h1 id="stockTitle">RELIANCE</h1>
+          <small id="stockKey">NSE_EQ|INE002A01018</small>
+        </div>
+        <div>
+          <div class="price" id="stockPrice">₹—</div>
+          <div class="change" id="stockChange">—</div>
+        </div>
       </div>
-      <div id="breadthBox" class="empty">Market breadth will be added after a defined market universe is connected.</div>
-    </div>
 
-    <div class="panel">
-      <div class="section-title" style="margin-top:0">
-        <h2>Top Movers</h2>
-        <span>Live watchlist</span>
+      <div class="chart-tools">
+        <button data-range="1D">1D</button>
+        <button data-range="1W">1W</button>
+        <button data-range="1M" class="active">1M</button>
+        <button data-range="3M">3M</button>
+        <button data-range="1Y">1Y</button>
+        <button data-range="ALL">ALL</button>
+        <span class="chart-status" id="chartStatus">Loading chart…</span>
       </div>
-      <div id="moversBox" class="movers">
-        <div class="empty" style="grid-column:1/-1">Loading market watch...</div>
-      </div>
-    </div>
-  </section>
 
-  <div class="section-title">
-    <h2>Stock Details</h2>
-    <span id="detailStatus">Select an instrument</span>
+      <div id="chart"></div>
+
+      <div class="stats">
+        <div class="stat"><small>OPEN</small><b id="open">—</b></div>
+        <div class="stat"><small>HIGH</small><b id="high">—</b></div>
+        <div class="stat"><small>LOW</small><b id="low">—</b></div>
+        <div class="stat"><small>PREVIOUS CLOSE</small><b id="prevClose">—</b></div>
+        <div class="stat"><small>VOLUME</small><b id="volume">—</b></div>
+        <div class="stat"><small>AVERAGE PRICE</small><b id="avgPrice">—</b></div>
+        <div class="stat"><small>52-WEEK HIGH</small><b id="yearHigh">—</b></div>
+        <div class="stat"><small>52-WEEK LOW</small><b id="yearLow">—</b></div>
+        <div class="stat"><small>LAST TRADE TIME</small><b id="tradeTime">—</b></div>
+      </div>
+    </section>
+
+    <aside class="side">
+      <div class="card watch">
+        <div class="section-title"><h2>Market Watch</h2></div>
+        <table>
+          <thead><tr><th>STOCK</th><th>LTP</th><th>CHG%</th></tr></thead>
+          <tbody id="watchBody"></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h3>Market Depth</h3>
+        <div class="depth-row depth-head"><div>BUY</div><div>SELL</div></div>
+        <div id="depthBox"><div class="empty">Select a stock to view available depth.</div></div>
+      </div>
+    </aside>
   </div>
 
-  <section class="panel">
-    <div id="details" class="empty">Search for a stock or click an instrument above.</div>
-  </section>
-</main>
+  <div class="card" style="margin-top:18px">
+    <div class="section-title">
+      <h2>StockGyan Market Terminal</h2>
+      <span style="color:var(--muted);font-size:12px">Educational market-data view</span>
+    </div>
+    <div class="empty">Prices and market data are supplied through the connected market-data service. Data may be delayed or subject to provider availability.</div>
+  </div>
 
-<footer>
-  © StockGyan · Market information powered by market-data APIs. Prices may be delayed or unavailable outside market hours.
-</footer>
+  <div class="footer-note">StockGyan.in • Learn. Analyse. Understand. Invest. • Market information is for educational/informational purposes and is not investment advice.</div>
+</div>
 
 <script>
-const API = "/api/market/quote";
-const SEARCH_API = "/api/market/search";
+const API="/api/market/quote";
+const OHLC="/api/market/ohlc";
+const SEARCH="/api/market/search";
 
-const instruments = {
-  "RELIANCE": "NSE_EQ|INE002A01018",
-  "NHPC": "NSE_EQ|INE848E01016"
+const instruments={
+  "RELIANCE":"NSE_EQ|INE002A01018",
+  "NHPC":"NSE_EQ|INE848E01016",
+  "NIFTY 50":"NSE_INDEX|Nifty 50",
+  "BANK NIFTY":"NSE_INDEX|Nifty Bank",
+  "INDIA VIX":"NSE_INDEX|India VIX"
 };
 
-const indexList = [
-  {name:"NIFTY 50", key:"NSE_INDEX|Nifty 50", prefix:"nifty"},
-  {name:"BANK NIFTY", key:"NSE_INDEX|Nifty Bank", prefix:"bank"},
-  {name:"INDIA VIX", key:"NSE_INDEX|India VIX", prefix:"vix"},
-  {name:"SENSEX", key:"BSE_INDEX|SENSEX", prefix:"sensex"}
+const watchItems=[
+  ["RELIANCE","NSE_EQ|INE002A01018"],
+  ["NHPC","NSE_EQ|INE848E01016"]
 ];
 
-let selectedKey = null;
-let searchTimer = null;
+let selectedKey=instruments.RELIANCE;
+let selectedName="RELIANCE";
+let allCandles=[];
+let currentRange="1M";
+let chart, candleSeries, volumeSeries;
 
-function formatNumber(value, decimals=2){
-  if(value === null || value === undefined || value === "" || Number.isNaN(Number(value))) return "—";
-  return Number(value).toLocaleString("en-IN",{minimumFractionDigits:decimals,maximumFractionDigits:decimals});
-}
-
-function formatVolume(value){
-  if(value === null || value === undefined || Number.isNaN(Number(value))) return "—";
-  const n=Number(value);
-  if(n>=10000000) return (n/10000000).toFixed(2)+" Cr";
-  if(n>=100000) return (n/100000).toFixed(2)+" L";
-  if(n>=1000) return (n/1000).toFixed(2)+" K";
+const $=id=>document.getElementById(id);
+const money=v=>Number.isFinite(Number(v))?"₹"+Number(v).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2}):"—";
+const num=v=>Number.isFinite(Number(v))?Number(v).toLocaleString("en-IN",{maximumFractionDigits:2}):"—";
+const volume=v=>{
+  const n=Number(v); if(!Number.isFinite(n)) return "—";
+  if(n>=1e7) return (n/1e7).toFixed(2)+" Cr";
+  if(n>=1e5) return (n/1e5).toFixed(2)+" L";
+  if(n>=1e3) return (n/1e3).toFixed(2)+" K";
   return n.toLocaleString("en-IN");
-}
+};
+const esc=s=>String(s??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
 
-function getQuote(data){
-  if(!data) return null;
-  const source = data.data ?? data;
-  if(source && typeof source === "object"){
-    if(source.last_price !== undefined) return source;
-    const keys = Object.keys(source);
-    if(keys.length) return source[keys[0]];
+function getQuoteObject(data){
+  if(data?.data && typeof data.data==="object"){
+    const vals=Object.values(data.data);
+    return vals[0] || null;
   }
   return null;
 }
 
-function changeValue(q){
-  if(!q) return 0;
-  if(q.net_change !== undefined) return Number(q.net_change);
-  if(q.change !== undefined) return Number(q.change);
-  if(q.last_price !== undefined && q.ohlc?.close !== undefined)
-    return Number(q.last_price)-Number(q.ohlc.close);
-  return 0;
+function renderQuote(q){
+  if(!q)return;
+  const price=Number(q.last_price);
+  const prev=Number(q.prev_close);
+  const chg=Number.isFinite(Number(q.change))?Number(q.change):(price-prev);
+  const pct=Number.isFinite(prev)&&prev?chg/prev*100:NaN;
+  $("stockTitle").textContent=selectedName;
+  $("stockKey").textContent=selectedKey;
+  $("stockPrice").textContent=money(price);
+  $("stockChange").textContent=Number.isFinite(chg)?`${chg>=0?"+":""}${money(chg)} (${pct>=0?"+":""}${pct.toFixed(2)}%)`:"—";
+  $("stockChange").className="change "+(chg>=0?"up":"down");
+  $("open").textContent=money(q.ohlc?.open);
+  $("high").textContent=money(q.ohlc?.high);
+  $("low").textContent=money(q.ohlc?.low);
+  $("prevClose").textContent=money(q.ohlc?.close ?? q.prev_close);
+  $("volume").textContent=volume(q.volume);
+  $("avgPrice").textContent=money(q.average_price);
+  $("yearHigh").textContent=money(q.year_high);
+  $("yearLow").textContent=money(q.year_low);
+  $("tradeTime").textContent=q.last_trade_time?new Date(q.last_trade_time).toLocaleString("en-IN"):"—";
+  renderDepth(q.depth);
 }
 
-function previousClose(q){
-  return q?.prev_close ?? q?.previous_close ?? q?.ohlc?.close ?? null;
+function renderDepth(depth){
+  const box=$("depthBox");
+  if(!depth){box.innerHTML='<div class="empty">Depth not available for this instrument.</div>';return}
+  const buy=Array.isArray(depth.buy)?depth.buy.slice(0,5):[];
+  const sell=Array.isArray(depth.sell)?depth.sell.slice(0,5):[];
+  if(!buy.length&&!sell.length){box.innerHTML='<div class="empty">Depth not available for this instrument.</div>';return}
+  let rows="";
+  for(let i=0;i<Math.max(buy.length,sell.length);i++){
+    const b=buy[i]||{},s=sell[i]||{};
+    rows+=`<div class="depth-row"><div class="depth-cell">${money(b.price)} · ${num(b.quantity??b.qty??0)}</div><div class="depth-cell">${money(s.price)} · ${num(s.quantity??s.qty??0)}</div></div>`;
+  }
+  box.innerHTML=rows;
 }
 
-function percentChange(q){
-  const ch=changeValue(q);
-  const prev=previousClose(q);
-  if(prev && Number(prev)!==0) return (ch/Number(prev))*100;
-  return 0;
+async function quote(key,name=selectedName){
+  try{
+    const res=await fetch(API+"?instrument_key="+encodeURIComponent(key),{cache:"no-store"});
+    const data=await res.json();
+    if(!res.ok)throw new Error(data?.message||"Quote failed");
+    selectedKey=key;selectedName=name;
+    renderQuote(getQuoteObject(data));
+    return getQuoteObject(data);
+  }catch(e){
+    console.error(e);
+    return null;
+  }
 }
 
-function setStatus(ok,text){
-  document.getElementById("statusDot").className="dot"+(ok?"":" off");
-  document.getElementById("statusText").textContent=text;
-}
-
-function renderChange(el,ch,pct){
-  const node=document.getElementById(el);
-  const sign=ch>0?"+":ch<0?"":"";
-  node.textContent=sign+formatNumber(ch)+" ("+sign+formatNumber(pct)+"%)";
-  node.className="change "+(ch>0?"up":ch<0?"down":"neutral");
-}
-
-async function fetchQuote(key){
-  const response=await fetch(API+"?instrument_key="+encodeURIComponent(key),{cache:"no-store"});
-  const data=await response.json();
-  if(!response.ok || data.status==="error") throw new Error(data.message||"Quote request failed");
-  const q=getQuote(data);
-  if(!q) throw new Error("No quote returned");
-  return q;
+async function loadIndex(id,key){
+  try{
+    const res=await fetch(API+"?instrument_key="+encodeURIComponent(key),{cache:"no-store"});
+    const data=await res.json();
+    const q=getQuoteObject(data); if(!q)return;
+    const p=Number(q.last_price),prev=Number(q.prev_close);
+    const chg=Number.isFinite(Number(q.change))?Number(q.change):(p-prev);
+    const pct=prev?chg/prev*100:NaN;
+    $(id+"Price").textContent=money(p);
+    $(id+"Change").textContent=Number.isFinite(pct)?`${chg>=0?"+":""}${pct.toFixed(2)}%`:"—";
+    $(id+"Change").className=chg>=0?"up":"down";
+  }catch(e){console.warn(e)}
 }
 
 async function loadIndices(){
-  for(const item of indexList){
-    try{
-      const q=await fetchQuote(item.key);
-      document.getElementById(item.prefix+"-price").textContent="₹"+formatNumber(q.last_price);
-      renderChange(item.prefix+"-change",changeValue(q),percentChange(q));
-    }catch(e){
-      document.getElementById(item.prefix+"-price").textContent="—";
-      document.getElementById(item.prefix+"-change").textContent="Unavailable";
-      document.getElementById(item.prefix+"-change").className="change neutral";
-    }
-  }
+  await Promise.all([
+    loadIndex("nifty","NSE_INDEX|Nifty 50"),
+    loadIndex("bank","NSE_INDEX|Nifty Bank"),
+    loadIndex("vix","NSE_INDEX|India VIX"),
+    loadIndex("sensex","BSE_INDEX|SENSEX")
+  ]);
 }
 
 async function loadWatch(){
-  const body=document.getElementById("watchBody");
-  body.innerHTML="";
-  for(const [symbol,key] of Object.entries(instruments)){
+  const body=$("watchBody");
+  body.innerHTML=watchItems.map(x=>`<tr data-key="${esc(x[1])}" data-name="${esc(x[0])}"><td><b>${esc(x[0])}</b></td><td>Loading…</td><td>—</td></tr>`).join("");
+  for(const [name,key] of watchItems){
     try{
-      const q=await fetchQuote(key);
-      const ch=changeValue(q), pct=percentChange(q);
-      const tr=document.createElement("tr");
-      tr.innerHTML=`
-        <td><div class="stock-name">${symbol}</div><div class="small">${key}</div></td>
-        <td><b>₹${formatNumber(q.last_price)}</b></td>
-        <td class="${ch>0?"up":ch<0?"down":"neutral"}">${ch>0?"+":""}${formatNumber(ch)} (${pct>0?"+":""}${formatNumber(pct)}%)</td>
-        <td>${formatNumber(q.ohlc?.open)}</td>
-        <td>${formatNumber(q.ohlc?.high)}</td>
-        <td>${formatNumber(q.ohlc?.low)}</td>
-        <td>${formatVolume(q.volume)}</td>`;
-      tr.onclick=()=>showStock(key,symbol);
-      body.appendChild(tr);
-    }catch(e){
-      const tr=document.createElement("tr");
-      tr.innerHTML=`<td><b>${symbol}</b></td><td colspan="6" class="neutral">Data unavailable</td>`;
-      body.appendChild(tr);
-    }
+      const data=await (await fetch(API+"?instrument_key="+encodeURIComponent(key),{cache:"no-store"})).json();
+      const q=getQuoteObject(data); if(!q)continue;
+      const tr=[...body.querySelectorAll("tr")].find(x=>x.dataset.key===key);
+      if(!tr)continue;
+      const p=Number(q.last_price),prev=Number(q.prev_close),chg=Number.isFinite(Number(q.change))?Number(q.change):(p-prev),pct=prev?chg/prev*100:NaN;
+      tr.children[1].textContent=money(p);
+      tr.children[2].textContent=Number.isFinite(pct)?`${chg>=0?"+":""}${pct.toFixed(2)}%`:"—";
+      tr.children[2].className=chg>=0?"up":"down";
+    }catch(e){}
   }
+  body.querySelectorAll("tr").forEach(tr=>tr.addEventListener("click",()=>selectStock(tr.dataset.key,tr.dataset.name)));
 }
 
-async function showStock(key,name=""){
-  selectedKey=key;
-  document.getElementById("detailStatus").textContent="Loading "+(name||key)+"...";
-  document.getElementById("details").innerHTML='<div class="empty loading">Loading live market data...</div>';
-  try{
-    const q=await fetchQuote(key);
-    const symbol=name || q.trading_symbol || q.symbol || key;
-    const ch=changeValue(q), pct=percentChange(q);
-    const high52=q.year_high ?? q.oe_year_high;
-    const low52=q.year_low ?? q.oe_year_low;
-    document.getElementById("detailStatus").textContent=symbol;
-
-    document.getElementById("details").innerHTML=`
-      <div class="detail-head">
-        <div>
-          <div class="detail-symbol">${symbol}</div>
-          <div class="small">${key}</div>
-          <div class="detail-price">₹${formatNumber(q.last_price)}</div>
-          <div class="change ${ch>0?"up":ch<0?"down":"neutral"}">${ch>0?"+":""}${formatNumber(ch)} (${pct>0?"+":""}${formatNumber(pct)}%)</div>
-        </div>
-        <div class="small">Live quote</div>
-      </div>
-
-      <div class="metrics">
-        <div class="metric"><label>OPEN</label><b>₹${formatNumber(q.ohlc?.open)}</b></div>
-        <div class="metric"><label>HIGH</label><b>₹${formatNumber(q.ohlc?.high)}</b></div>
-        <div class="metric"><label>LOW</label><b>₹${formatNumber(q.ohlc?.low)}</b></div>
-        <div class="metric"><label>PREVIOUS CLOSE</label><b>₹${formatNumber(previousClose(q))}</b></div>
-        <div class="metric"><label>VOLUME</label><b>${formatVolume(q.volume)}</b></div>
-        <div class="metric"><label>AVERAGE PRICE</label><b>₹${formatNumber(q.average_price)}</b></div>
-        <div class="metric"><label>52-WEEK HIGH</label><b>₹${formatNumber(high52)}</b></div>
-        <div class="metric"><label>52-WEEK LOW</label><b>₹${formatNumber(low52)}</b></div>
-        <div class="metric"><label>LAST TRADE TIME</label><b>${q.last_trade_time ? new Date(Number(q.last_trade_time)).toLocaleString("en-IN") : "—"}</b></div>
-      </div>
-
-      <div class="depth">
-        <div class="depth-box">
-          <div class="depth-title">BUY DEPTH</div>
-          ${depthRows(q.depth?.buy)}
-        </div>
-        <div class="depth-box">
-          <div class="depth-title">SELL DEPTH</div>
-          ${depthRows(q.depth?.sell)}
-        </div>
-      </div>`;
-  }catch(e){
-    document.getElementById("detailStatus").textContent="Data unavailable";
-    document.getElementById("details").innerHTML='<div class="empty">Unable to load this instrument right now.</div>';
-  }
-}
-
-function depthRows(rows){
-  if(!Array.isArray(rows) || !rows.length) return '<div class="small">Depth not available.</div>';
-  return rows.slice(0,5).map(r=>`
-    <div class="depth-row">
-      <span>₹${formatNumber(r.price)}</span>
-      <span>${formatVolume(r.quantity ?? r.qty)}</span>
-    </div>`).join("");
-}
-
-function renderSearchResults(items){
-  const box=document.getElementById("searchResults");
-  if(!items.length){
-    box.innerHTML='<div class="empty">No matching instruments found.</div>';
-    box.classList.add("show");
-    return;
-  }
-
-  box.innerHTML=items.map((item,i)=>`
-    <div class="result" data-index="${i}">
-      <div>
-        <div class="result-name">${escapeHtml(item.name || item.trading_symbol || "Unknown")}</div>
-        <div class="result-meta">${escapeHtml(item.trading_symbol || "")} · ${escapeHtml(item.exchange || "")}</div>
-      </div>
-      <div class="result-badge">${escapeHtml(item.segment || item.instrument_type || "")}</div>
-    </div>`).join("");
-
-  box.querySelectorAll(".result").forEach((el)=>{
-    el.addEventListener("click",()=>{
-      const item=items[Number(el.dataset.index)];
-      if(item?.instrument_key){
-        document.getElementById("searchInput").value=item.trading_symbol || item.name || "";
-        box.classList.remove("show");
-        showStock(item.instrument_key,item.trading_symbol || item.name);
-      }
-    });
+function createChart(){
+  const el=$("chart");
+  chart=LightweightCharts.createChart(el,{
+    width:el.clientWidth,height:470,
+    layout:{background:{type:"solid",color:"#ffffff"},textColor:"#64748b"},
+    grid:{vertLines:{color:"#eef2f7"},horzLines:{color:"#eef2f7"}},
+    rightPriceScale:{borderColor:"#e5eaf2"},
+    timeScale:{borderColor:"#e5eaf2",timeVisible:true,secondsVisible:false},
+    crosshair:{mode:LightweightCharts.CrosshairMode.Normal}
   });
-
-  box.classList.add("show");
+  candleSeries=chart.addSeries(LightweightCharts.CandlestickSeries,{
+    upColor:"#159447",downColor:"#d94b4b",borderUpColor:"#159447",borderDownColor:"#d94b4b",
+    wickUpColor:"#159447",wickDownColor:"#d94b4b"
+  });
+  volumeSeries=chart.addSeries(LightweightCharts.HistogramSeries,{
+    priceFormat:{type:"volume"},priceScaleId:""
+  });
+  volumeSeries.priceScale().applyOptions({scaleMargins:{top:.78,bottom:0}});
+  new ResizeObserver(()=>chart.applyOptions({width:el.clientWidth})).observe(el);
 }
 
-function escapeHtml(value){
-  return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+function parseCandles(raw){
+  const arr=Array.isArray(raw)?raw:[];
+  return arr.map(c=>({
+    time:Math.floor(new Date(c[0]).getTime()/1000),
+    open:Number(c[1]),high:Number(c[2]),low:Number(c[3]),close:Number(c[4]),volume:Number(c[5]||0)
+  })).filter(c=>Number.isFinite(c.time)&&[c.open,c.high,c.low,c.close].every(Number.isFinite)).sort((a,b)=>a.time-b.time);
 }
 
-async function searchInstruments(query){
-  const box=document.getElementById("searchResults");
+async function loadChart(){
+  $("chartStatus").textContent="Loading historical data…";
   try{
-    const response=await fetch(SEARCH_API+"?query="+encodeURIComponent(query),{cache:"no-store"});
-    const data=await response.json();
-    if(!response.ok || data.status==="error") throw new Error(data.message||"Search failed");
-    const items=Array.isArray(data.data)?data.data:[];
-    renderSearchResults(items);
+    const interval=(currentRange==="1D"||currentRange==="1W")?"30m":"1d";
+    const res=await fetch(OHLC+"?instrument_key="+encodeURIComponent(selectedKey)+"&interval="+interval,{cache:"no-store"});
+    const data=await res.json();
+    if(!res.ok)throw new Error(data?.message||"Historical data failed");
+    allCandles=parseCandles(data?.data?.candles);
+    renderRange();
+    $("chartStatus").textContent=`${allCandles.length} candles • ${interval}`;
   }catch(e){
-    box.innerHTML='<div class="empty">Search temporarily unavailable.</div>';
-    box.classList.add("show");
+    console.error(e);$("chartStatus").textContent="Chart data unavailable";
   }
 }
 
-document.getElementById("searchInput").addEventListener("input",(e)=>{
-  const query=e.target.value.trim();
+function renderRange(){
+  if(!candleSeries||!allCandles.length)return;
+  const now=Date.now();
+  const days={ "1D":1,"1W":7,"1M":30,"3M":90,"1Y":365,"ALL":99999 };
+  const cutoff=now-days[currentRange]*86400000;
+  const filtered=currentRange==="ALL"?allCandles:allCandles.filter(c=>c.time*1000>=cutoff);
+  const data=filtered.map(c=>({time:c.time,open:c.open,high:c.high,low:c.low,close:c.close}));
+  const vols=filtered.map(c=>({time:c.time,value:c.volume,color:c.close>=c.open?"#159447":"#d94b4b"}));
+  candleSeries.setData(data);volumeSeries.setData(vols);chart.timeScale().fitContent();
+}
+
+async function selectStock(key,name){
+  selectedKey=key;selectedName=name;
+  $("results").style.display="none";$("searchInput").value=name;
+  await quote(key,name);await loadChart();
+}
+
+let searchTimer;
+$("searchInput").addEventListener("input",e=>{
   clearTimeout(searchTimer);
-  if(query.length<2){
-    document.getElementById("searchResults").classList.remove("show");
-    return;
-  }
-  searchTimer=setTimeout(()=>searchInstruments(query),300);
+  const q=e.target.value.trim();
+  if(q.length<2){$("results").style.display="none";return}
+  searchTimer=setTimeout(async()=>{
+    try{
+      const res=await fetch(SEARCH+"?query="+encodeURIComponent(q),{cache:"no-store"});
+      const data=await res.json();
+      const rows=Array.isArray(data?.data)?data.data.slice(0,10):[];
+      const unique=rows.filter((r,i,a)=>i===a.findIndex(x=>x.instrument_key===r.instrument_key));
+      $("results").innerHTML=unique.map(r=>`<div class="result" data-key="${esc(r.instrument_key)}" data-name="${esc(r.trading_symbol||r.name||"Instrument")}"><b>${esc(r.trading_symbol||r.name||"Instrument")}</b><small>${esc(r.exchange||"")} • ${esc(r.segment||"")} • ${esc(r.name||"")}</small></div>`).join("") || '<div class="result"><small>No matching instruments found.</small></div>';
+      $("results").style.display="block";
+      $("results").querySelectorAll(".result[data-key]").forEach(x=>x.addEventListener("click",()=>selectStock(x.dataset.key,x.dataset.name)));
+    }catch(e){$("results").innerHTML='<div class="result"><small>Search unavailable.</small></div>';$("results").style.display="block"}
+  },300);
 });
+document.addEventListener("click",e=>{if(!e.target.closest(".search"))$("results").style.display="none"});
+document.querySelectorAll(".chart-tools button").forEach(b=>b.addEventListener("click",async()=>{
+  document.querySelectorAll(".chart-tools button").forEach(x=>x.classList.remove("active"));
+  b.classList.add("active");currentRange=b.dataset.range;
+  const needed=(currentRange==="1D"||currentRange==="1W")?"30m":"1d";
+  const haveInterval=$("chartStatus").textContent.includes(needed);
+  if(!haveInterval)await loadChart(); else renderRange();
+}));
 
-document.addEventListener("click",(e)=>{
-  if(!e.target.closest(".search-wrap")){
-    document.getElementById("searchResults").classList.remove("show");
-  }
-});
-
-async function refreshAll(){
-  setStatus(true,"Market data connected");
+(async function init(){
+  createChart();
+  $("searchInput").value="RELIANCE";
+  await quote(selectedKey,"RELIANCE");
   await Promise.all([loadIndices(),loadWatch()]);
-  document.getElementById("lastUpdated").textContent="Updated "+new Date().toLocaleTimeString("en-IN");
-}
-
-refreshAll();
-setInterval(refreshAll,30000);
+  await loadChart();
+  setInterval(async()=>{await quote(selectedKey,selectedName);await loadIndices();await loadWatch()},30000);
+})();
 </script>
 </body>
 </html>
