@@ -179,7 +179,7 @@ button,input{font:inherit}
       <div class="breadth-bar">
         <span id="advanceBar"></span><span id="unchangedBar"></span><span id="declineBar"></span>
       </div>
-      <div id="breadthNote" class="breadth-note">Calculating…</div>
+      <div id="breadthNote" class="breadth-note">Calculating…</div><div class="breadth-note" style="padding-top:0">On weekends and market holidays, Movers and Breadth use the latest available trading session.</div>
     </div>
   </div>
 
@@ -293,7 +293,21 @@ function renderQuote(q){
   $("avgPrice").textContent=money(q.average_price);
   $("yearHigh").textContent=money(q.year_high);
   $("yearLow").textContent=money(q.year_low);
-  $("tradeTime").textContent=q.last_trade_time?new Date(q.last_trade_time).toLocaleString("en-IN"):"—";
+  const rawTradeTime = q.last_trade_time ?? q.ohlc?.ts ?? null;
+  let tradeTimeText = "—";
+
+  if(rawTradeTime !== null && rawTradeTime !== ""){
+    const n = Number(rawTradeTime);
+    const d = Number.isFinite(n)
+      ? new Date(n < 100000000000 ? n * 1000 : n)
+      : new Date(rawTradeTime);
+
+    if(!Number.isNaN(d.getTime())){
+      tradeTimeText = d.toLocaleString("en-IN");
+    }
+  }
+
+  $("tradeTime").textContent=tradeTimeText;
   renderDepth(q.depth);
 }
 
@@ -424,13 +438,40 @@ async function loadMovers(){
     if(!res.ok)throw new Error(data?.message||"Batch quote failed");
 
     const rows=[];
+    const returned = data?.data || {};
+
     for(const [name,key] of moverUniverse){
-      const q=data?.data?.[key];
+      const normalizedKey = key.replace("|", ":");
+
+      let q = returned[normalizedKey];
+
+      // Fallback: locate the quote by its instrument_token.
+      if(!q){
+        q = Object.values(returned).find(
+          item => item?.instrument_token === key
+        );
+      }
+
       if(q)rows.push({name,key,q});
     }
 
     renderMovers(rows);
-    $("moversStatus").textContent=`${rows.length}/${moverUniverse.length} stocks`;
+    const fallbackUsed = rows.some(r => r.q?._source === "ohlc-fallback");
+    $("moversStatus").textContent = fallbackUsed
+      ? `${rows.length}/${moverUniverse.length} • Last session`
+      : `${rows.length}/${moverUniverse.length} stocks`;
+
+    if(rows.length){
+      const hasLiveTrade = rows.some(r => {
+        const t = r.q?.last_trade_time;
+        return t !== undefined && t !== null && t !== "";
+      });
+
+      if(!hasLiveTrade){
+        $("moversStatus").textContent =
+          `${rows.length}/${moverUniverse.length} • Last session`;
+      }
+    }
   }catch(e){
     console.error(e);
     $("moversStatus").textContent="Unavailable";
