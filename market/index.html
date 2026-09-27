@@ -64,6 +64,69 @@ button,input{font:inherit}
 #unchangedBar{background:#94a3b8;width:0}
 #declineBar{background:var(--red);width:0}
 .breadth-note{padding:13px 18px 18px;color:var(--muted);font-size:12px;text-align:center}
+  .heatmap-card{
+  margin-top:18px;
+  overflow:hidden;
+}
+
+.heatmap-grid{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:8px;
+  padding:0 18px 18px;
+}
+
+.heatmap-tile{
+  min-height:82px;
+  border-radius:10px;
+  padding:12px;
+  color:#fff;
+  cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  transition:transform .15s ease,box-shadow .15s ease;
+}
+
+.heatmap-tile:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 18px rgba(0,0,0,.12);
+}
+
+.heatmap-symbol{
+  font-size:13px;
+  font-weight:900;
+}
+
+.heatmap-price{
+  font-size:12px;
+  opacity:.9;
+}
+
+.heatmap-change{
+  font-size:17px;
+  font-weight:900;
+}
+
+.heatmap-positive-strong{background:#087f3d}
+.heatmap-positive{background:#159447}
+.heatmap-positive-light{background:#5eaf7a}
+.heatmap-neutral{background:#94a3b8}
+.heatmap-negative-light{background:#d66b6b}
+.heatmap-negative{background:#c94b4b}
+.heatmap-negative-strong{background:#a83232}
+
+@media(max-width:1000px){
+  .heatmap-grid{
+    grid-template-columns:repeat(4,1fr);
+  }
+}
+
+@media(max-width:650px){
+  .heatmap-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+}
 @media(max-width:1000px){
 .movers-grid{grid-template-columns:1fr}
 .main{grid-template-columns:1fr}.tickers{grid-template-columns:repeat(2,1fr)}.side{display:grid;grid-template-columns:1fr 1fr}}
@@ -165,7 +228,16 @@ button,input{font:inherit}
         </div>
       </div>
     </div>
+<div class="card heatmap-card">
+  <div class="section-title">
+    <h2>🔥 StockGyan Market Heatmap</h2>
+    <span class="section-meta">Market Movers</span>
+  </div>
 
+  <div id="heatmapGrid" class="heatmap-grid">
+    <div class="empty">Loading heatmap...</div>
+  </div>
+</div>
     <div class="card breadth-card">
       <div class="section-title">
         <h2>📊 Market Breadth</h2>
@@ -576,6 +648,108 @@ document.querySelectorAll(".chart-tools button").forEach(b=>b.addEventListener("
   await loadChart();
   setInterval(async()=>{await quote(selectedKey,selectedName);await loadIndices();await loadWatch();await loadMovers()},30000);
 })();
+  async function loadHeatmap() {
+  const grid = document.getElementById("heatmapGrid");
+  if (!grid) return;
+
+  try {
+    const keys = moverUniverse.map(item => item[1]).join(",");
+
+    const response = await fetch(
+      BATCH + "?instrument_keys=" + encodeURIComponent(keys)
+    );
+
+    const result = await response.json();
+
+    if (!result || !result.data) {
+      throw new Error("No heatmap data");
+    }
+
+    const data = result.data;
+
+    const stocks = moverUniverse.map(([symbol, instrumentKey]) => {
+      const shortKey = instrumentKey.replace("|", ":");
+
+      const q =
+        data[instrumentKey] ||
+        data[shortKey] ||
+        data[symbol] ||
+        {};
+
+      const price =
+        Number(q.last_price ?? q.ltp ?? q.price ?? 0);
+
+      const previous =
+        Number(
+          q.ohlc?.close ??
+          q.prev_ohlc?.close ??
+          q.previous_close ??
+          q.prev_close ??
+          0
+        );
+
+      let change = 0;
+
+      if (previous > 0 && price > 0) {
+        change = ((price - previous) / previous) * 100;
+      }
+
+      return {
+        symbol,
+        price,
+        change
+      };
+    }).filter(stock => stock.price > 0);
+
+    if (!stocks.length) {
+      grid.innerHTML =
+        '<div class="empty">Heatmap data unavailable</div>';
+      return;
+    }
+
+    stocks.sort((a, b) => b.change - a.change);
+
+    grid.innerHTML = stocks.map(stock => {
+
+      let cls = "heatmap-neutral";
+
+      if (stock.change >= 2) {
+        cls = "heatmap-positive-strong";
+      } else if (stock.change >= 0.5) {
+        cls = "heatmap-positive";
+      } else if (stock.change > 0) {
+        cls = "heatmap-positive-light";
+      } else if (stock.change <= -2) {
+        cls = "heatmap-negative-strong";
+      } else if (stock.change <= -0.5) {
+        cls = "heatmap-negative";
+      } else if (stock.change < 0) {
+        cls = "heatmap-negative-light";
+      }
+
+      const sign = stock.change > 0 ? "+" : "";
+
+      return `
+        <div class="heatmap-tile ${cls}"
+             onclick="selectStock('${stock.symbol}')">
+          <strong>${stock.symbol}</strong>
+          <span>₹${stock.price.toLocaleString("en-IN", {
+            maximumFractionDigits: 2
+          })}</span>
+          <small>${sign}${stock.change.toFixed(2)}%</small>
+        </div>
+      `;
+    }).join("");
+
+  } catch (error) {
+    console.error("Heatmap error:", error);
+
+    grid.innerHTML =
+      '<div class="empty">Unable to load heatmap</div>';
+  }
+}
+
+loadHeatmap();
 </script>
 </body>
 </html>
