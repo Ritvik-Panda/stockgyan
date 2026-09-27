@@ -1,0 +1,86 @@
+name: Update NSE Stock Universe
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "30 1 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  update-universe:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download and process Upstox NSE instruments
+        run: |
+          mkdir -p assets
+
+          curl -L \
+            "https://assets.upstox.com/market-quote/instruments/exchange/NSE.json.gz" \
+            -o /tmp/NSE.json.gz
+
+          python3 - <<'PY'
+          import gzip
+          import json
+          from datetime import datetime, timezone
+
+          source = "/tmp/NSE.json.gz"
+          output = "assets/nse-universe.json"
+
+          with gzip.open(source, "rt", encoding="utf-8") as f:
+              instruments = json.load(f)
+
+          stocks = []
+
+          for item in instruments:
+              if (
+                  item.get("segment") == "NSE_EQ"
+                  and item.get("instrument_type") == "EQ"
+                  and item.get("instrument_key")
+              ):
+                  stocks.append({
+                      "symbol": item.get("trading_symbol"),
+                      "name": item.get("name"),
+                      "isin": item.get("isin"),
+                      "instrument_key": item.get("instrument_key")
+                  })
+
+          stocks.sort(
+              key=lambda x: (x.get("symbol") or "").upper()
+          )
+
+          result = {
+              "status": "success",
+              "count": len(stocks),
+              "source": "Upstox NSE BOD",
+              "updated_at": datetime.now(timezone.utc).isoformat(),
+              "data": stocks
+          }
+
+          with open(output, "w", encoding="utf-8") as f:
+              json.dump(
+                  result,
+                  f,
+                  ensure_ascii=False,
+                  separators=(",", ":")
+              )
+
+          print("NSE stocks:", len(stocks))
+          PY
+
+      - name: Commit updated universe
+        run: |
+          git config user.name "StockGyan Bot"
+          git config user.email "stockgyan-bot@users.noreply.github.com"
+
+          git add assets/nse-universe.json
+
+          git diff --cached --quiet || \
+            git commit -m "Update NSE stock universe"
+
+          git push
