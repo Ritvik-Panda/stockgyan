@@ -679,11 +679,14 @@ document.querySelectorAll(".chart-tools button").forEach(b=>b.addEventListener("
       const price =
         Number(q.last_price ?? q.ltp ?? q.price ?? 0);
 
-      const change = Number(
-  q.change ??
+     const change = Number(
   q.change_percent ??
   q.percent_change ??
-  0
+  (
+    q.prev_close > 0
+      ? (q.change / q.prev_close) * 100
+      : 0
+  )
 );
 
       return {
