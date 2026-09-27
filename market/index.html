@@ -679,20 +679,12 @@ document.querySelectorAll(".chart-tools button").forEach(b=>b.addEventListener("
       const price =
         Number(q.last_price ?? q.ltp ?? q.price ?? 0);
 
-      const previous =
-        Number(
-          q.ohlc?.close ??
-          q.prev_ohlc?.close ??
-          q.previous_close ??
-          q.prev_close ??
-          0
-        );
-
-      let change = 0;
-
-      if (previous > 0 && price > 0) {
-        change = ((price - previous) / previous) * 100;
-      }
+      const change = Number(
+  q.change ??
+  q.change_percent ??
+  q.percent_change ??
+  0
+);
 
       return {
         symbol,
