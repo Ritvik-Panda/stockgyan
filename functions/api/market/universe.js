@@ -1,5 +1,17 @@
 export async function onRequestGet(context) {
   try {
+    const token = context.env.UPSTOX_ANALYTICS_TOKEN;
+
+    if (!token) {
+      return Response.json(
+        {
+          status: "error",
+          message: "Upstox token is not configured"
+        },
+        { status: 500 }
+      );
+    }
+
     const cache = caches.default;
 
     const cacheKey = new Request(
@@ -21,37 +33,71 @@ export async function onRequestGet(context) {
       return Response.json(
         {
           status: "error",
-          message: "Unable to download NSE instrument file"
+          message:
+            "Upstox NSE instrument file returned HTTP " +
+            response.status
         },
         { status: 502 }
       );
     }
 
+    const contentType =
+      response.headers.get("content-type") || "";
+
+    const encoding =
+      response.headers.get("content-encoding") || "";
+
     let text;
 
-    try {
-      const decompressedStream =
-        response.body.pipeThrough(
-          new DecompressionStream("gzip")
+    /*
+     * Cloudflare may automatically decompress
+     * the gzip response depending on the response headers.
+     */
+
+    if (
+      encoding.includes("gzip") ||
+      contentType.includes("gzip")
+    ) {
+      try {
+        const stream =
+          response.body.pipeThrough(
+            new DecompressionStream("gzip")
+          );
+
+        text = await new Response(stream).text();
+
+      } catch (error) {
+        return Response.json(
+          {
+            status: "error",
+            message:
+              "Gzip decompression failed: " +
+              error.message
+          },
+          { status: 500 }
         );
+      }
+    } else {
+      text = await response.text();
+    }
 
-      text = await new Response(
-        decompressedStream
-      ).text();
+    let instruments;
 
-    } catch (e) {
+    try {
+      instruments = JSON.parse(text);
+    } catch (error) {
       return Response.json(
         {
           status: "error",
           message:
-            "Unable to decompress NSE instrument file: " +
-            e.message
+            "Unable to parse NSE instrument data",
+          content_type: contentType,
+          content_encoding: encoding,
+          sample: text.substring(0, 200)
         },
         { status: 500 }
       );
     }
-
-    const instruments = JSON.parse(text);
 
     const stocks = instruments
       .filter(item =>
@@ -74,12 +120,16 @@ export async function onRequestGet(context) {
       },
       {
         headers: {
-          "Cache-Control": "public, max-age=21600"
+          "Cache-Control":
+            "public, max-age=21600"
         }
       }
     );
 
-    await cache.put(cacheKey, result.clone());
+    await cache.put(
+      cacheKey,
+      result.clone()
+    );
 
     return result;
 
