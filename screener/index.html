@@ -1,380 +1,447 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<title>StockGyan NSE Screener</title>
+  <title>StockGyan Screener</title>
 
-<style>
-*{
-  box-sizing:border-box;
-}
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-body{
-  margin:0;
-  font-family:Arial,Helvetica,sans-serif;
-  background:#f4f7fb;
-  color:#172033;
-}
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f4f7fb;
+      color: #172033;
+    }
 
-header{
-  background:#082a63;
-  color:white;
-  padding:18px 24px;
-}
+    header {
+      background: linear-gradient(135deg, #082a63, #0b478f);
+      color: white;
+      padding: 22px 20px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.12);
+    }
 
-.header{
-  max-width:1400px;
-  margin:auto;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:20px;
-}
+    .header-inner {
+      max-width: 1450px;
+      margin: auto;
+    }
 
-.logo{
-  font-size:26px;
-  font-weight:800;
-}
+    .brand {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: .3px;
+    }
 
-.logo span{
-  color:#159447;
-}
+    .brand span {
+      color: #f28c28;
+    }
 
-.subtitle{
-  font-size:13px;
-  opacity:.85;
-  margin-top:4px;
-}
+    .subtitle {
+      margin-top: 5px;
+      font-size: 14px;
+      opacity: .9;
+    }
 
-.container{
-  max-width:1400px;
-  margin:20px auto;
-  padding:0 16px;
-}
+    main {
+      max-width: 1450px;
+      margin: 22px auto;
+      padding: 0 16px;
+    }
 
-.panel{
-  background:white;
-  border-radius:14px;
-  padding:18px;
-  margin-bottom:18px;
-  box-shadow:0 4px 18px rgba(0,0,0,.07);
-}
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 14px;
+      margin-bottom: 18px;
+    }
 
-.controls{
-  display:grid;
-  grid-template-columns:2fr repeat(4,1fr);
-  gap:12px;
-}
+    .stat {
+      background: white;
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.07);
+      border: 1px solid #e7edf5;
+    }
 
-input,select,button{
-  width:100%;
-  padding:11px 12px;
-  border:1px solid #d5dce8;
-  border-radius:8px;
-  font-size:14px;
-}
+    .stat-title {
+      font-size: 12px;
+      color: #697386;
+      margin-bottom: 8px;
+    }
 
-button{
-  background:#082a63;
-  color:white;
-  border:none;
-  cursor:pointer;
-  font-weight:600;
-}
+    .stat-value {
+      font-size: 25px;
+      font-weight: 800;
+      color: #082a63;
+    }
 
-button:hover{
-  opacity:.92;
-}
+    .controls {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 18px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.07);
+      border: 1px solid #e7edf5;
+    }
 
-.stats{
-  display:grid;
-  grid-template-columns:repeat(5,1fr);
-  gap:12px;
-}
+    .control-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
 
-.stat{
-  background:#f7f9fc;
-  border-radius:10px;
-  padding:14px;
-}
+    input,
+    select,
+    button {
+      font-family: inherit;
+    }
 
-.stat-label{
-  font-size:12px;
-  color:#667085;
-}
+    input[type="text"],
+    select {
+      height: 42px;
+      border: 1px solid #ccd5e2;
+      border-radius: 8px;
+      padding: 0 12px;
+      background: white;
+      font-size: 14px;
+    }
 
-.stat-value{
-  font-size:21px;
-  font-weight:700;
-  margin-top:5px;
-}
+    #search {
+      flex: 1;
+      min-width: 250px;
+    }
 
-.status{
-  padding:12px;
-  background:#eef5ff;
-  border-radius:8px;
-  margin-top:12px;
-  font-size:14px;
-}
+    button {
+      height: 42px;
+      border: 0;
+      border-radius: 8px;
+      padding: 0 16px;
+      cursor: pointer;
+      font-weight: 700;
+    }
 
-.table-wrap{
-  overflow:auto;
-  max-height:680px;
-}
+    .btn-primary {
+      background: #082a63;
+      color: white;
+    }
 
-table{
-  width:100%;
-  border-collapse:collapse;
-  min-width:1100px;
-}
+    .btn-green {
+      background: #159447;
+      color: white;
+    }
 
-th{
-  position:sticky;
-  top:0;
-  background:#082a63;
-  color:white;
-  padding:11px 9px;
-  text-align:right;
-  font-size:12px;
-  z-index:2;
-}
+    .btn-orange {
+      background: #f28c28;
+      color: white;
+    }
 
-th:first-child,
-th:nth-child(2){
-  text-align:left;
-}
+    .btn-light {
+      background: #edf2f8;
+      color: #17335f;
+    }
 
-td{
-  padding:10px 9px;
-  border-bottom:1px solid #edf0f5;
-  text-align:right;
-  font-size:13px;
-}
+    button:hover {
+      opacity: .9;
+    }
 
-td:first-child,
-td:nth-child(2){
-  text-align:left;
-}
+    .status {
+      margin-top: 12px;
+      font-size: 13px;
+      color: #536174;
+    }
 
-tr:hover{
-  background:#f5f9ff;
-}
+    .progress {
+      margin-top: 10px;
+      height: 7px;
+      background: #e7edf5;
+      border-radius: 20px;
+      overflow: hidden;
+    }
 
-.symbol{
-  color:#082a63;
-  font-weight:700;
-  cursor:pointer;
-}
+    .progress-bar {
+      width: 0%;
+      height: 100%;
+      background: #159447;
+      transition: width .25s ease;
+    }
 
-.name{
-  color:#667085;
-  max-width:250px;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
+    .table-container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.07);
+      border: 1px solid #e7edf5;
+      overflow: hidden;
+    }
 
-.positive{
-  color:#159447;
-  font-weight:700;
-}
+    .table-header {
+      padding: 15px 16px;
+      background: #f8fafc;
+      border-bottom: 1px solid #e7edf5;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
 
-.negative{
-  color:#d92d20;
-  font-weight:700;
-}
+    .table-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: #082a63;
+    }
 
-.neutral{
-  color:#667085;
-}
+    .table-wrap {
+      overflow-x: auto;
+      max-height: 72vh;
+    }
 
-.badge{
-  display:inline-block;
-  padding:4px 7px;
-  border-radius:5px;
-  background:#edf3ff;
-  color:#082a63;
-  font-size:11px;
-}
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1050px;
+    }
 
-.detail-grid{
-  display:grid;
-  grid-template-columns:repeat(6,1fr);
-  gap:10px;
-}
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: #082a63;
+      color: white;
+      padding: 12px 10px;
+      text-align: right;
+      font-size: 12px;
+      white-space: nowrap;
+    }
 
-.detail{
-  background:#f7f9fc;
-  padding:12px;
-  border-radius:8px;
-}
+    th:first-child,
+    th:nth-child(2) {
+      text-align: left;
+    }
 
-.detail small{
-  color:#667085;
-  display:block;
-}
+    td {
+      padding: 11px 10px;
+      border-bottom: 1px solid #edf1f6;
+      font-size: 13px;
+      text-align: right;
+      white-space: nowrap;
+    }
 
-.detail strong{
-  display:block;
-  margin-top:4px;
-  font-size:16px;
-}
+    td:first-child,
+    td:nth-child(2) {
+      text-align: left;
+    }
 
-.loading{
-  text-align:center;
-  padding:30px;
-  color:#667085;
-}
+    tr:hover td {
+      background: #f7faff;
+    }
 
-@media(max-width:900px){
-  .controls{
-    grid-template-columns:1fr 1fr;
-  }
+    .symbol {
+      font-weight: 800;
+      color: #082a63;
+    }
 
-  .stats{
-    grid-template-columns:repeat(2,1fr);
-  }
+    .company {
+      color: #667085;
+      max-width: 260px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
-  .detail-grid{
-    grid-template-columns:repeat(2,1fr);
-  }
-}
-</style>
+    .positive {
+      color: #159447;
+      font-weight: 700;
+    }
+
+    .negative {
+      color: #d83232;
+      font-weight: 700;
+    }
+
+    .neutral {
+      color: #687386;
+    }
+
+    .range-cell {
+      min-width: 90px;
+    }
+
+    .position {
+      position: relative;
+      height: 7px;
+      background: #e5eaf1;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 5px;
+      min-width: 70px;
+    }
+
+    .position-bar {
+      height: 100%;
+      background: #159447;
+      border-radius: 10px;
+    }
+
+    .load52 {
+      background: #edf2f8;
+      color: #082a63;
+      padding: 6px 9px;
+      height: 32px;
+      font-size: 11px;
+    }
+
+    .loading {
+      opacity: .65;
+      pointer-events: none;
+    }
+
+    .empty {
+      padding: 50px 20px;
+      text-align: center;
+      color: #697386;
+    }
+
+    .footer-note {
+      padding: 14px 16px;
+      font-size: 12px;
+      color: #7a8494;
+      background: #fafbfd;
+      border-top: 1px solid #edf1f6;
+    }
+
+    @media (max-width: 900px) {
+      .stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .stats {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .brand {
+        font-size: 23px;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
 <header>
-  <div class="header">
-    <div>
-      <div class="logo">
-        Stock<span>Gyan</span>
-      </div>
-      <div class="subtitle">
-        NSE Equity Screener • Full Market Universe
-      </div>
-    </div>
-
-    <div>
-      <span class="badge" id="universeBadge">
-        Loading universe...
-      </span>
+  <div class="header-inner">
+    <div class="brand">Stock<span>Gyan</span> Screener</div>
+    <div class="subtitle">
+      Indian Equity Market Screener • NSE Universe • Powered by Upstox Market Data
     </div>
   </div>
 </header>
 
-<div class="container">
+<main>
 
-  <div class="panel">
+  <section class="stats">
 
-    <h2>Stock Screener</h2>
+    <div class="stat">
+      <div class="stat-title">NSE Universe</div>
+      <div class="stat-value" id="universeCount">0</div>
+    </div>
 
-    <div class="controls">
+    <div class="stat">
+      <div class="stat-title">Stocks With Data</div>
+      <div class="stat-value" id="dataCount">0</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-title">Gainers</div>
+      <div class="stat-value positive" id="gainerCount">0</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-title">Losers</div>
+      <div class="stat-value negative" id="loserCount">0</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-title">Displayed</div>
+      <div class="stat-value" id="displayedCount">0</div>
+    </div>
+
+  </section>
+
+
+  <section class="controls">
+
+    <div class="control-row">
 
       <input
-        id="searchInput"
+        id="search"
         type="text"
-        placeholder="Search stock or company..."
-      >
+        placeholder="Search stock symbol or company name..."
+      />
 
       <select id="changeFilter">
-        <option value="all">Daily Change: All</option>
+        <option value="all">All Stocks</option>
         <option value="gainers">Gainers</option>
         <option value="losers">Losers</option>
       </select>
 
-      <select id="priceFilter">
-        <option value="all">Price: All</option>
-        <option value="under100">Under ₹100</option>
-        <option value="100to500">₹100 - ₹500</option>
-        <option value="500to1000">₹500 - ₹1,000</option>
-        <option value="above1000">Above ₹1,000</option>
-      </select>
-
-      <select id="volumeFilter">
-        <option value="all">Volume: All</option>
-        <option value="high">High Volume</option>
-        <option value="veryhigh">Very High Volume</option>
-      </select>
-
-      <select id="sortFilter">
+      <select id="sortBy">
         <option value="symbol">Sort: Symbol</option>
         <option value="changeDesc">Daily % ↓</option>
         <option value="changeAsc">Daily % ↑</option>
         <option value="priceDesc">Price ↓</option>
         <option value="priceAsc">Price ↑</option>
         <option value="volumeDesc">Volume ↓</option>
+        <option value="52posDesc">52W Position ↓</option>
+        <option value="52posAsc">52W Position ↑</option>
       </select>
 
-    </div>
-
-    <div style="margin-top:12px">
-      <button id="loadButton">
-        Load / Refresh NSE Market Data
+      <button class="btn-primary" onclick="loadUniverse()">
+        Refresh Data
       </button>
+
+      <button class="btn-light" onclick="clearFilters()">
+        Clear
+      </button>
+
     </div>
 
     <div class="status" id="status">
-      Loading StockGyan NSE universe...
+      Loading NSE universe...
     </div>
 
-  </div>
+    <div class="progress">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+  </section>
 
 
-  <div class="panel">
+  <section class="table-container">
 
-    <div class="stats">
+    <div class="table-header">
 
-      <div class="stat">
-        <div class="stat-label">NSE Universe</div>
-        <div class="stat-value" id="totalStocks">—</div>
+      <div class="table-title">
+        NSE Stocks
       </div>
 
-      <div class="stat">
-        <div class="stat-label">Stocks With Data</div>
-        <div class="stat-value" id="stocksWithData">—</div>
-      </div>
-
-      <div class="stat">
-        <div class="stat-label">Gainers</div>
-        <div class="stat-value positive" id="gainers">—</div>
-      </div>
-
-      <div class="stat">
-        <div class="stat-label">Losers</div>
-        <div class="stat-value negative" id="losers">—</div>
-      </div>
-
-      <div class="stat">
-        <div class="stat-label">Displayed</div>
-        <div class="stat-value" id="displayed">—</div>
+      <div id="resultInfo">
+        Preparing screener...
       </div>
 
     </div>
-
-  </div>
-
-
-  <div class="panel">
-
-    <h3>Stock Details</h3>
-
-    <div id="detailArea">
-      Select a stock from the table.
-    </div>
-
-  </div>
-
-
-  <div class="panel">
 
     <div class="table-wrap">
 
       <table>
 
         <thead>
+
           <tr>
             <th>Symbol</th>
             <th>Company</th>
@@ -384,15 +451,18 @@ tr:hover{
             <th>52W High</th>
             <th>52W Low</th>
             <th>52W Position</th>
-            <th>Instrument</th>
+            <th>52W Data</th>
           </tr>
+
         </thead>
 
-        <tbody id="tableBody">
+        <tbody id="stockTableBody">
 
           <tr>
-            <td colspan="9" class="loading">
-              Loading...
+            <td colspan="9">
+              <div class="empty">
+                Loading...
+              </div>
             </td>
           </tr>
 
@@ -402,843 +472,1047 @@ tr:hover{
 
     </div>
 
-  </div>
+    <div class="footer-note">
+      52-week values are calculated from historical daily candles and are loaded when requested for an individual stock.
+    </div>
 
-</div>
+  </section>
+
+</main>
 
 
 <script>
 
-const universeUrl =
-  "/assets/nse-universe.json";
-
-const batchUrl =
-  "/api/market/batch";
-
-const ohlcUrl =
-  "/api/market/ohlc";
-
+const API_BASE = "/api/market";
 
 let universe = [];
-
-let marketData = [];
-
-let filteredData = [];
-
-let selectedStock = null;
+let stocks = [];
+let loading = false;
 
 
-/* --------------------------------
-   LOAD UNIVERSE
--------------------------------- */
+/* =========================================================
+   BASIC HELPERS
+========================================================= */
 
-async function loadUniverse(){
-
-  setStatus(
-    "Loading complete NSE stock universe..."
-  );
-
-  try{
-
-    const response =
-      await fetch(
-        universeUrl +
-        "?v=" +
-        Date.now()
-      );
-
-    if(!response.ok){
-
-      throw new Error(
-        "Unable to load NSE universe"
-      );
-
-    }
-
-    const json =
-      await response.json();
-
-    if(
-      json.status !== "success" ||
-      !Array.isArray(json.data)
-    ){
-
-      throw new Error(
-        "Invalid NSE universe response"
-      );
-
-    }
-
-    universe =
-      json.data;
-
-    document.getElementById(
-      "totalStocks"
-    ).textContent =
-      universe.length.toLocaleString();
-
-    document.getElementById(
-      "universeBadge"
-    ).textContent =
-      universe.length.toLocaleString() +
-      " NSE stocks";
-
-    setStatus(
-      universe.length.toLocaleString() +
-      " NSE stocks loaded. Fetching market prices..."
-    );
-
-    await loadMarketData();
-
-  }catch(error){
-
-    console.error(error);
-
-    setStatus(
-      "Error loading NSE universe: " +
-      error.message
-    );
-
-  }
-
+function number(value) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
 }
 
 
-/* --------------------------------
-   BATCH HELPERS
--------------------------------- */
+function formatNumber(value, decimals = 2) {
 
-function chunkArray(array,size){
+  const n = number(value);
 
-  const chunks = [];
+  if (n === null) return "—";
 
-  for(
-    let i=0;
-    i<array.length;
-    i+=size
-  ){
-
-    chunks.push(
-      array.slice(
-        i,
-        i+size
-      )
-    );
-
-  }
-
-  return chunks;
-
+  return n.toLocaleString("en-IN", {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals
+  });
 }
 
 
-/* --------------------------------
-   LOAD MARKET DATA
--------------------------------- */
+function formatVolume(value) {
 
-async function loadMarketData(){
+  const n = number(value);
 
-  if(!universe.length){
+  if (n === null) return "—";
 
-    return;
+  if (n >= 10000000) {
+    return (n / 10000000).toFixed(2) + " Cr";
+  }
+
+  if (n >= 100000) {
+    return (n / 100000).toFixed(2) + " L";
+  }
+
+  if (n >= 1000) {
+    return (n / 1000).toFixed(2) + " K";
+  }
+
+  return n.toLocaleString("en-IN");
+}
+
+
+function escapeHtml(value) {
+
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+
+/* =========================================================
+   LOAD NSE UNIVERSE
+========================================================= */
+
+async function loadNSEUniverse() {
+
+  const response = await fetch("/assets/nse-universe.json", {
+    cache: "no-store"
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      "Unable to load NSE universe: HTTP " + response.status
+    );
+  }
+
+  const json = await response.json();
+
+  if (!json.data || !Array.isArray(json.data)) {
+    throw new Error("Invalid NSE universe file");
+  }
+
+  return json.data.filter(item =>
+    item &&
+    item.instrument_key &&
+    item.symbol
+  );
+}
+
+
+/* =========================================================
+   ROBUST BATCH RESPONSE NORMALIZER
+========================================================= */
+
+/*
+  The existing /api/market/batch endpoint can return data in
+  different structures.
+
+  This function deliberately supports all common forms:
+
+  1. data = object keyed by instrument key
+  2. data = array with instrument_key
+  3. data = array without key
+  4. quotes = object
+  5. quotes = array
+  6. top-level object keyed by instrument key
+
+  This is the important fix for the previous
+  "Stocks With Data = 0" problem.
+*/
+
+function normalizeBatchResponse(json, requestedKeys) {
+
+  const output = [];
+
+  if (!json) {
+    return output;
+  }
+
+
+  function addItem(item, keyFromObject = null, index = -1) {
+
+    if (!item) {
+      return;
+    }
+
+    let key =
+      item.instrument_key ||
+      item.instrumentKey ||
+      item.instrument_token ||
+      item.key ||
+      keyFromObject;
+
+    /*
+      If the API returns an array without instrument_key,
+      preserve the request order.
+    */
+    if (!key && index >= 0 && requestedKeys[index]) {
+      key = requestedKeys[index];
+    }
+
+    if (!key) {
+      return;
+    }
+
+    /*
+      Some API responses may wrap the actual quote.
+    */
+    let quote = item;
+
+    if (item.quote && typeof item.quote === "object") {
+      quote = {
+        ...item,
+        ...item.quote
+      };
+    }
+
+    if (item.data && typeof item.data === "object" &&
+        !Array.isArray(item.data)) {
+
+      quote = {
+        ...item,
+        ...item.data
+      };
+    }
+
+    output.push({
+      instrument_key: key,
+      quote
+    });
+  }
+
+
+  function processContainer(container) {
+
+    if (!container) {
+      return;
+    }
+
+
+    /*
+      Array response
+    */
+    if (Array.isArray(container)) {
+
+      container.forEach((item, index) => {
+        addItem(item, null, index);
+      });
+
+      return;
+    }
+
+
+    /*
+      Object response keyed by instrument key
+    */
+    if (typeof container === "object") {
+
+      for (const [key, value] of Object.entries(container)) {
+
+        /*
+          Ignore metadata fields.
+        */
+        if (
+          key === "status" ||
+          key === "message" ||
+          key === "source" ||
+          key === "count"
+        ) {
+          continue;
+        }
+
+        addItem(value, key);
+      }
+    }
+  }
+
+
+  /*
+    Most common location.
+  */
+  if (json.data) {
+    processContainer(json.data);
+  }
+
+
+  /*
+    Alternative API naming.
+  */
+  if (json.quotes) {
+    processContainer(json.quotes);
+  }
+
+
+  /*
+    If neither worked, try top-level object.
+  */
+  if (output.length === 0 && typeof json === "object") {
+
+    processContainer(json);
+  }
+
+
+  /*
+    Remove duplicate instrument keys.
+  */
+  const map = new Map();
+
+  for (const item of output) {
+    if (!map.has(item.instrument_key)) {
+      map.set(item.instrument_key, item);
+    }
+  }
+
+  return Array.from(map.values());
+}
+
+
+/* =========================================================
+   EXTRACT QUOTE VALUES
+========================================================= */
+
+function extractQuote(item) {
+
+  const q = item.quote || {};
+
+  let price =
+    number(q.last_price) ??
+    number(q.lastPrice) ??
+    number(q.ltp) ??
+    number(q.LTP) ??
+    number(q.close) ??
+    number(q.ohlc?.close) ??
+    number(q.ohlc?.ltp);
+
+
+  let volume =
+    number(q.volume) ??
+    number(q.volume_traded) ??
+    number(q.volumeTraded) ??
+    number(q.total_volume) ??
+    number(q.ohlc?.volume);
+
+
+  let prevClose =
+    number(q.prev_close) ??
+    number(q.prev_close_price) ??
+    number(q.previous_close) ??
+    number(q.previousClose) ??
+    number(q.ohlc?.prev_close);
+
+
+  let rupeeChange =
+    number(q.net_change) ??
+    number(q.netChange) ??
+    number(q.change);
+
+
+  let percentChange =
+    number(q.change_percent) ??
+    number(q.changePercent) ??
+    number(q.percent_change) ??
+    number(q.percentChange);
+
+
+  /*
+    Existing StockGyan batch API returns change as
+    rupee change. Therefore calculate percentage when
+    percentage isn't directly available.
+  */
+
+  if (
+    percentChange === null &&
+    rupeeChange !== null &&
+    prevClose !== null &&
+    prevClose !== 0
+  ) {
+
+    percentChange =
+      (rupeeChange / prevClose) * 100;
+  }
+
+
+  /*
+    If previous close is missing but OHLC exists,
+    calculate it from price and rupee change.
+  */
+
+  if (
+    prevClose === null &&
+    price !== null &&
+    rupeeChange !== null
+  ) {
+
+    prevClose = price - rupeeChange;
 
   }
 
-  const chunks =
-    chunkArray(
-      universe,
-      450
-    );
 
-  marketData = [];
+  if (
+    percentChange === null &&
+    price !== null &&
+    prevClose !== null &&
+    prevClose !== 0
+  ) {
 
-  setStatus(
-    "Fetching market prices: 0 / " +
-    chunks.length +
-    " batches..."
-  );
+    percentChange =
+      ((price - prevClose) / prevClose) * 100;
+
+  }
 
 
-  for(
-    let i=0;
-    i<chunks.length;
-    i++
-  ){
+  return {
+    price,
+    volume,
+    prevClose,
+    rupeeChange,
+    percentChange
+  };
+}
+
+
+/* =========================================================
+   LOAD MARKET DATA IN BATCHES
+========================================================= */
+
+async function loadMarketData() {
+
+  const BATCH_SIZE = 450;
+
+  stocks = [];
+
+  const total = universe.length;
+
+  let completed = 0;
+
+  document.getElementById("progressBar").style.width = "0%";
+
+  for (
+    let start = 0;
+    start < universe.length;
+    start += BATCH_SIZE
+  ) {
 
     const chunk =
-      chunks[i];
+      universe.slice(start, start + BATCH_SIZE);
 
     const keys =
-      chunk
-        .map(
-          item =>
-            item.instrument_key
-        )
-        .join(",");
+      chunk.map(item => item.instrument_key);
 
-    try{
+    try {
 
-      const response =
-        await fetch(
-          batchUrl +
-          "?instrument_keys=" +
-          encodeURIComponent(keys)
-        );
+      const params = new URLSearchParams();
 
-      if(!response.ok){
+      params.set(
+        "instrument_keys",
+        keys.join(",")
+      );
+
+      const response = await fetch(
+        API_BASE +
+        "/batch?" +
+        params.toString(),
+        {
+          cache: "no-store"
+        }
+      );
+
+
+      if (!response.ok) {
 
         console.warn(
-          "Batch failed:",
-          i+1
+          "Batch request failed:",
+          response.status
+        );
+
+        completed += chunk.length;
+
+        updateProgress(
+          completed,
+          total
         );
 
         continue;
-
       }
 
-      const json =
-        await response.json();
 
-      const quotes =
+      const json = await response.json();
+
+
+      const normalized =
         normalizeBatchResponse(
-          json
+          json,
+          keys
         );
 
-      const map =
-        new Map();
 
-      chunk.forEach(
-        item => {
+      /*
+        Create lookup map.
+      */
 
-          map.set(
-            item.instrument_key,
-            item
+      const quoteMap = new Map();
+
+      for (const item of normalized) {
+
+        quoteMap.set(
+          item.instrument_key,
+          extractQuote(item)
+        );
+      }
+
+
+      /*
+        Match quotes to NSE universe.
+      */
+
+      for (const instrument of chunk) {
+
+        const quote =
+          quoteMap.get(
+            instrument.instrument_key
           );
 
-        }
-      );
 
-
-      quotes.forEach(
-        quote => {
-
-          const key =
-            quote.instrument_key ||
-            quote.instrumentKey ||
-            quote.key;
-
-          const stock =
-            map.get(key);
-
-          if(!stock){
-
-            return;
-
-          }
-
-
-          const price =
-            Number(
-              quote.last_price ??
-              quote.lastPrice ??
-              quote.ltp ??
-              0
-            );
-
-
-          const change =
-            Number(
-              quote.change_percent ??
-              quote.percent_change ??
-              (
-                Number(
-                  quote.prev_close ??
-                  quote.prev_close_price ??
-                  0
-                ) > 0
-
-                ?
-
-                (
-                  (
-                    Number(
-                      quote.change ??
-                      quote.net_change ??
-                      0
-                    )
-                    /
-                    Number(
-                      quote.prev_close ??
-                      quote.prev_close_price ??
-                      1
-                    )
-                  ) * 100
-                )
-
-                :
-
-                0
-              )
-            );
-
-
-          const volume =
-            Number(
-              quote.volume ??
-              quote.volume_traded ??
-              0
-            );
-
-
-          marketData.push({
-
-            ...stock,
-
-            price,
-            change,
-            volume,
-
-            yearHigh:
-              null,
-
-            yearLow:
-              null,
-
-            position52:
-              null
-
-          });
-
+        if (!quote) {
+          continue;
         }
 
-      );
 
-    }catch(error){
+        /*
+          A stock is considered valid if we have
+          at least a price.
+        */
+
+        if (quote.price === null) {
+          continue;
+        }
+
+
+        stocks.push({
+
+          symbol:
+            instrument.symbol,
+
+          name:
+            instrument.name ||
+            instrument.symbol,
+
+          isin:
+            instrument.isin,
+
+          instrument_key:
+            instrument.instrument_key,
+
+          price:
+            quote.price,
+
+          volume:
+            quote.volume,
+
+          prevClose:
+            quote.prevClose,
+
+          change:
+            quote.rupeeChange,
+
+          changePercent:
+            quote.percentChange,
+
+          high52:
+            null,
+
+          low52:
+            null,
+
+          position52:
+            null,
+
+          rangeLoaded:
+            false
+
+        });
+      }
+
+
+    } catch (error) {
 
       console.error(
-        "Batch error",
-        i+1,
+        "Batch error:",
         error
       );
 
     }
 
 
-    setStatus(
-      "Fetching market prices: " +
-      (i+1) +
-      " / " +
-      chunks.length +
-      " batches..."
+    completed += chunk.length;
+
+    updateProgress(
+      completed,
+      total
     );
 
+
+    /*
+      Small pause to avoid unnecessary burst
+      requests to the backend.
+    */
+
+    await sleep(150);
   }
 
 
-  document.getElementById(
-    "stocksWithData"
-  ).textContent =
-    marketData.length.toLocaleString();
+  stocks.sort((a, b) =>
+    a.symbol.localeCompare(b.symbol)
+  );
 
 
   updateStats();
-
-  applyFilters();
-
-  setStatus(
-    "Market data loaded for " +
-    marketData.length.toLocaleString() +
-    " stocks."
-  );
-
-}
-
-
-/* --------------------------------
-   NORMALIZE BATCH RESPONSE
--------------------------------- */
-
-function normalizeBatchResponse(json){
-
-  if(
-    Array.isArray(json)
-  ){
-
-    return json;
-
-  }
-
-
-  if(
-    json &&
-    Array.isArray(json.data)
-  ){
-
-    return json.data;
-
-  }
-
-
-  if(
-    json &&
-    json.data &&
-    typeof json.data === "object"
-  ){
-
-    return Object.entries(
-      json.data
-    ).map(
-      ([key,value]) => ({
-
-        instrument_key:
-          key,
-
-        ...value
-
-      })
-    );
-
-  }
-
-
-  return [];
-
-}
-
-
-/* --------------------------------
-   FILTERS
--------------------------------- */
-
-function applyFilters(){
-
-  const search =
-    document
-      .getElementById(
-        "searchInput"
-      )
-      .value
-      .trim()
-      .toUpperCase();
-
-
-  const changeFilter =
-    document
-      .getElementById(
-        "changeFilter"
-      )
-      .value;
-
-
-  const priceFilter =
-    document
-      .getElementById(
-        "priceFilter"
-      )
-      .value;
-
-
-  const volumeFilter =
-    document
-      .getElementById(
-        "volumeFilter"
-      )
-      .value;
-
-
-  const sortFilter =
-    document
-      .getElementById(
-        "sortFilter"
-      )
-      .value;
-
-
-  filteredData =
-    marketData.filter(
-      stock => {
-
-
-        if(search){
-
-          const symbol =
-            (
-              stock.symbol ||
-              ""
-            ).toUpperCase();
-
-          const name =
-            (
-              stock.name ||
-              ""
-            ).toUpperCase();
-
-          if(
-            !symbol.includes(search) &&
-            !name.includes(search)
-          ){
-
-            return false;
-
-          }
-
-        }
-
-
-        if(
-          changeFilter ===
-          "gainers" &&
-          stock.change <= 0
-        ){
-
-          return false;
-
-        }
-
-
-        if(
-          changeFilter ===
-          "losers" &&
-          stock.change >= 0
-        ){
-
-          return false;
-
-        }
-
-
-        const price =
-          stock.price;
-
-
-        if(
-          priceFilter ===
-          "under100" &&
-          !(price < 100)
-        ){
-
-          return false;
-
-        }
-
-
-        if(
-          priceFilter ===
-          "100to500" &&
-          !(price >= 100 &&
-            price < 500)
-        ){
-
-          return false;
-
-        }
-
-
-        if(
-          priceFilter ===
-          "500to1000" &&
-          !(price >= 500 &&
-            price <= 1000)
-        ){
-
-          return false;
-
-        }
-
-
-        if(
-          priceFilter ===
-          "above1000" &&
-          !(price > 1000)
-        ){
-
-          return false;
-
-        }
-
-
-        if(
-          volumeFilter ===
-          "high" &&
-          stock.volume < 1000000
-        ){
-
-          return false;
-
-        }
-
-
-        if(
-          volumeFilter ===
-          "veryhigh" &&
-          stock.volume < 5000000
-        ){
-
-          return false;
-
-        }
-
-
-        return true;
-
-      }
-    );
-
-
-  filteredData.sort(
-    (a,b) => {
-
-      switch(sortFilter){
-
-        case "changeDesc":
-          return b.change -
-                 a.change;
-
-        case "changeAsc":
-          return a.change -
-                 b.change;
-
-        case "priceDesc":
-          return b.price -
-                 a.price;
-
-        case "priceAsc":
-          return a.price -
-                 b.price;
-
-        case "volumeDesc":
-          return b.volume -
-                 a.volume;
-
-        default:
-
-          return (
-            a.symbol || ""
-          ).localeCompare(
-            b.symbol || ""
-          );
-
-      }
-
-    }
-  );
-
 
   renderTable();
 
 }
 
 
-/* --------------------------------
-   RENDER TABLE
--------------------------------- */
+/* =========================================================
+   PROGRESS
+========================================================= */
 
-function renderTable(){
+function updateProgress(done, total) {
 
-  const body =
-    document.getElementById(
-      "tableBody"
-    );
+  const percentage =
+    total > 0
+      ? Math.min(
+          100,
+          (done / total) * 100
+        )
+      : 0;
 
 
   document.getElementById(
-    "displayed"
+    "progressBar"
+  ).style.width =
+    percentage.toFixed(1) + "%";
+
+
+  document.getElementById(
+    "status"
   ).textContent =
-    filteredData.length.toLocaleString();
+    "Loading market data... " +
+    Math.round(percentage) +
+    "%";
+}
 
 
-  if(!filteredData.length){
+/* =========================================================
+   STATS
+========================================================= */
 
-    body.innerHTML = `
+function updateStats() {
+
+  document.getElementById(
+    "universeCount"
+  ).textContent =
+    universe.length.toLocaleString("en-IN");
+
+
+  document.getElementById(
+    "dataCount"
+  ).textContent =
+    stocks.length.toLocaleString("en-IN");
+
+
+  const gainers =
+    stocks.filter(
+      stock =>
+        number(stock.changePercent) !== null &&
+        stock.changePercent > 0
+    ).length;
+
+
+  const losers =
+    stocks.filter(
+      stock =>
+        number(stock.changePercent) !== null &&
+        stock.changePercent < 0
+    ).length;
+
+
+  document.getElementById(
+    "gainerCount"
+  ).textContent =
+    gainers.toLocaleString("en-IN");
+
+
+  document.getElementById(
+    "loserCount"
+  ).textContent =
+    losers.toLocaleString("en-IN");
+
+
+  document.getElementById(
+    "status"
+  ).textContent =
+    "Market data loaded for " +
+    stocks.length.toLocaleString("en-IN") +
+    " stocks.";
+
+
+  document.getElementById(
+    "resultInfo"
+  ).textContent =
+    stocks.length.toLocaleString("en-IN") +
+    " stocks available";
+}
+
+
+/* =========================================================
+   FILTERS
+========================================================= */
+
+function getFilteredStocks() {
+
+  const search =
+    document.getElementById(
+      "search"
+    ).value
+      .trim()
+      .toLowerCase();
+
+
+  const filter =
+    document.getElementById(
+      "changeFilter"
+    ).value;
+
+
+  let result =
+    stocks.filter(stock => {
+
+      const matchesSearch =
+        !search ||
+        stock.symbol
+          .toLowerCase()
+          .includes(search) ||
+        stock.name
+          .toLowerCase()
+          .includes(search);
+
+
+      if (!matchesSearch) {
+        return false;
+      }
+
+
+      if (
+        filter === "gainers" &&
+        !(stock.changePercent > 0)
+      ) {
+        return false;
+      }
+
+
+      if (
+        filter === "losers" &&
+        !(stock.changePercent < 0)
+      ) {
+        return false;
+      }
+
+
+      return true;
+    });
+
+
+  const sort =
+    document.getElementById(
+      "sortBy"
+    ).value;
+
+
+  result.sort((a, b) => {
+
+    switch (sort) {
+
+      case "changeDesc":
+        return (
+          (b.changePercent ?? -Infinity) -
+          (a.changePercent ?? -Infinity)
+        );
+
+      case "changeAsc":
+        return (
+          (a.changePercent ?? Infinity) -
+          (b.changePercent ?? Infinity)
+        );
+
+      case "priceDesc":
+        return (
+          (b.price ?? -Infinity) -
+          (a.price ?? -Infinity)
+        );
+
+      case "priceAsc":
+        return (
+          (a.price ?? Infinity) -
+          (b.price ?? Infinity)
+        );
+
+      case "volumeDesc":
+        return (
+          (b.volume ?? -Infinity) -
+          (a.volume ?? -Infinity)
+        );
+
+      case "52posDesc":
+        return (
+          (b.position52 ?? -Infinity) -
+          (a.position52 ?? -Infinity)
+        );
+
+      case "52posAsc":
+        return (
+          (a.position52 ?? Infinity) -
+          (b.position52 ?? Infinity)
+        );
+
+      default:
+        return a.symbol.localeCompare(
+          b.symbol
+        );
+    }
+  });
+
+
+  return result;
+}
+
+
+/* =========================================================
+   RENDER TABLE
+========================================================= */
+
+function renderTable() {
+
+  const tbody =
+    document.getElementById(
+      "stockTableBody"
+    );
+
+
+  const filtered =
+    getFilteredStocks();
+
+
+  document.getElementById(
+    "displayedCount"
+  ).textContent =
+    filtered.length.toLocaleString("en-IN");
+
+
+  document.getElementById(
+    "resultInfo"
+  ).textContent =
+    filtered.length.toLocaleString("en-IN") +
+    " stocks displayed";
+
+
+  if (filtered.length === 0) {
+
+    tbody.innerHTML = `
       <tr>
-        <td colspan="9"
-            class="loading">
-          No stocks match the selected filters.
+        <td colspan="9">
+          <div class="empty">
+            No stocks found.
+          </div>
         </td>
       </tr>
     `;
 
     return;
-
   }
 
 
   /*
-   * To keep the browser fast,
-   * initially display up to 500 rows.
-   */
+    Rendering all 2,680 rows is acceptable for this
+    screener size.
+  */
 
-  const visible =
-    filteredData.slice(
-      0,
-      500
-    );
+  tbody.innerHTML =
+    filtered.map(stock => {
 
-
-  body.innerHTML =
-    visible.map(
-      stock => {
-
-        const changeClass =
-          stock.change > 0
-            ? "positive"
-            : stock.change < 0
-              ? "negative"
-              : "neutral";
+      const change =
+        number(stock.changePercent);
 
 
-        return `
-          <tr>
+      let changeClass =
+        "neutral";
 
-            <td>
-              <span
-                class="symbol"
-                onclick="selectStock('${escapeHtml(stock.instrument_key)}')"
-              >
-                ${escapeHtml(stock.symbol || "—")}
-              </span>
-            </td>
 
-            <td>
-              <div class="name">
-                ${escapeHtml(stock.name || "—")}
-              </div>
-            </td>
+      if (change !== null) {
 
-            <td>
-              ₹${formatNumber(stock.price)}
-            </td>
+        if (change > 0) {
+          changeClass = "positive";
+        }
 
-            <td class="${changeClass}">
-              ${formatPercent(stock.change)}
-            </td>
-
-            <td>
-              ${formatVolume(stock.volume)}
-            </td>
-
-            <td>
-              ${
-                stock.yearHigh
-                  ? "₹" +
-                    formatNumber(
-                      stock.yearHigh
-                    )
-                  : "—"
-              }
-            </td>
-
-            <td>
-              ${
-                stock.yearLow
-                  ? "₹" +
-                    formatNumber(
-                      stock.yearLow
-                    )
-                  : "—"
-              }
-            </td>
-
-            <td>
-              ${
-                stock.position52 !== null
-                  ? stock.position52.toFixed(2) +
-                    "%"
-                  : "Click stock"
-              }
-            </td>
-
-            <td>
-              <span class="badge">
-                NSE EQ
-              </span>
-            </td>
-
-          </tr>
-        `;
-
+        if (change < 0) {
+          changeClass = "negative";
+        }
       }
-    )
-    .join("");
 
 
-  if(filteredData.length > 500){
+      let positionHtml =
+        "—";
 
-    body.innerHTML += `
-      <tr>
-        <td colspan="9"
-            class="loading">
 
-          Showing first 500 of
-          ${filteredData.length.toLocaleString()}
-          matching stocks.
+      if (
+        stock.position52 !== null
+      ) {
 
-          Use Search or Filters to narrow the list.
+        const position =
+          Math.max(
+            0,
+            Math.min(
+              100,
+              stock.position52
+            )
+          );
 
-        </td>
-      </tr>
-    `;
 
-  }
+        positionHtml = `
 
+          <div>
+            ${position.toFixed(1)}%
+          </div>
+
+          <div class="position">
+            <div
+              class="position-bar"
+              style="width:${position}%"
+            ></div>
+          </div>
+
+        `;
+      }
+
+
+      return `
+
+        <tr>
+
+          <td>
+            <div class="symbol">
+              ${escapeHtml(stock.symbol)}
+            </div>
+          </td>
+
+          <td>
+            <div class="company"
+                 title="${escapeHtml(stock.name)}">
+              ${escapeHtml(stock.name)}
+            </div>
+          </td>
+
+          <td>
+            ₹${formatNumber(stock.price)}
+          </td>
+
+          <td class="${changeClass}">
+            ${
+              change === null
+                ? "—"
+                : (
+                    change >= 0
+                      ? "+"
+                      : ""
+                  ) +
+                  change.toFixed(2) +
+                  "%"
+            }
+          </td>
+
+          <td>
+            ${formatVolume(stock.volume)}
+          </td>
+
+          <td class="range-cell">
+            ${
+              stock.high52 === null
+                ? "—"
+                : "₹" +
+                  formatNumber(
+                    stock.high52
+                  )
+            }
+          </td>
+
+          <td class="range-cell">
+            ${
+              stock.low52 === null
+                ? "—"
+                : "₹" +
+                  formatNumber(
+                    stock.low52
+                  )
+            }
+          </td>
+
+          <td>
+            ${positionHtml}
+          </td>
+
+          <td>
+
+            ${
+              stock.rangeLoaded
+
+                ? `
+                  <span class="neutral">
+                    Loaded
+                  </span>
+                `
+
+                : `
+                  <button
+                    class="load52"
+                    onclick="load52Week('${escapeHtml(stock.instrument_key)}')"
+                  >
+                    Load 52W
+                  </button>
+                `
+            }
+
+          </td>
+
+        </tr>
+
+      `;
+
+    }).join("");
 }
 
 
-/* --------------------------------
-   SELECT STOCK
--------------------------------- */
+/* =========================================================
+   52 WEEK DATA
+========================================================= */
 
-async function selectStock(key){
+async function load52Week(instrumentKey) {
 
   const stock =
-    marketData.find(
+    stocks.find(
       item =>
-        item.instrument_key === key
+        item.instrument_key ===
+        instrumentKey
     );
 
 
-  if(!stock){
-
+  if (!stock) {
     return;
-
   }
 
 
-  selectedStock =
-    stock;
+  try {
 
+    const url =
+      API_BASE +
+      "/ohlc?instrument_key=" +
+      encodeURIComponent(
+        instrumentKey
+      ) +
+      "&interval=1d";
 
-  renderDetail(
-    stock
-  );
-
-
-  setStatus(
-    "Loading 52-week history for " +
-    stock.symbol +
-    "..."
-  );
-
-
-  try{
 
     const response =
       await fetch(
-        ohlcUrl +
-        "?instrument_key=" +
-        encodeURIComponent(
-          stock.instrument_key
-        ) +
-        "&interval=1d"
+        url,
+        {
+          cache: "no-store"
+        }
       );
 
 
-    if(!response.ok){
+    if (!response.ok) {
 
       throw new Error(
-        "Historical data unavailable"
+        "HTTP " +
+        response.status
       );
-
     }
 
 
@@ -1247,498 +1521,297 @@ async function selectStock(key){
 
 
     const candles =
-      extractCandles(
-        json
-      );
+      json?.data?.candles ||
+      json?.candles ||
+      [];
 
 
-    if(!candles.length){
+    if (!Array.isArray(candles) ||
+        candles.length === 0) {
 
       throw new Error(
         "No historical candles returned"
       );
-
     }
 
 
+    /*
+      Upstox candle structure:
+
+      [timestamp, open, high, low, close, volume, ...]
+    */
+
     const highs =
       candles
-        .map(
-          candle =>
-            Number(candle[2])
-        )
-        .filter(
-          value =>
-            Number.isFinite(value)
-        );
+        .map(c => number(c[2]))
+        .filter(v => v !== null);
 
 
     const lows =
       candles
-        .map(
-          candle =>
-            Number(candle[3])
-        )
-        .filter(
-          value =>
-            Number.isFinite(value)
-        );
+        .map(c => number(c[3]))
+        .filter(v => v !== null);
 
 
-    if(
-      !highs.length ||
-      !lows.length
-    ){
+    if (
+      highs.length === 0 ||
+      lows.length === 0
+    ) {
 
       throw new Error(
-        "Unable to calculate 52-week range"
+        "Invalid historical candle data"
       );
-
     }
 
 
     const high52 =
-      Math.max(
-        ...highs
-      );
+      Math.max(...highs);
 
 
     const low52 =
-      Math.min(
-        ...lows
-      );
+      Math.min(...lows);
 
 
-    const position =
-      high52 === low52
-        ? 0
-        : (
-            (
-              stock.price -
-              low52
-            )
-            /
-            (
-              high52 -
-              low52
-            )
-          ) * 100;
+    const price =
+      number(stock.price);
 
 
-    stock.yearHigh =
+    let position52 = null;
+
+
+    if (
+      price !== null &&
+      high52 > low52
+    ) {
+
+      position52 =
+        (
+          (price - low52) /
+          (high52 - low52)
+        ) * 100;
+
+    }
+
+
+    stock.high52 =
       high52;
 
-    stock.yearLow =
+
+    stock.low52 =
       low52;
 
+
     stock.position52 =
-      Math.max(
-        0,
-        Math.min(
-          100,
-          position
-        )
-      );
+      position52;
 
 
-    renderDetail(
-      stock
-    );
+    stock.rangeLoaded =
+      true;
+
 
     renderTable();
 
 
-    setStatus(
-      stock.symbol +
-      " 52-week analysis loaded."
+  } catch (error) {
+
+    console.error(
+      "52W error:",
+      error
     );
 
-  }catch(error){
 
-    console.error(error);
-
-    setStatus(
-      "52-week data unavailable for " +
+    alert(
+      "Unable to load 52-week data for " +
       stock.symbol +
       "."
     );
-
   }
-
 }
 
 
-/* --------------------------------
-   CANDLE EXTRACTION
--------------------------------- */
+/* =========================================================
+   CLEAR FILTERS
+========================================================= */
 
-function extractCandles(json){
-
-  if(
-    json &&
-    json.data &&
-    Array.isArray(
-      json.data.candles
-    )
-  ){
-
-    return json.data.candles;
-
-  }
-
-
-  if(
-    json &&
-    Array.isArray(
-      json.candles
-    )
-  ){
-
-    return json.candles;
-
-  }
-
-
-  return [];
-
-}
-
-
-/* --------------------------------
-   DETAIL
--------------------------------- */
-
-function renderDetail(stock){
+function clearFilters() {
 
   document.getElementById(
-    "detailArea"
-  ).innerHTML = `
-
-    <div class="detail-grid">
-
-      <div class="detail">
-        <small>Symbol</small>
-        <strong>
-          ${escapeHtml(stock.symbol || "—")}
-        </strong>
-      </div>
-
-      <div class="detail">
-        <small>Company</small>
-        <strong>
-          ${escapeHtml(stock.name || "—")}
-        </strong>
-      </div>
-
-      <div class="detail">
-        <small>CMP</small>
-        <strong>
-          ₹${formatNumber(stock.price)}
-        </strong>
-      </div>
-
-      <div class="detail">
-        <small>Daily Change</small>
-        <strong class="${
-          stock.change > 0
-            ? "positive"
-            : stock.change < 0
-              ? "negative"
-              : ""
-        }">
-          ${formatPercent(stock.change)}
-        </strong>
-      </div>
-
-      <div class="detail">
-        <small>52W High</small>
-        <strong>
-          ${
-            stock.yearHigh
-              ? "₹" +
-                formatNumber(
-                  stock.yearHigh
-                )
-              : "Loading..."
-          }
-        </strong>
-      </div>
-
-      <div class="detail">
-        <small>52W Low</small>
-        <strong>
-          ${
-            stock.yearLow
-              ? "₹" +
-                formatNumber(
-                  stock.yearLow
-                )
-              : "Loading..."
-          }
-        </strong>
-      </div>
-
-    </div>
-
-  `;
-
-}
-
-
-/* --------------------------------
-   STATS
--------------------------------- */
-
-function updateStats(){
-
-  const gainers =
-    marketData.filter(
-      stock =>
-        stock.change > 0
-    ).length;
-
-
-  const losers =
-    marketData.filter(
-      stock =>
-        stock.change < 0
-    ).length;
+    "search"
+  ).value = "";
 
 
   document.getElementById(
-    "gainers"
-  ).textContent =
-    gainers.toLocaleString();
+    "changeFilter"
+  ).value = "all";
 
 
   document.getElementById(
-    "losers"
-  ).textContent =
-    losers.toLocaleString();
+    "sortBy"
+  ).value = "symbol";
 
+
+  renderTable();
 }
 
 
-/* --------------------------------
-   FORMATTING
--------------------------------- */
+/* =========================================================
+   SEARCH / FILTER EVENTS
+========================================================= */
 
-function formatNumber(value){
-
-  const number =
-    Number(value);
-
-  if(
-    !Number.isFinite(number)
-  ){
-
-    return "—";
-
-  }
-
-
-  return number.toLocaleString(
-    "en-IN",
-    {
-      maximumFractionDigits:2
-    }
+document
+  .getElementById("search")
+  .addEventListener(
+    "input",
+    renderTable
   );
 
-}
 
-
-function formatPercent(value){
-
-  const number =
-    Number(value);
-
-  if(
-    !Number.isFinite(number)
-  ){
-
-    return "0.00%";
-
-  }
-
-
-  return (
-    number >= 0
-      ? "+"
-      : ""
-  ) +
-  number.toFixed(2) +
-  "%";
-
-}
-
-
-function formatVolume(value){
-
-  const number =
-    Number(value);
-
-  if(
-    !Number.isFinite(number) ||
-    number <= 0
-  ){
-
-    return "—";
-
-  }
-
-
-  if(
-    number >= 10000000
-  ){
-
-    return (
-      number /
-      10000000
-    ).toFixed(2) +
-    " Cr";
-
-  }
-
-
-  if(
-    number >= 100000
-  ){
-
-    return (
-      number /
-      100000
-    ).toFixed(2) +
-    " L";
-
-  }
-
-
-  if(
-    number >= 1000
-  ){
-
-    return (
-      number /
-      1000
-    ).toFixed(1) +
-    " K";
-
-  }
-
-
-  return number.toLocaleString(
-    "en-IN"
+document
+  .getElementById("changeFilter")
+  .addEventListener(
+    "change",
+    renderTable
   );
 
-}
 
-
-function escapeHtml(value){
-
-  return String(
-    value ?? ""
-  )
-  .replace(
-    /&/g,
-    "&amp;"
-  )
-  .replace(
-    /</g,
-    "&lt;"
-  )
-  .replace(
-    />/g,
-    "&gt;"
-  )
-  .replace(
-    /"/g,
-    "&quot;"
-  )
-  .replace(
-    /'/g,
-    "&#039;"
+document
+  .getElementById("sortBy")
+  .addEventListener(
+    "change",
+    renderTable
   );
 
+
+/* =========================================================
+   UTILITY
+========================================================= */
+
+function sleep(ms) {
+
+  return new Promise(
+    resolve =>
+      setTimeout(
+        resolve,
+        ms
+      )
+  );
 }
 
 
-function setStatus(message){
+/* =========================================================
+   MAIN INITIALIZATION
+========================================================= */
+
+async function loadUniverse() {
+
+  if (loading) {
+    return;
+  }
+
+
+  loading = true;
+
+
+  document.body.classList.add(
+    "loading"
+  );
+
 
   document.getElementById(
     "status"
   ).textContent =
-    message;
+    "Loading NSE universe...";
 
+
+  document.getElementById(
+    "stockTableBody"
+  ).innerHTML = `
+
+    <tr>
+      <td colspan="9">
+        <div class="empty">
+          Loading NSE universe and market data...
+        </div>
+      </td>
+    </tr>
+
+  `;
+
+
+  try {
+
+    universe =
+      await loadNSEUniverse();
+
+
+    document.getElementById(
+      "universeCount"
+    ).textContent =
+      universe.length.toLocaleString(
+        "en-IN"
+      );
+
+
+    await loadMarketData();
+
+
+  } catch (error) {
+
+    console.error(
+      "Screener error:",
+      error
+    );
+
+
+    document.getElementById(
+      "status"
+    ).textContent =
+      error.message ||
+      "Unable to load screener";
+
+
+    document.getElementById(
+      "stockTableBody"
+    ).innerHTML = `
+
+      <tr>
+        <td colspan="9">
+
+          <div class="empty">
+
+            <strong>
+              Unable to load Screener
+            </strong>
+
+            <br><br>
+
+            ${escapeHtml(
+              error.message ||
+              "Unknown error"
+            )}
+
+          </div>
+
+        </td>
+      </tr>
+
+    `;
+
+  }
+
+
+  loading = false;
+
+
+  document.body.classList.remove(
+    "loading"
+  );
 }
 
 
-/* --------------------------------
-   EVENTS
--------------------------------- */
-
-document
-  .getElementById(
-    "searchInput"
-  )
-  .addEventListener(
-    "input",
-    applyFilters
-  );
-
-
-document
-  .getElementById(
-    "changeFilter"
-  )
-  .addEventListener(
-    "change",
-    applyFilters
-  );
-
-
-document
-  .getElementById(
-    "priceFilter"
-  )
-  .addEventListener(
-    "change",
-    applyFilters
-  );
-
-
-document
-  .getElementById(
-    "volumeFilter"
-  )
-  .addEventListener(
-    "change",
-    applyFilters
-  );
-
-
-document
-  .getElementById(
-    "sortFilter"
-  )
-  .addEventListener(
-    "change",
-    applyFilters
-  );
-
-
-document
-  .getElementById(
-    "loadButton"
-  )
-  .addEventListener(
-    "click",
-    loadUniverse
-  );
-
-
-/* --------------------------------
+/* =========================================================
    START
--------------------------------- */
+========================================================= */
 
 loadUniverse();
 
