@@ -1,3 +1,8 @@
+import {
+  createSessionToken,
+  SESSION_COOKIE_NAME
+} from "../../lib/session.js";
+
 export async function onRequestPost(context) {
   try {
     const { request, env } = context;
@@ -17,7 +22,21 @@ export async function onRequestPost(context) {
     }
 
     // --------------------------------------------------
-    // 2. Read request
+    // 2. Check session secret
+    // --------------------------------------------------
+
+    if (!env.SESSION_SECRET) {
+      return Response.json(
+        {
+          status: "error",
+          message: "SESSION_SECRET is not configured"
+        },
+        { status: 500 }
+      );
+    }
+
+    // --------------------------------------------------
+    // 3. Read request
     // --------------------------------------------------
 
     const body = await request.json();
@@ -59,7 +78,7 @@ export async function onRequestPost(context) {
     }
 
     // --------------------------------------------------
-    // 3. Find latest OTP for this email
+    // 4. Find latest OTP for this email
     // --------------------------------------------------
 
     const result = await env.DB
@@ -90,21 +109,22 @@ export async function onRequestPost(context) {
     }
 
     // --------------------------------------------------
-    // 4. Check if OTP was already used
+    // 5. Check if OTP was already used
     // --------------------------------------------------
 
     if (Number(result.used) === 1) {
       return Response.json(
         {
           status: "error",
-          message: "This OTP has already been used. Please request a new OTP."
+          message:
+            "This OTP has already been used. Please request a new OTP."
         },
         { status: 400 }
       );
     }
 
     // --------------------------------------------------
-    // 5. Check maximum attempts
+    // 6. Check maximum attempts
     // --------------------------------------------------
 
     const attempts = Number(result.attempts || 0);
@@ -113,14 +133,15 @@ export async function onRequestPost(context) {
       return Response.json(
         {
           status: "error",
-          message: "Too many incorrect attempts. Please request a new OTP."
+          message:
+            "Too many incorrect attempts. Please request a new OTP."
         },
         { status: 429 }
       );
     }
 
     // --------------------------------------------------
-    // 6. Check expiry
+    // 7. Check expiry
     // --------------------------------------------------
 
     const now = Date.now();
@@ -138,15 +159,15 @@ export async function onRequestPost(context) {
       return Response.json(
         {
           status: "error",
-          message: "OTP has expired. Please request a new OTP."
+          message:
+            "OTP has expired. Please request a new OTP."
         },
         { status: 400 }
       );
     }
 
     // --------------------------------------------------
-    // 7. Hash entered OTP using same SHA-256 method
-    //    used by send-otp.js
+    // 8. Hash entered OTP using SHA-256
     // --------------------------------------------------
 
     const encoder = new TextEncoder();
@@ -167,11 +188,10 @@ export async function onRequestPost(context) {
       .join("");
 
     // --------------------------------------------------
-    // 8. Compare OTP hash
+    // 9. Compare OTP hash
     // --------------------------------------------------
 
     if (enteredOtpHash !== result.otp_hash) {
-
       const newAttempts = attempts + 1;
 
       await env.DB
@@ -197,7 +217,7 @@ export async function onRequestPost(context) {
     }
 
     // --------------------------------------------------
-    // 9. OTP is correct
+    // 10. OTP is correct
     // --------------------------------------------------
 
     await env.DB
@@ -210,16 +230,37 @@ export async function onRequestPost(context) {
       .run();
 
     // --------------------------------------------------
-    // 10. Success
+    // 11. Create secure login session
     // --------------------------------------------------
 
-    return Response.json(
-      {
+    const sessionToken = await createSessionToken(
+      email,
+      env.SESSION_SECRET
+    );
+
+    // --------------------------------------------------
+    // 12. Success + secure session cookie
+    // --------------------------------------------------
+
+    return new Response(
+      JSON.stringify({
         status: "success",
-        message: "OTP verified successfully",
-        email: email
-      },
-      { status: 200 }
+        message: "OTP verified successfully"
+      }),
+      {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+
+          "Set-Cookie":
+            `${SESSION_COOKIE_NAME}=${sessionToken}; ` +
+            "HttpOnly; " +
+            "Secure; " +
+            "SameSite=Lax; " +
+            "Path=/; " +
+            "Max-Age=604800"
+        }
+      }
     );
 
   } catch (error) {
