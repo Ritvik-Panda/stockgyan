@@ -15,10 +15,10 @@ export async function onRequestGet(context) {
     const requestUrl = new URL(context.request.url);
 
     const instrumentKey =
-      requestUrl.searchParams.get("instrument_key");
+      requestUrl.searchParams.get("instrument_key")?.trim();
 
     const interval =
-      requestUrl.searchParams.get("interval") || "1d";
+      requestUrl.searchParams.get("interval")?.trim() || "1d";
 
     if (!instrumentKey) {
       return Response.json(
@@ -30,79 +30,111 @@ export async function onRequestGet(context) {
       );
     }
 
-    let unit;
-    let value;
-    let daysBack;
+    /*
+      1D on StockGyan = intraday candles.
 
-    if (interval === "1d") {
-      unit = "days";
-      value = "1";
-      daysBack = 365;
-    } else if (interval === "1m") {
-      unit = "minutes";
-      value = "1";
-      daysBack = 30;
-    } else if (interval === "30m") {
-      unit = "minutes";
-      value = "30";
-      daysBack = 90;
+      Supported:
+      1 minute
+      5 minutes
+      15 minutes
+      30 minutes
+    */
+
+    const intradayIntervals = [
+      "1m",
+      "5m",
+      "15m",
+      "30m"
+    ];
+
+    let upstoxUrl;
+
+    if (intradayIntervals.includes(interval)) {
+
+      const minutes = interval.replace("m", "");
+
+      upstoxUrl =
+        "https://api.upstox.com/v3/historical-candle/intraday/" +
+        `${encodeURIComponent(instrumentKey)}/minutes/${minutes}`;
+
+    } else if (interval === "1d") {
+
+      /*
+        Daily candles are used for:
+        1W
+        1M
+        3M
+        1Y
+        ALL
+
+        The frontend will filter the required period.
+      */
+
+      const today = new Date();
+
+      const toDate =
+        today.toISOString().slice(0, 10);
+
+      const from = new Date(today);
+
+      from.setFullYear(
+        from.getFullYear() - 10
+      );
+
+      const fromDate =
+        from.toISOString().slice(0, 10);
+
+      upstoxUrl =
+        "https://api.upstox.com/v3/historical-candle/" +
+        `${encodeURIComponent(instrumentKey)}/days/1/${toDate}/${fromDate}`;
+
     } else {
+
       return Response.json(
         {
           status: "error",
-          message: "Invalid interval"
+          message:
+            "Invalid interval. Use 1m, 5m, 15m, 30m or 1d."
         },
         { status: 400 }
       );
     }
 
-    const today = new Date();
-
-    const toDate =
-      today.toISOString().slice(0, 10);
-
-    const from = new Date(today);
-
-    from.setDate(
-      from.getDate() - daysBack
-    );
-
-    const fromDate =
-      from.toISOString().slice(0, 10);
-
-    const encodedKey =
-      encodeURIComponent(instrumentKey);
-
-    const upstoxUrl =
-      `https://api.upstox.com/v3/historical-candle/` +
-      `${encodedKey}/${unit}/${value}/${toDate}/${fromDate}`;
-
-    const response = await fetch(upstoxUrl, {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-        Authorization: `Bearer ${token}`
+    const response = await fetch(
+      upstoxUrl,
+      {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`
+        }
       }
-    });
+    );
 
     const data = await response.json();
 
-    return Response.json(data, {
-      status: response.status,
-      headers: {
-        "Cache-Control": "no-store"
+    return Response.json(
+      data,
+      {
+        status: response.status,
+        headers: {
+          "Cache-Control": "no-store"
+        }
       }
-    });
+    );
 
   } catch (error) {
+
     return Response.json(
       {
         status: "error",
         message:
           error.message ||
-          "Unable to fetch historical market data"
+          "Unable to fetch chart data"
       },
-      { status: 500 }
+      {
+        status: 500
+      }
     );
   }
 }
