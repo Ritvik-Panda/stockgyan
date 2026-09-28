@@ -781,6 +781,14 @@
           Rename
         </button>
 
+        <button
+          class="btn btn-light"
+          style="color:#dc3545;border-color:#f3c2c7;"
+          onclick="deletePortfolio()"
+        >
+          Delete
+        </button>
+
       </div>
 
     </section>
@@ -1329,6 +1337,107 @@
   </div>
 
 
+
+  <!-- =========================
+       ADD HOLDING MODAL
+  ========================= -->
+
+  <div id="holdingModal" class="modal-overlay">
+    <div class="modal" style="max-width:560px;">
+      <h3>Add Holding</h3>
+      <p id="holdingPortfolioText">
+        Add a stock to the selected portfolio.
+      </p>
+
+      <label style="display:block;font-size:13px;font-weight:700;color:#344054;margin-bottom:7px;">
+        Search Stock
+      </label>
+
+      <input
+        id="stockSearchInput"
+        type="text"
+        placeholder="Search company or symbol — e.g. Reliance, TCS"
+        autocomplete="off"
+        style="margin-bottom:8px;"
+      >
+
+      <div
+        id="stockSearchStatus"
+        style="font-size:12px;color:#667085;margin-bottom:10px;min-height:18px;"
+      ></div>
+
+      <div
+        id="stockResults"
+        style="max-height:220px;overflow:auto;margin-bottom:16px;"
+      ></div>
+
+      <div id="selectedStockBox"
+           style="display:none;background:#f8fafc;border:1px solid #e5eaf1;border-radius:10px;padding:12px;margin-bottom:16px;">
+        <div id="selectedStockName" style="font-weight:800;color:#082a63;"></div>
+        <div id="selectedStockDetails" style="font-size:12px;color:#667085;margin-top:4px;"></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <label style="display:block;font-size:13px;font-weight:700;color:#344054;margin-bottom:7px;">
+            Quantity
+          </label>
+          <input id="holdingQuantity" type="number" min="0.0001" step="any" placeholder="100">
+        </div>
+
+        <div>
+          <label style="display:block;font-size:13px;font-weight:700;color:#344054;margin-bottom:7px;">
+            Average Buy Price
+          </label>
+          <input id="holdingAvgPrice" type="number" min="0.01" step="0.01" placeholder="250.00">
+        </div>
+      </div>
+
+      <div
+        id="holdingMessage"
+        style="display:none;margin-top:12px;padding:10px 12px;border-radius:9px;font-size:13px;"
+      ></div>
+
+      <div class="modal-actions" style="margin-top:18px;">
+        <button class="btn btn-light" onclick="closeHoldingModal()">
+          Cancel
+        </button>
+
+        <button class="btn btn-green" onclick="saveHolding()">
+          Save Holding
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================
+       DELETE PORTFOLIO MODAL
+  ========================= -->
+
+  <div id="deletePortfolioModal" class="modal-overlay">
+    <div class="modal" style="max-width:430px;">
+      <h3 style="color:#dc3545;">Delete Portfolio?</h3>
+
+      <p id="deletePortfolioText">
+        This will delete the selected portfolio and its holdings.
+      </p>
+
+      <div class="modal-actions">
+        <button class="btn btn-light" onclick="closeDeletePortfolioModal()">
+          Cancel
+        </button>
+
+        <button
+          class="btn"
+          style="background:#dc3545;color:white;"
+          onclick="confirmDeletePortfolio()"
+        >
+          Delete Portfolio
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- =========================
        JAVASCRIPT
   ========================= -->
@@ -1354,8 +1463,14 @@
         localStorage.getItem("stockgyan_portfolios") || "null"
       );
 
+    let holdings =
+      JSON.parse(
+        localStorage.getItem("stockgyan_holdings") || "{}"
+      );
 
-    if (!portfolios) {
+    let selectedStock = null;
+
+    if (!portfolios || !Array.isArray(portfolios) || portfolios.length === 0) {
 
       portfolios = [
         {
@@ -1534,9 +1649,498 @@
 
     function addHolding() {
 
-      alert(
-        "Stock holding entry will be connected to the StockGyan portfolio system next."
+      const selectedId = portfolioSelect.value;
+      const portfolio = portfolios.find(function(item) {
+        return item.id === selectedId;
+      });
+
+      if (!portfolio) {
+        alert("Please select a portfolio first.");
+        return;
+      }
+
+      document.getElementById("holdingPortfolioText").textContent =
+        "Add a stock to \"" + portfolio.name + "\".";
+
+      document.getElementById("stockSearchInput").value = "";
+      document.getElementById("stockSearchStatus").textContent = "";
+      document.getElementById("stockResults").innerHTML = "";
+      document.getElementById("holdingQuantity").value = "";
+      document.getElementById("holdingAvgPrice").value = "";
+      document.getElementById("holdingMessage").style.display = "none";
+      document.getElementById("selectedStockBox").style.display = "none";
+
+      selectedStock = null;
+
+      document.getElementById("holdingModal").classList.add("show");
+
+      setTimeout(function() {
+        document.getElementById("stockSearchInput").focus();
+      }, 100);
+    }
+
+    function closeHoldingModal() {
+      document.getElementById("holdingModal").classList.remove("show");
+      selectedStock = null;
+    }
+
+    async function searchStocks() {
+
+      const input = document.getElementById("stockSearchInput");
+      const results = document.getElementById("stockResults");
+      const status = document.getElementById("stockSearchStatus");
+      const query = input.value.trim();
+
+      if (query.length < 2) {
+        results.innerHTML = "";
+        status.textContent = "Type at least 2 characters to search.";
+        return;
+      }
+
+      status.textContent = "Searching NSE + BSE...";
+      results.innerHTML = "";
+
+      try {
+
+        const response = await fetch(
+          "/api/market/search?query=" +
+          encodeURIComponent(query)
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || data.status !== "success") {
+          throw new Error(
+            data.message || "Unable to search stocks."
+          );
+        }
+
+        const list = Array.isArray(data.data)
+          ? data.data
+          : [];
+
+        if (!list.length) {
+          status.textContent = "No matching NSE/BSE stocks found.";
+          return;
+        }
+
+        status.textContent =
+          list.length + " result" + (list.length === 1 ? "" : "s") + " found.";
+
+        list.forEach(function(stock) {
+
+          const exchange =
+            stock.exchange ||
+            (stock.instrument_key || "").split("_")[0];
+
+          const symbol =
+            stock.trading_symbol ||
+            stock.symbol ||
+            "—";
+
+          const name =
+            stock.name ||
+            symbol;
+
+          const item = document.createElement("button");
+
+          item.type = "button";
+          item.style.cssText =
+            "width:100%;text-align:left;background:#fff;border:1px solid #e5eaf1;" +
+            "border-radius:10px;padding:11px 12px;margin-bottom:7px;cursor:pointer;";
+
+          item.innerHTML =
+            '<div style="display:flex;justify-content:space-between;gap:10px;">' +
+              '<div>' +
+                '<div style="font-weight:800;color:#082a63;">' +
+                  escapeHtml(symbol) +
+                '</div>' +
+                '<div style="font-size:12px;color:#667085;margin-top:3px;">' +
+                  escapeHtml(name) +
+                '</div>' +
+              '</div>' +
+              '<div style="font-size:11px;font-weight:800;color:#159447;">' +
+                escapeHtml(exchange) +
+              '</div>' +
+            '</div>';
+
+          item.onclick = function() {
+            selectStock(stock);
+          };
+
+          results.appendChild(item);
+
+        });
+
+      } catch (error) {
+
+        status.textContent =
+          error.message || "Unable to search stocks.";
+
+      }
+    }
+
+    function selectStock(stock) {
+
+      selectedStock = stock;
+
+      const symbol =
+        stock.trading_symbol ||
+        stock.symbol ||
+        "—";
+
+      const name =
+        stock.name ||
+        symbol;
+
+      const exchange =
+        stock.exchange ||
+        (stock.instrument_key || "").split("_")[0] ||
+        "—";
+
+      document.getElementById("selectedStockName").textContent =
+        symbol + " — " + name;
+
+      document.getElementById("selectedStockDetails").textContent =
+        exchange + " • " +
+        (stock.instrument_key || "Instrument key unavailable");
+
+      document.getElementById("selectedStockBox").style.display = "block";
+      document.getElementById("stockResults").innerHTML = "";
+      document.getElementById("stockSearchStatus").textContent =
+        "Stock selected.";
+
+    }
+
+    function saveHolding() {
+
+      const portfolioId = portfolioSelect.value;
+      const quantity = Number(
+        document.getElementById("holdingQuantity").value
       );
+      const avgPrice = Number(
+        document.getElementById("holdingAvgPrice").value
+      );
+
+      if (!selectedStock || !selectedStock.instrument_key) {
+        showHoldingMessage(
+          "Please search and select a stock first.",
+          "error"
+        );
+        return;
+      }
+
+      if (!Number.isFinite(quantity) || quantity <= 0) {
+        showHoldingMessage(
+          "Please enter a valid quantity.",
+          "error"
+        );
+        return;
+      }
+
+      if (!Number.isFinite(avgPrice) || avgPrice <= 0) {
+        showHoldingMessage(
+          "Please enter a valid average buy price.",
+          "error"
+        );
+        return;
+      }
+
+      if (!holdings[portfolioId]) {
+        holdings[portfolioId] = [];
+      }
+
+      const existing = holdings[portfolioId].find(function(item) {
+        return item.instrument_key === selectedStock.instrument_key;
+      });
+
+      if (existing) {
+
+        const oldQty = Number(existing.quantity);
+        const oldAvg = Number(existing.avg_price);
+
+        const totalQty = oldQty + quantity;
+        const totalCost =
+          (oldQty * oldAvg) +
+          (quantity * avgPrice);
+
+        existing.quantity = totalQty;
+        existing.avg_price = totalCost / totalQty;
+
+      } else {
+
+        holdings[portfolioId].push({
+          instrument_key: selectedStock.instrument_key,
+          symbol:
+            selectedStock.trading_symbol ||
+            selectedStock.symbol ||
+            "",
+          name:
+            selectedStock.name ||
+            selectedStock.trading_symbol ||
+            selectedStock.symbol ||
+            "",
+          exchange:
+            selectedStock.exchange ||
+            (selectedStock.instrument_key || "").split("_")[0],
+          quantity: quantity,
+          avg_price: avgPrice
+        });
+
+      }
+
+      localStorage.setItem(
+        "stockgyan_holdings",
+        JSON.stringify(holdings)
+      );
+
+      closeHoldingModal();
+      renderHoldings();
+      updateSummary();
+
+    }
+
+    function showHoldingMessage(message, type) {
+
+      const box = document.getElementById("holdingMessage");
+
+      box.textContent = message;
+      box.style.display = "block";
+
+      if (type === "error") {
+        box.style.background = "#fff1f0";
+        box.style.color = "#b42318";
+        box.style.border = "1px solid #fecdca";
+      } else {
+        box.style.background = "#ecfdf3";
+        box.style.color = "#067647";
+        box.style.border = "1px solid #abefc6";
+      }
+
+    }
+
+    function renderHoldings() {
+
+      const body = document.getElementById("holdingsBody");
+      const portfolioId = portfolioSelect.value;
+      const list = holdings[portfolioId] || [];
+
+      body.innerHTML = "";
+
+      if (!list.length) {
+
+        body.innerHTML =
+          '<tr>' +
+            '<td colspan="8" class="empty-table">' +
+              '<strong>No holdings added yet</strong><br>' +
+              '<span style="font-size:12px;">Add stocks to start tracking your portfolio.</span>' +
+            '</td>' +
+          '</tr>';
+
+        updateSummary();
+        return;
+      }
+
+      list.forEach(function(item) {
+
+        const invested =
+          Number(item.quantity) *
+          Number(item.avg_price);
+
+        const row = document.createElement("tr");
+
+        row.innerHTML =
+          '<td>' +
+            '<div class="stock-cell">' +
+              '<div class="stock-avatar">' +
+                escapeHtml((item.symbol || "?").substring(0, 2)) +
+              '</div>' +
+              '<div>' +
+                '<div class="stock-symbol">' +
+                  escapeHtml(item.symbol || "—") +
+                '</div>' +
+                '<div class="stock-company">' +
+                  escapeHtml(item.name || "") +
+                  ' • ' + escapeHtml(item.exchange || "") +
+                '</div>' +
+              '</div>' +
+            '</div>' +
+          '</td>' +
+          '<td>' + formatNumber(item.quantity) + '</td>' +
+          '<td>₹' + formatMoney(item.avg_price) + '</td>' +
+          '<td>—</td>' +
+          '<td>₹' + formatMoney(invested) + '</td>' +
+          '<td>—</td>' +
+          '<td>—</td>' +
+          '<td>—</td>';
+
+        body.appendChild(row);
+
+      });
+
+      updateSummary();
+
+    }
+
+    function updateSummary() {
+
+      const portfolioId = portfolioSelect.value;
+      const list = holdings[portfolioId] || [];
+
+      let invested = 0;
+
+      list.forEach(function(item) {
+        invested +=
+          Number(item.quantity) *
+          Number(item.avg_price);
+      });
+
+      document.getElementById("totalInvested").textContent =
+        "₹" + formatMoney(invested);
+
+      document.getElementById("currentValue").textContent =
+        "₹" + formatMoney(invested);
+
+      document.getElementById("totalGain").textContent = "₹0";
+      document.getElementById("totalGainPercent").textContent = "—";
+      document.getElementById("todayGain").textContent = "₹0";
+      document.getElementById("todayGainPercent").textContent = "—";
+
+    }
+
+    function formatMoney(value) {
+      return Number(value || 0).toLocaleString(
+        "en-IN",
+        {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }
+      );
+    }
+
+    function formatNumber(value) {
+      return Number(value || 0).toLocaleString(
+        "en-IN",
+        {
+          maximumFractionDigits: 4
+        }
+      );
+    }
+
+    function escapeHtml(value) {
+
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+    }
+
+    let searchTimer = null;
+
+    document.getElementById("stockSearchInput").addEventListener(
+      "input",
+      function() {
+
+        clearTimeout(searchTimer);
+
+        searchTimer = setTimeout(
+          searchStocks,
+          350
+        );
+
+      }
+    );
+
+    portfolioSelect.addEventListener(
+      "change",
+      function() {
+        renderHoldings();
+      }
+    );
+
+    function deletePortfolio() {
+
+      const selectedId = portfolioSelect.value;
+
+      if (selectedId === "default") {
+        alert("My Portfolio is the default portfolio and cannot be deleted.");
+        return;
+      }
+
+      const portfolio =
+        portfolios.find(function(item) {
+          return item.id === selectedId;
+        });
+
+      if (!portfolio) {
+        return;
+      }
+
+      document.getElementById("deletePortfolioText").textContent =
+        'Delete "' + portfolio.name +
+        '"? This will also remove all holdings inside this portfolio.';
+
+      document.getElementById("deletePortfolioModal").classList.add("show");
+
+    }
+
+    function closeDeletePortfolioModal() {
+      document.getElementById("deletePortfolioModal").classList.remove("show");
+    }
+
+    function confirmDeletePortfolio() {
+
+      const selectedId = portfolioSelect.value;
+
+      if (selectedId === "default") {
+        closeDeletePortfolioModal();
+        return;
+      }
+
+      const portfolio =
+        portfolios.find(function(item) {
+          return item.id === selectedId;
+        });
+
+      if (!portfolio) {
+        closeDeletePortfolioModal();
+        return;
+      }
+
+      const confirmed = confirm(
+        'Delete "' + portfolio.name +
+        '" permanently?'
+      );
+
+      if (!confirmed) {
+        return;
+      }
+
+      portfolios =
+        portfolios.filter(function(item) {
+          return item.id !== selectedId;
+        });
+
+      delete holdings[selectedId];
+
+      savePortfolios();
+
+      localStorage.setItem(
+        "stockgyan_holdings",
+        JSON.stringify(holdings)
+      );
+
+      renderPortfolios();
+
+      portfolioSelect.value = "default";
+
+      closeDeletePortfolioModal();
+
+      renderHoldings();
+      updateSummary();
 
     }
 
@@ -1586,6 +2190,31 @@
       }
     );
 
+    document.getElementById("holdingModal").addEventListener(
+      "click",
+      function(event) {
+
+        if (event.target === this) {
+          closeHoldingModal();
+        }
+
+      }
+    );
+
+    document.getElementById("deletePortfolioModal").addEventListener(
+      "click",
+      function(event) {
+
+        if (event.target === this) {
+          closeDeletePortfolioModal();
+        }
+
+      }
+    );
+
+    renderHoldings();
+    updateSummary();
+
 
     /* --------------------------------
        ESCAPE KEY
@@ -1598,6 +2227,8 @@
         if (event.key === "Escape") {
 
           closeModal();
+          closeHoldingModal();
+          closeDeletePortfolioModal();
 
         }
 
