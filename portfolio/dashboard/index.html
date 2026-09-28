@@ -1,0 +1,1610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>My Portfolio | StockGyan</title>
+
+  <style>
+    :root {
+      --navy: #082a63;
+      --green: #159447;
+      --orange: #f28c28;
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #172033;
+      --muted: #6b7280;
+      --border: #e5eaf1;
+      --danger: #dc3545;
+      --shadow: 0 8px 25px rgba(8, 42, 99, 0.08);
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Arial,
+        sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    button,
+    select {
+      font-family: inherit;
+    }
+
+    /* =========================
+       TOP NAVBAR
+    ========================= */
+
+    .navbar {
+      height: 68px;
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .brand-logo {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: var(--navy);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    .brand-name {
+      font-size: 21px;
+      font-weight: 800;
+      color: var(--navy);
+    }
+
+    .brand-name span {
+      color: var(--green);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .market-btn {
+      text-decoration: none;
+      color: var(--navy);
+      border: 1px solid var(--border);
+      padding: 9px 14px;
+      border-radius: 9px;
+      font-size: 14px;
+      font-weight: 600;
+      background: white;
+    }
+
+    .user-badge {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: #eaf2ff;
+      color: var(--navy);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
+
+    /* =========================
+       PAGE
+    ========================= */
+
+    .page {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 30px 24px 50px;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 26px;
+    }
+
+    .page-title {
+      font-size: 30px;
+      font-weight: 800;
+      color: var(--navy);
+      margin-bottom: 6px;
+    }
+
+    .page-subtitle {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    /* =========================
+       PORTFOLIO CONTROLS
+    ========================= */
+
+    .portfolio-controls {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+    }
+
+    .portfolio-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .portfolio-label {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .portfolio-select {
+      min-width: 230px;
+      padding: 11px 38px 11px 13px;
+      border: 1px solid #d8dee8;
+      border-radius: 9px;
+      background: #ffffff;
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 600;
+      outline: none;
+    }
+
+    .portfolio-select:focus {
+      border-color: var(--navy);
+    }
+
+    .control-buttons {
+      display: flex;
+      gap: 9px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 9px;
+      padding: 10px 15px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 700;
+      transition: 0.2s;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: var(--navy);
+      color: white;
+    }
+
+    .btn-green {
+      background: var(--green);
+      color: white;
+    }
+
+    .btn-light {
+      background: #f3f6fa;
+      color: var(--navy);
+      border: 1px solid var(--border);
+    }
+
+    /* =========================
+       SUMMARY CARDS
+    ========================= */
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    .summary-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      min-height: 135px;
+    }
+
+    .summary-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .summary-title {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .summary-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      background: #edf3ff;
+      color: var(--navy);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+    }
+
+    .summary-value {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--navy);
+    }
+
+    .summary-change {
+      margin-top: 7px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .positive {
+      color: var(--green) !important;
+    }
+
+    .negative {
+      color: var(--danger) !important;
+    }
+
+    /* =========================
+       MAIN GRID
+    ========================= */
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .card-title {
+      color: var(--navy);
+      font-size: 17px;
+      font-weight: 800;
+    }
+
+    .card-subtitle {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .card-body {
+      padding: 20px;
+    }
+
+    /* =========================
+       PERFORMANCE
+    ========================= */
+
+    .performance-empty {
+      height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: var(--muted);
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .empty-icon {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: #edf3ff;
+      color: var(--navy);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 25px;
+      font-weight: 800;
+    }
+
+    .empty-title {
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    .empty-text {
+      font-size: 13px;
+      max-width: 360px;
+      line-height: 1.5;
+    }
+
+    /* =========================
+       GAINERS / LOSERS
+    ========================= */
+
+    .leader-list {
+      display: flex;
+      flex-direction: column;
+      gap: 13px;
+    }
+
+    .leader-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px;
+      background: #f8fafc;
+      border-radius: 10px;
+    }
+
+    .leader-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .stock-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      background: #eaf2ff;
+      color: var(--navy);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .stock-name {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .stock-qty {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    .leader-value {
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    /* =========================
+       HOLDINGS
+    ========================= */
+
+    .holdings-card {
+      margin-bottom: 24px;
+    }
+
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 850px;
+    }
+
+    th {
+      background: #f8fafc;
+      color: var(--muted);
+      text-align: left;
+      padding: 13px 16px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 15px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .stock-cell {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .stock-symbol {
+      font-weight: 800;
+      color: var(--navy);
+    }
+
+    .stock-company {
+      color: var(--muted);
+      font-size: 11px;
+      margin-top: 3px;
+    }
+
+    .empty-table {
+      text-align: center;
+      padding: 55px 20px !important;
+      color: var(--muted);
+    }
+
+    /* =========================
+       QUICK ACTIONS
+    ========================= */
+
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .quick-action {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .quick-action:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+
+    .quick-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: #edf3ff;
+      color: var(--navy);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .quick-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--navy);
+      margin-bottom: 5px;
+    }
+
+    .quick-text {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    /* =========================
+       FOOTER
+    ========================= */
+
+    .footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      padding-top: 35px;
+    }
+
+    /* =========================
+       MODAL
+    ========================= */
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal {
+      width: 100%;
+      max-width: 430px;
+      background: white;
+      border-radius: 16px;
+      padding: 25px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal h3 {
+      color: var(--navy);
+      margin-bottom: 8px;
+    }
+
+    .modal p {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 18px;
+    }
+
+    .modal input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #d8dee8;
+      border-radius: 9px;
+      font-size: 14px;
+      outline: none;
+      margin-bottom: 16px;
+    }
+
+    .modal input:focus {
+      border-color: var(--navy);
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    /* =========================
+       RESPONSIVE
+    ========================= */
+
+    @media (max-width: 1100px) {
+      .summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .navbar {
+        padding: 0 15px;
+      }
+
+      .market-btn {
+        display: none;
+      }
+
+      .page {
+        padding: 22px 14px 40px;
+      }
+
+      .page-header {
+        flex-direction: column;
+      }
+
+      .page-title {
+        font-size: 25px;
+      }
+
+      .portfolio-controls {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .portfolio-left {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .portfolio-select {
+        width: 100%;
+      }
+
+      .control-buttons {
+        width: 100%;
+      }
+
+      .control-buttons .btn {
+        flex: 1;
+      }
+
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .quick-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-value {
+        font-size: 23px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- =========================
+       NAVBAR
+  ========================= -->
+
+  <header class="navbar">
+
+    <a href="/" class="brand">
+      <div class="brand-logo">SG</div>
+      <div class="brand-name">
+        Stock<span>Gyan</span>
+      </div>
+    </a>
+
+    <div class="nav-right">
+
+      <a href="/market/" class="market-btn">
+        Market
+      </a>
+
+      <div class="user-badge">
+        U
+      </div>
+
+    </div>
+
+  </header>
+
+
+  <!-- =========================
+       PAGE
+  ========================= -->
+
+  <main class="page">
+
+    <div class="page-header">
+
+      <div>
+        <h1 class="page-title">
+          My Portfolio
+        </h1>
+
+        <p class="page-subtitle">
+          Track your investments, performance and portfolio health.
+        </p>
+      </div>
+
+    </div>
+
+
+    <!-- =========================
+         PORTFOLIO SELECTOR
+    ========================= -->
+
+    <section class="portfolio-controls">
+
+      <div class="portfolio-left">
+
+        <span class="portfolio-label">
+          Portfolio
+        </span>
+
+        <select
+          id="portfolioSelect"
+          class="portfolio-select"
+        >
+          <option value="default">
+            My Portfolio
+          </option>
+        </select>
+
+      </div>
+
+
+      <div class="control-buttons">
+
+        <button
+          class="btn btn-primary"
+          onclick="addPortfolio()"
+        >
+          + Add Portfolio
+        </button>
+
+        <button
+          class="btn btn-light"
+          onclick="renamePortfolio()"
+        >
+          Rename
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         SUMMARY
+    ========================= -->
+
+    <section class="summary-grid">
+
+      <div class="summary-card">
+
+        <div class="summary-top">
+          <div class="summary-title">
+            Total Invested
+          </div>
+
+          <div class="summary-icon">
+            ₹
+          </div>
+        </div>
+
+        <div
+          id="totalInvested"
+          class="summary-value"
+        >
+          ₹0
+        </div>
+
+        <div class="summary-change">
+          Amount invested in this portfolio
+        </div>
+
+      </div>
+
+
+      <div class="summary-card">
+
+        <div class="summary-top">
+          <div class="summary-title">
+            Current Value
+          </div>
+
+          <div class="summary-icon">
+            ₹
+          </div>
+        </div>
+
+        <div
+          id="currentValue"
+          class="summary-value"
+        >
+          ₹0
+        </div>
+
+        <div class="summary-change">
+          Live portfolio valuation
+        </div>
+
+      </div>
+
+
+      <div class="summary-card">
+
+        <div class="summary-top">
+          <div class="summary-title">
+            Total Gain
+          </div>
+
+          <div class="summary-icon">
+            ↑
+          </div>
+        </div>
+
+        <div
+          id="totalGain"
+          class="summary-value"
+        >
+          ₹0
+        </div>
+
+        <div
+          id="totalGainPercent"
+          class="summary-change"
+        >
+          —
+        </div>
+
+      </div>
+
+
+      <div class="summary-card">
+
+        <div class="summary-top">
+          <div class="summary-title">
+            Today's Gain
+          </div>
+
+          <div class="summary-icon">
+            ↗
+          </div>
+        </div>
+
+        <div
+          id="todayGain"
+          class="summary-value"
+        >
+          ₹0
+        </div>
+
+        <div
+          id="todayGainPercent"
+          class="summary-change"
+        >
+          —
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         PERFORMANCE + LEADERS
+    ========================= -->
+
+    <section class="main-grid">
+
+
+      <!-- PERFORMANCE -->
+
+      <div class="card">
+
+        <div class="card-header">
+
+          <div>
+            <div class="card-title">
+              Portfolio Performance
+            </div>
+
+            <div class="card-subtitle">
+              Track your portfolio growth over time
+            </div>
+          </div>
+
+          <select
+            class="portfolio-select"
+            style="min-width:110px;"
+            id="performancePeriod"
+          >
+            <option>1M</option>
+            <option>3M</option>
+            <option>6M</option>
+            <option>1Y</option>
+            <option>ALL</option>
+          </select>
+
+        </div>
+
+        <div class="card-body">
+
+          <div class="performance-empty">
+
+            <div class="empty-icon">
+              ↗
+            </div>
+
+            <div class="empty-title">
+              Performance data will appear here
+            </div>
+
+            <div class="empty-text">
+              Once holdings and transactions are added,
+              StockGyan will calculate your portfolio
+              performance automatically.
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- TOP GAINERS / LOSERS -->
+
+      <div class="card">
+
+        <div class="card-header">
+
+          <div>
+            <div class="card-title">
+              Portfolio Movers
+            </div>
+
+            <div class="card-subtitle">
+              Biggest gainers and losers
+            </div>
+          </div>
+
+        </div>
+
+
+        <div class="card-body">
+
+          <div class="leader-list">
+
+            <!-- TOP GAINER -->
+
+            <div>
+
+              <div
+                style="
+                  font-size:12px;
+                  font-weight:800;
+                  color:#159447;
+                  margin-bottom:8px;
+                "
+              >
+                TOP GAINER
+              </div>
+
+              <div class="leader-item">
+
+                <div class="leader-left">
+
+                  <div class="stock-avatar">
+                    —
+                  </div>
+
+                  <div>
+
+                    <div class="stock-name">
+                      No holdings
+                    </div>
+
+                    <div class="stock-qty">
+                      Add stocks to your portfolio
+                    </div>
+
+                  </div>
+
+                </div>
+
+                <div class="leader-value positive">
+                  —
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <!-- TOP LOSER -->
+
+            <div>
+
+              <div
+                style="
+                  font-size:12px;
+                  font-weight:800;
+                  color:#dc3545;
+                  margin-bottom:8px;
+                "
+              >
+                TOP LOSER
+              </div>
+
+              <div class="leader-item">
+
+                <div class="leader-left">
+
+                  <div
+                    class="stock-avatar"
+                    style="
+                      background:#fff0f1;
+                      color:#dc3545;
+                    "
+                  >
+                    —
+                  </div>
+
+                  <div>
+
+                    <div class="stock-name">
+                      No holdings
+                    </div>
+
+                    <div class="stock-qty">
+                      Add stocks to your portfolio
+                    </div>
+
+                  </div>
+
+                </div>
+
+                <div class="leader-value negative">
+                  —
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         HOLDINGS
+    ========================= -->
+
+    <section class="card holdings-card">
+
+      <div class="card-header">
+
+        <div>
+
+          <div class="card-title">
+            Holdings
+          </div>
+
+          <div class="card-subtitle">
+            Stocks held in the selected portfolio
+          </div>
+
+        </div>
+
+        <button
+          class="btn btn-green"
+          onclick="addHolding()"
+        >
+          + Add Holding
+        </button>
+
+      </div>
+
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>
+                Stock
+              </th>
+
+              <th>
+                Quantity
+              </th>
+
+              <th>
+                Avg. Price
+              </th>
+
+              <th>
+                LTP
+              </th>
+
+              <th>
+                Invested
+              </th>
+
+              <th>
+                Current Value
+              </th>
+
+              <th>
+                Gain / Loss
+              </th>
+
+              <th>
+                %
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody id="holdingsBody">
+
+            <tr>
+
+              <td
+                colspan="8"
+                class="empty-table"
+              >
+
+                <strong>
+                  No holdings added yet
+                </strong>
+
+                <br>
+
+                <span style="font-size:12px;">
+                  Add stocks to start tracking your portfolio.
+                </span>
+
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         QUICK ACTIONS
+    ========================= -->
+
+    <section class="quick-actions">
+
+      <div
+        class="quick-action"
+        onclick="addHolding()"
+      >
+
+        <div class="quick-icon">
+          +
+        </div>
+
+        <div class="quick-title">
+          Add Holdings
+        </div>
+
+        <div class="quick-text">
+          Add stocks to your selected portfolio and
+          start tracking live valuation.
+        </div>
+
+      </div>
+
+
+      <div
+        class="quick-action"
+        onclick="openMarket()"
+      >
+
+        <div class="quick-icon">
+          ↗
+        </div>
+
+        <div class="quick-title">
+          Market
+        </div>
+
+        <div class="quick-text">
+          Search stocks, view charts and check
+          live market prices.
+        </div>
+
+      </div>
+
+
+      <div
+        class="quick-action"
+        onclick="showComingSoon()"
+      >
+
+        <div class="quick-icon">
+          ◈
+        </div>
+
+        <div class="quick-title">
+          Portfolio Analytics
+        </div>
+
+        <div class="quick-text">
+          Portfolio health, sector allocation,
+          diversification and risk analysis.
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <div class="footer">
+      StockGyan • Your personal investment dashboard
+    </div>
+
+  </main>
+
+
+  <!-- =========================
+       ADD PORTFOLIO MODAL
+  ========================= -->
+
+  <div
+    id="portfolioModal"
+    class="modal-overlay"
+  >
+
+    <div class="modal">
+
+      <h3>
+        Add Portfolio
+      </h3>
+
+      <p>
+        Give your new portfolio a name.
+      </p>
+
+      <input
+        id="portfolioNameInput"
+        type="text"
+        placeholder="Example: Long Term Portfolio"
+        maxlength="50"
+      >
+
+      <div class="modal-actions">
+
+        <button
+          class="btn btn-light"
+          onclick="closeModal()"
+        >
+          Cancel
+        </button>
+
+        <button
+          class="btn btn-primary"
+          onclick="savePortfolio()"
+        >
+          Create Portfolio
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================
+       JAVASCRIPT
+  ========================= -->
+
+  <script>
+
+    const portfolioSelect =
+      document.getElementById("portfolioSelect");
+
+    const portfolioModal =
+      document.getElementById("portfolioModal");
+
+    const portfolioNameInput =
+      document.getElementById("portfolioNameInput");
+
+
+    /* --------------------------------
+       PORTFOLIO STORAGE
+    -------------------------------- */
+
+    let portfolios =
+      JSON.parse(
+        localStorage.getItem("stockgyan_portfolios") || "null"
+      );
+
+
+    if (!portfolios) {
+
+      portfolios = [
+        {
+          id: "default",
+          name: "My Portfolio"
+        }
+      ];
+
+      savePortfolios();
+
+    }
+
+
+    function savePortfolios() {
+
+      localStorage.setItem(
+        "stockgyan_portfolios",
+        JSON.stringify(portfolios)
+      );
+
+    }
+
+
+    function renderPortfolios() {
+
+      portfolioSelect.innerHTML = "";
+
+      portfolios.forEach(function(portfolio) {
+
+        const option =
+          document.createElement("option");
+
+        option.value = portfolio.id;
+
+        option.textContent = portfolio.name;
+
+        portfolioSelect.appendChild(option);
+
+      });
+
+    }
+
+
+    renderPortfolios();
+
+
+    /* --------------------------------
+       ADD PORTFOLIO
+    -------------------------------- */
+
+    function addPortfolio() {
+
+      portfolioNameInput.value = "";
+
+      portfolioModal.classList.add("show");
+
+      setTimeout(function() {
+        portfolioNameInput.focus();
+      }, 100);
+
+    }
+
+
+    function closeModal() {
+
+      portfolioModal.classList.remove("show");
+
+    }
+
+
+    function savePortfolio() {
+
+      const name =
+        portfolioNameInput.value.trim();
+
+      if (!name) {
+
+        alert("Please enter a portfolio name.");
+
+        return;
+
+      }
+
+
+      const portfolio = {
+
+        id:
+          "portfolio_" +
+          Date.now(),
+
+        name: name
+
+      };
+
+
+      portfolios.push(portfolio);
+
+      savePortfolios();
+
+      renderPortfolios();
+
+      portfolioSelect.value =
+        portfolio.id;
+
+      closeModal();
+
+    }
+
+
+    /* --------------------------------
+       RENAME PORTFOLIO
+    -------------------------------- */
+
+    function renamePortfolio() {
+
+      const selectedId =
+        portfolioSelect.value;
+
+      const portfolio =
+        portfolios.find(
+          function(item) {
+            return item.id === selectedId;
+          }
+        );
+
+
+      if (!portfolio) {
+
+        return;
+
+      }
+
+
+      const newName =
+        prompt(
+          "Enter new portfolio name:",
+          portfolio.name
+        );
+
+
+      if (!newName) {
+
+        return;
+
+      }
+
+
+      const cleanName =
+        newName.trim();
+
+
+      if (!cleanName) {
+
+        return;
+
+      }
+
+
+      portfolio.name =
+        cleanName.substring(0, 50);
+
+
+      savePortfolios();
+
+      renderPortfolios();
+
+      portfolioSelect.value =
+        selectedId;
+
+    }
+
+
+    /* --------------------------------
+       HOLDING
+    -------------------------------- */
+
+    function addHolding() {
+
+      alert(
+        "Stock holding entry will be connected to the StockGyan portfolio system next."
+      );
+
+    }
+
+
+    /* --------------------------------
+       MARKET
+    -------------------------------- */
+
+    function openMarket() {
+
+      window.location.href =
+        "/market/";
+
+    }
+
+
+    /* --------------------------------
+       COMING SOON
+    -------------------------------- */
+
+    function showComingSoon() {
+
+      alert(
+        "Portfolio Analytics will be connected after the holdings system is completed."
+      );
+
+    }
+
+
+    /* --------------------------------
+       CLOSE MODAL WHEN CLICKING OUTSIDE
+    -------------------------------- */
+
+    portfolioModal.addEventListener(
+      "click",
+      function(event) {
+
+        if (
+          event.target ===
+          portfolioModal
+        ) {
+
+          closeModal();
+
+        }
+
+      }
+    );
+
+
+    /* --------------------------------
+       ESCAPE KEY
+    -------------------------------- */
+
+    document.addEventListener(
+      "keydown",
+      function(event) {
+
+        if (event.key === "Escape") {
+
+          closeModal();
+
+        }
+
+      }
+    );
+
+  </script>
+
+</body>
+</html>
