@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>My Portfolio | StockGyan</title>
+
+  <meta
+    name="description"
+    content="Secure StockGyan My Portfolio login"
+  />
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family:
+        Inter,
+        Arial,
+        Helvetica,
+        sans-serif;
+      background:
+        linear-gradient(
+          135deg,
+          #082a63 0%,
+          #0b3d91 50%,
+          #159447 100%
+        );
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: #14213d;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 460px;
+    }
+
+    .brand {
+      text-align: center;
+      color: white;
+      margin-bottom: 22px;
+    }
+
+    .brand-name {
+      font-size: 30px;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+
+    .brand-name span {
+      color: #f28c28;
+    }
+
+    .brand-tagline {
+      margin-top: 5px;
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    .card {
+      background: white;
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow:
+        0 25px 70px rgba(0, 0, 0, 0.25);
+    }
+
+    .portfolio-icon {
+      width: 68px;
+      height: 68px;
+      margin: 0 auto 18px;
+      border-radius: 18px;
+      background: #eaf5ef;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+    }
+
+    h1 {
+      margin: 0;
+      text-align: center;
+      color: #082a63;
+      font-size: 28px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #667085;
+      font-size: 14px;
+      line-height: 1.6;
+      margin: 10px 0 28px;
+    }
+
+    .step {
+      display: none;
+    }
+
+    .step.active {
+      display: block;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #344054;
+    }
+
+    input {
+      width: 100%;
+      height: 52px;
+      border: 1px solid #d0d5dd;
+      border-radius: 12px;
+      padding: 0 15px;
+      font-size: 16px;
+      outline: none;
+      transition: 0.2s;
+    }
+
+    input:focus {
+      border-color: #159447;
+      box-shadow:
+        0 0 0 3px rgba(21, 148, 71, 0.12);
+    }
+
+    .otp-input {
+      text-align: center;
+      letter-spacing: 8px;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    button {
+      width: 100%;
+      height: 52px;
+      border: 0;
+      border-radius: 12px;
+      margin-top: 18px;
+      background: #082a63;
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background: #0b3d91;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .secondary {
+      background: transparent;
+      color: #082a63;
+      border: 1px solid #d0d5dd;
+    }
+
+    .secondary:hover {
+      background: #f8fafc;
+    }
+
+    .message {
+      display: none;
+      margin-top: 16px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .message.show {
+      display: block;
+    }
+
+    .message.error {
+      background: #fff1f0;
+      color: #b42318;
+      border: 1px solid #fecdca;
+    }
+
+    .message.success {
+      background: #ecfdf3;
+      color: #067647;
+      border: 1px solid #abefc6;
+    }
+
+    .email-display {
+      text-align: center;
+      margin: -10px 0 22px;
+      color: #475467;
+      font-size: 14px;
+    }
+
+    .email-display strong {
+      color: #082a63;
+    }
+
+    .security-note {
+      margin-top: 24px;
+      padding-top: 18px;
+      border-top: 1px solid #eaecf0;
+      text-align: center;
+      color: #667085;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .security-note span {
+      color: #159447;
+      font-weight: 700;
+    }
+
+    .dashboard-preview {
+      display: none;
+      text-align: center;
+    }
+
+    .dashboard-preview.active {
+      display: block;
+    }
+
+    .success-icon {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 18px;
+      border-radius: 50%;
+      background: #ecfdf3;
+      color: #159447;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 38px;
+    }
+
+    .dashboard-preview h2 {
+      margin: 0;
+      color: #082a63;
+    }
+
+    .dashboard-preview p {
+      color: #667085;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .back-home {
+      display: block;
+      text-align: center;
+      margin-top: 20px;
+      color: white;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .back-home:hover {
+      text-decoration: underline;
+    }
+
+    .resend {
+      margin-top: 15px;
+      text-align: center;
+      font-size: 13px;
+      color: #667085;
+    }
+
+    .resend button {
+      width: auto;
+      height: auto;
+      margin: 0;
+      padding: 0;
+      background: transparent;
+      color: #159447;
+      font-size: 13px;
+    }
+
+    @media (max-width: 520px) {
+      .card {
+        padding: 25px 20px;
+        border-radius: 20px;
+      }
+
+      h1 {
+        font-size: 25px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <div class="brand">
+      <div class="brand-name">
+        Stock<span>Gyan</span>
+      </div>
+
+      <div class="brand-tagline">
+        Learn • Analyse • Understand • Invest
+      </div>
+    </div>
+
+    <div class="card">
+
+      <!-- ========================= -->
+      <!-- EMAIL STEP -->
+      <!-- ========================= -->
+
+      <div id="emailStep" class="step active">
+
+        <div class="portfolio-icon">
+          📊
+        </div>
+
+        <h1>My Portfolio</h1>
+
+        <p class="subtitle">
+          View your portfolio, holdings and market insights
+          securely through StockGyan.
+        </p>
+
+        <label for="email">
+          Email Address
+        </label>
+
+        <input
+          id="email"
+          type="email"
+          placeholder="Enter your registered email"
+          autocomplete="email"
+        />
+
+        <button
+          id="sendOtpButton"
+          type="button"
+          onclick="sendOTP()"
+        >
+          Send OTP
+        </button>
+
+        <div
+          id="emailMessage"
+          class="message"
+        ></div>
+
+        <div class="security-note">
+          🔒 <span>Secure login</span><br />
+          We will send a one-time password to your
+          registered email address.
+        </div>
+
+      </div>
+
+
+      <!-- ========================= -->
+      <!-- OTP STEP -->
+      <!-- ========================= -->
+
+      <div id="otpStep" class="step">
+
+        <div class="portfolio-icon">
+          🔐
+        </div>
+
+        <h1>Enter OTP</h1>
+
+        <p class="subtitle">
+          We've sent a 6-digit OTP to your email.
+        </p>
+
+        <div class="email-display">
+          Email:
+          <strong id="emailDisplay"></strong>
+        </div>
+
+        <label for="otp">
+          6-Digit OTP
+        </label>
+
+        <input
+          id="otp"
+          class="otp-input"
+          type="text"
+          inputmode="numeric"
+          maxlength="6"
+          placeholder="••••••"
+          autocomplete="one-time-code"
+        />
+
+        <button
+          id="verifyOtpButton"
+          type="button"
+          onclick="verifyOTP()"
+        >
+          Verify OTP
+        </button>
+
+        <div
+          id="otpMessage"
+          class="message"
+        ></div>
+
+        <button
+          class="secondary"
+          type="button"
+          onclick="backToEmail()"
+        >
+          Change Email
+        </button>
+
+        <div class="resend">
+          Didn't receive the OTP?
+
+          <button
+            type="button"
+            onclick="sendOTP(true)"
+          >
+            Resend OTP
+          </button>
+        </div>
+
+      </div>
+
+
+      <!-- ========================= -->
+      <!-- SUCCESS STEP -->
+      <!-- ========================= -->
+
+      <div
+        id="successStep"
+        class="dashboard-preview"
+      >
+
+        <div class="success-icon">
+          ✓
+        </div>
+
+        <h2>OTP Verified</h2>
+
+        <p>
+          Your email has been verified successfully.
+        </p>
+
+        <p>
+          Your secure My Portfolio dashboard will
+          open here.
+        </p>
+
+        <button
+          type="button"
+          onclick="window.location.href='/portfolio/dashboard/'"
+        >
+          Continue to My Portfolio
+        </button>
+
+      </div>
+
+    </div>
+
+    <a
+      href="/"
+      class="back-home"
+    >
+      ← Back to StockGyan Home
+    </a>
+
+  </div>
+
+
+  <script>
+
+    let registeredEmail = "";
+
+    // ==========================================
+    // Utility: Show message
+    // ==========================================
+
+    function showMessage(elementId, message, type) {
+
+      const element =
+        document.getElementById(elementId);
+
+      element.textContent = message;
+
+      element.className =
+        "message show " + type;
+    }
+
+
+    function hideMessage(elementId) {
+
+      const element =
+        document.getElementById(elementId);
+
+      element.className =
+        "message";
+    }
+
+
+    // ==========================================
+    // Send OTP
+    // ==========================================
+
+    async function sendOTP(isResend = false) {
+
+      const emailInput =
+        document.getElementById("email");
+
+      const button =
+        document.getElementById("sendOtpButton");
+
+      const email =
+        emailInput.value.trim().toLowerCase();
+
+      hideMessage("emailMessage");
+
+      if (!email) {
+
+        showMessage(
+          "emailMessage",
+          "Please enter your email address.",
+          "error"
+        );
+
+        return;
+      }
+
+      const emailPattern =
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if (!emailPattern.test(email)) {
+
+        showMessage(
+          "emailMessage",
+          "Please enter a valid email address.",
+          "error"
+        );
+
+        return;
+      }
+
+      registeredEmail = email;
+
+      button.disabled = true;
+      button.textContent = "Sending OTP...";
+
+      try {
+
+        const response =
+          await fetch("/api/auth/send-otp", {
+
+            method: "POST",
+
+            headers: {
+              "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+              email: email
+            })
+
+          });
+
+        const data =
+          await response.json();
+
+        if (!response.ok ||
+            data.status !== "success") {
+
+          throw new Error(
+            data.message ||
+            "Unable to send OTP."
+          );
+        }
+
+        document.getElementById(
+          "emailDisplay"
+        ).textContent = email;
+
+        document.getElementById(
+          "emailStep"
+        ).classList.remove("active");
+
+        document.getElementById(
+          "otpStep"
+        ).classList.add("active");
+
+        document.getElementById(
+          "otp"
+        ).focus();
+
+        showMessage(
+          "otpMessage",
+          "OTP sent successfully. Please check your email.",
+          "success"
+        );
+
+      } catch (error) {
+
+        showMessage(
+          "emailMessage",
+          error.message ||
+          "Unable to send OTP. Please try again.",
+          "error"
+        );
+
+      } finally {
+
+        button.disabled = false;
+        button.textContent = "Send OTP";
+
+      }
+    }
+
+
+    // ==========================================
+    // Verify OTP
+    // ==========================================
+
+    async function verifyOTP() {
+
+      const otpInput =
+        document.getElementById("otp");
+
+      const button =
+        document.getElementById("verifyOtpButton");
+
+      const otp =
+        otpInput.value.trim();
+
+      hideMessage("otpMessage");
+
+      if (!/^\d{6}$/.test(otp)) {
+
+        showMessage(
+          "otpMessage",
+          "Please enter the 6-digit OTP.",
+          "error"
+        );
+
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = "Verifying...";
+
+      try {
+
+        const response =
+          await fetch("/api/auth/verify-otp", {
+
+            method: "POST",
+
+            headers: {
+              "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+
+              email: registeredEmail,
+              otp: otp
+
+            })
+
+          });
+
+        const data =
+          await response.json();
+
+        if (!response.ok ||
+            data.status !== "success") {
+
+          throw new Error(
+            data.message ||
+            "OTP verification failed."
+          );
+        }
+
+        document.getElementById(
+          "otpStep"
+        ).classList.remove("active");
+
+        document.getElementById(
+          "successStep"
+        ).classList.add("active");
+
+      } catch (error) {
+
+        showMessage(
+          "otpMessage",
+          error.message ||
+          "Unable to verify OTP.",
+          "error"
+        );
+
+      } finally {
+
+        button.disabled = false;
+        button.textContent = "Verify OTP";
+
+      }
+    }
+
+
+    // ==========================================
+    // Change Email
+    // ==========================================
+
+    function backToEmail() {
+
+      document.getElementById(
+        "otpStep"
+      ).classList.remove("active");
+
+      document.getElementById(
+        "emailStep"
+      ).classList.add("active");
+
+      hideMessage("emailMessage");
+      hideMessage("otpMessage");
+
+      document.getElementById(
+        "otp"
+      ).value = "";
+
+    }
+
+
+    // ==========================================
+    // OTP input: numbers only
+    // ==========================================
+
+    document
+      .getElementById("otp")
+      .addEventListener("input", function () {
+
+        this.value =
+          this.value
+            .replace(/\D/g, "")
+            .slice(0, 6);
+
+      });
+
+
+    // ==========================================
+    // Press Enter
+    // ==========================================
+
+    document
+      .getElementById("email")
+      .addEventListener("keydown", function(event) {
+
+        if (event.key === "Enter") {
+          sendOTP();
+        }
+
+      });
+
+
+    document
+      .getElementById("otp")
+      .addEventListener("keydown", function(event) {
+
+        if (event.key === "Enter") {
+          verifyOTP();
+        }
+
+      });
+
+  </script>
+
+</body>
+</html>
