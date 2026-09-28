@@ -1,730 +1,123 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>StockGyan Market Terminal</title>
-<meta name="description" content="StockGyan live market terminal with Upstox market data.">
-<script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
-<style>
-:root{
-  --navy:#082a63;--navy2:#061c43;--green:#159447;--orange:#f28c28;
-  --bg:#f4f7fb;--card:#fff;--text:#17233b;--muted:#6f7b90;--border:#e5eaf2;
-  --red:#d94b4b;--shadow:0 10px 30px rgba(8,42,99,.08)
-}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif}
-button,input{font:inherit}
-.header{position:sticky;top:0;z-index:20;background:linear-gradient(100deg,var(--navy2),var(--navy));color:#fff;box-shadow:0 5px 18px rgba(0,0,0,.15)}
-.nav{max-width:1440px;margin:auto;display:flex;align-items:center;gap:18px;padding:13px 22px}
-.logo{font-size:25px;font-weight:900;letter-spacing:-1px;margin-right:8px}.logo span{color:var(--orange)}
-.search{position:relative;flex:1;max-width:520px}.search input{width:100%;border:1px solid rgba(255,255,255,.18);background:#fff;color:#17233b;border-radius:10px;padding:11px 14px;outline:none}
-.results{position:absolute;left:0;right:0;top:48px;background:#fff;color:#17233b;border-radius:10px;box-shadow:0 18px 40px rgba(0,0,0,.22);overflow:hidden;display:none;z-index:30}
-.result{padding:12px 14px;border-bottom:1px solid var(--border);cursor:pointer}.result:hover{background:#f3f7fc}
-.result b{display:block}.result small{color:var(--muted)}
-.status{font-size:13px;white-space:nowrap}.dot{display:inline-block;width:8px;height:8px;background:#35c879;border-radius:50%;margin-right:7px}
-.nav a{color:#fff;text-decoration:none;font-size:14px;margin-left:auto}
-.container{max-width:1440px;margin:auto;padding:20px}
-.tickers{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
-.card{background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow)}
-.ticker{padding:17px}.ticker small{display:block;color:var(--muted);font-weight:700}.ticker strong{display:block;font-size:25px;margin:7px 0 3px}.up{color:var(--green)}.down{color:var(--red)}
-.main{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:18px}
-.stock-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;padding:20px 22px;border-bottom:1px solid var(--border)}
-.stock-name h1{margin:0;font-size:27px}.stock-name small{color:var(--muted)}.price{font-size:31px;font-weight:900;text-align:right}.change{text-align:right;font-weight:800;margin-top:4px}
-.chart-tools{display:flex;gap:7px;align-items:center;padding:13px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap}
-.chart-tools button{border:1px solid var(--border);background:#fff;color:var(--navy);padding:7px 12px;border-radius:8px;cursor:pointer;font-weight:700}
-.chart-tools button.active{background:var(--navy);color:#fff;border-color:var(--navy)}
-.chart-status{margin-left:auto;color:var(--muted);font-size:12px}
-.intraday-tools{display:flex;gap:5px;align-items:center;margin-left:4px}.intraday-tools .interval-btn{padding:6px 9px;font-size:12px}.intraday-tools .interval-btn.active{background:var(--green);border-color:var(--green);color:#fff}.intraday-label{font-size:11px;color:var(--muted);font-weight:800;margin-right:2px}
-#chart{height:470px;width:100%}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:16px}
-.stat{border:1px solid var(--border);border-radius:10px;padding:13px}.stat small{display:block;color:var(--muted);font-size:11px;font-weight:800}.stat b{display:block;margin-top:5px;font-size:16px}
-.side{display:flex;flex-direction:column;gap:18px}.side .card{padding:18px}.side h3{margin:0 0 15px}.depth-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;margin-bottom:8px}.depth-head{color:var(--muted);font-weight:800}.depth-cell{padding:9px;background:#f7f9fc;border-radius:8px}
-.watch{overflow:hidden}.watch table{width:100%;border-collapse:collapse}.watch th,.watch td{text-align:left;padding:11px 13px;border-bottom:1px solid var(--border);font-size:13px}.watch th{background:#f7f9fc;color:var(--muted);font-size:11px}.watch tr{cursor:pointer}.watch tr:hover{background:#f8fbff}
-.section-title{display:flex;justify-content:space-between;align-items:center;padding:17px 18px}.section-title h2{margin:0;font-size:18px}
-.footer-note{text-align:center;color:var(--muted);font-size:12px;padding:25px}
-.empty{padding:28px;color:var(--muted);text-align:center}
+export async function onRequestGet(context) {
+  try {
+    const token = context.env.UPSTOX_ANALYTICS_TOKEN;
 
-.movers-grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(300px,.8fr);gap:18px;margin-top:18px}
-.section-meta{color:var(--muted);font-size:12px}
-.movers-columns{display:grid;grid-template-columns:1fr 1fr;gap:18px;padding:0 18px 18px}
-.mover-heading{font-size:12px;font-weight:900;letter-spacing:.5px;padding:10px 0;border-bottom:1px solid var(--border)}
-.mover-list{min-height:190px}
-.mover-item{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;padding:11px 2px;border-bottom:1px solid var(--border);cursor:pointer}
-.mover-item:hover{background:#f8fbff}
-.mover-symbol{font-weight:800;font-size:13px}
-.mover-ltp{font-size:13px;font-weight:700}
-.mover-pct{font-size:13px;font-weight:900;text-align:right}
-.breadth-card{overflow:hidden}
-.breadth-wrap{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:5px 18px 18px}
-.breadth-number{text-align:center;border:1px solid var(--border);border-radius:10px;padding:13px 5px}
-.breadth-number b{display:block;font-size:27px}
-.breadth-number span{display:block;color:var(--muted);font-size:11px;font-weight:800;margin-top:4px}
-.breadth-bar{display:flex;height:12px;margin:0 18px;border-radius:20px;overflow:hidden;background:#eef2f7}
-#advanceBar{background:var(--green);width:0}
-#unchangedBar{background:#94a3b8;width:0}
-#declineBar{background:var(--red);width:0}
-.breadth-note{padding:13px 18px 18px;color:var(--muted);font-size:12px;text-align:center}
-
-/* StockGyan Market Heatmap */
-.heatmap-card{margin:18px auto 0;overflow:hidden;max-width:1120px}
-.heatmap-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:0 18px 14px}
-.heatmap-legend{display:flex;gap:12px;align-items:center;color:var(--muted);font-size:11px;font-weight:800}
-.hm-dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:4px}
-.hm-green{background:#159447}.hm-red{background:#d64545}.hm-grey{background:#94a3b8}
-.heatmap{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;padding:0 18px 18px;max-width:1040px;margin:0 auto}
-.hm-tile{border-radius:10px;min-height:74px;padding:10px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;border:1px solid rgba(0,0,0,.05);transition:transform .12s ease,filter .12s ease}
-.hm-tile:hover{transform:translateY(-2px);filter:brightness(.98)}
-.hm-tile.up{background:rgba(21,148,71,.13);border-color:rgba(21,148,71,.24)}
-.hm-tile.down{background:rgba(214,69,69,.12);border-color:rgba(214,69,69,.23)}
-.hm-tile.flat{background:#f1f4f8}
-.hm-symbol{font-size:12px;font-weight:900}
-.hm-name{font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hm-change{font-size:15px;font-weight:950}
-.hm-tile.up .hm-change{color:#087b37}.hm-tile.down .hm-change{color:#c03434}.hm-tile.flat .hm-change{color:#64748b}
-.hm-size-1{min-height:68px}.hm-size-2{min-height:82px}.hm-size-3{min-height:96px}
-@media(max-width:1100px){.heatmap{grid-template-columns:repeat(5,minmax(0,1fr));max-width:100%}}
-@media(max-width:800px){.heatmap{grid-template-columns:repeat(4,minmax(0,1fr))}}
-@media(max-width:600px){.heatmap{grid-template-columns:repeat(3,minmax(0,1fr));padding:0 12px 12px}.heatmap-toolbar{padding:0 12px 12px}.heatmap-legend{gap:7px;font-size:10px}}
-@media(max-width:1000px){
-.movers-grid{grid-template-columns:1fr}
-.main{grid-template-columns:1fr}.tickers{grid-template-columns:repeat(2,1fr)}.side{display:grid;grid-template-columns:1fr 1fr}}
-@media(max-width:650px){
-.movers-columns{grid-template-columns:1fr}.breadth-wrap{grid-template-columns:repeat(3,1fr)}.nav{padding:10px 12px;flex-wrap:wrap}.logo{width:100%}.search{order:3;flex-basis:100%;max-width:none}.status{display:none}.container{padding:12px}.tickers{grid-template-columns:1fr 1fr}.stock-head{display:block}.price{text-align:left;margin-top:12px}.change{text-align:left}.stats{grid-template-columns:1fr 1fr}#chart{height:360px}.side{display:block}.side .card{margin-bottom:14px}}
-</style>
-</head>
-<body>
-<header class="header">
-  <div class="nav">
-    <div class="logo">Stock<span>Gyan</span></div>
-    <div class="search">
-      <input id="searchInput" autocomplete="off" placeholder="Search stocks, e.g. RELIANCE, TCS, HDFC BANK">
-      <div id="results" class="results"></div>
-    </div>
-    <div class="status"><span class="dot"></span>Market data connected</div>
-    <a href="/">Home</a>
-    <a href="/market/">Market</a>
-  </div>
-</header>
-
-<div class="container">
-  <div class="tickers">
-    <div class="card ticker"><small>NIFTY 50</small><strong id="niftyPrice">—</strong><span id="niftyChange">Loading...</span></div>
-    <div class="card ticker"><small>BANK NIFTY</small><strong id="bankPrice">—</strong><span id="bankChange">Loading...</span></div>
-    <div class="card ticker"><small>INDIA VIX</small><strong id="vixPrice">—</strong><span id="vixChange">Loading...</span></div>
-    <div class="card ticker"><small>SENSEX</small><strong id="sensexPrice">—</strong><span id="sensexChange">Loading...</span></div>
-  </div>
-
-  <div class="main">
-    <section class="card">
-      <div class="stock-head">
-        <div class="stock-name">
-          <h1 id="stockTitle">RELIANCE</h1>
-          <small id="stockKey">NSE_EQ|INE002A01018</small>
-        </div>
-        <div>
-          <div class="price" id="stockPrice">₹—</div>
-          <div class="change" id="stockChange">—</div>
-        </div>
-      </div>
-
-      <div class="chart-tools">
-        <button data-range="1D">1D</button>
-        <button data-range="1W">1W</button>
-        <button data-range="1M" class="active">1M</button>
-        <button data-range="3M">3M</button>
-        <button data-range="1Y">1Y</button>
-        <button data-range="ALL">ALL</button>
-        <span id="intradayTools" class="intraday-tools">
-          <span class="intraday-label">Intraday</span>
-          <button data-interval="1m" class="interval-btn active">1 Min</button>
-          <button data-interval="5m" class="interval-btn">5 Min</button>
-          <button data-interval="15m" class="interval-btn">15 Min</button>
-          <button data-interval="30m" class="interval-btn">30 Min</button>
-        </span>
-        <span class="chart-status" id="chartStatus">Loading chart…</span>
-      </div>
-
-      <div id="chart"></div>
-
-      <div class="stats">
-        <div class="stat"><small>OPEN</small><b id="open">—</b></div>
-        <div class="stat"><small>HIGH</small><b id="high">—</b></div>
-        <div class="stat"><small>LOW</small><b id="low">—</b></div>
-        <div class="stat"><small>PREVIOUS CLOSE</small><b id="prevClose">—</b></div>
-        <div class="stat"><small>VOLUME</small><b id="volume">—</b></div>
-        <div class="stat"><small>AVERAGE PRICE</small><b id="avgPrice">—</b></div>
-        <div class="stat"><small>52-WEEK HIGH</small><b id="yearHigh">—</b></div>
-        <div class="stat"><small>52-WEEK LOW</small><b id="yearLow">—</b></div>
-        <div class="stat"><small>LAST TRADE TIME</small><b id="tradeTime">—</b></div>
-      </div>
-    </section>
-
-    <aside class="side">
-      <div class="card watch">
-        <div class="section-title"><h2>Market Watch</h2></div>
-        <table>
-          <thead><tr><th>STOCK</th><th>LTP</th><th>CHG%</th></tr></thead>
-          <tbody id="watchBody"></tbody>
-        </table>
-      </div>
-
-      <div class="card">
-        <h3>Market Depth</h3>
-        <div class="depth-row depth-head"><div>BUY</div><div>SELL</div></div>
-        <div id="depthBox"><div class="empty">Select a stock to view available depth.</div></div>
-      </div>
-    </aside>
-  </div>
-
-  <div class="movers-grid">
-    <div class="card movers-card">
-      <div class="section-title">
-        <h2>📈 StockGyan Movers</h2>
-        <span id="moversStatus" class="section-meta">Loading…</span>
-      </div>
-      <div class="movers-columns">
-        <div>
-          <div class="mover-heading up">Top Gainers</div>
-          <div id="gainers" class="mover-list"><div class="empty">Loading…</div></div>
-        </div>
-        <div>
-          <div class="mover-heading down">Top Losers</div>
-          <div id="losers" class="mover-list"><div class="empty">Loading…</div></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card breadth-card">
-      <div class="section-title">
-        <h2>📊 Market Breadth</h2>
-        <span class="section-meta">StockGyan Basket</span>
-      </div>
-      <div class="breadth-wrap">
-        <div class="breadth-number"><b id="advanceCount">—</b><span>Advances</span></div>
-        <div class="breadth-number"><b id="declineCount">—</b><span>Declines</span></div>
-        <div class="breadth-number"><b id="unchangedCount">—</b><span>Unchanged</span></div>
-      </div>
-      <div class="breadth-bar">
-        <span id="advanceBar"></span><span id="unchangedBar"></span><span id="declineBar"></span>
-      </div>
-      <div id="breadthNote" class="breadth-note">Calculating…</div><div class="breadth-note" style="padding-top:0">On weekends and market holidays, Movers and Breadth use the latest available trading session.</div>
-    </div>
-  </div>
-
-  <div class="card heatmap-card">
-    <div class="section-title">
-      <h2>🗺️ StockGyan Market Heatmap</h2>
-      <span id="heatmapStatus" class="section-meta">Loading…</span>
-    </div>
-    <div class="heatmap-toolbar">
-      <div class="section-meta">Large-cap basket • tile size reflects relative basket weight</div>
-      <div class="heatmap-legend">
-        <span><i class="hm-dot hm-green"></i>Gainer</span>
-        <span><i class="hm-dot hm-red"></i>Loser</span>
-        <span><i class="hm-dot hm-grey"></i>Flat</span>
-      </div>
-    </div>
-    <div id="heatmap" class="heatmap">
-      <div class="empty">Loading heatmap…</div>
-    </div>
-  </div>
-
-  <div class="card" style="margin-top:18px">
-    <div class="section-title">
-      <h2>StockGyan Market Terminal</h2>
-      <span style="color:var(--muted);font-size:12px">Educational market-data view</span>
-    </div>
-    <div class="empty">Prices and market data are supplied through the connected market-data service. Data may be delayed or subject to provider availability.</div>
-  </div>
-
-  <div class="footer-note">StockGyan.in • Learn. Analyse. Understand. Invest. • Market information is for educational/informational purposes and is not investment advice.</div>
-</div>
-
-<script>
-const API="/api/market/quote";
-const OHLC="/api/market/ohlc";
-const SEARCH="/api/market/search";
-const BATCH="/api/market/batch";
-
-const instruments={
-  "RELIANCE":"NSE_EQ|INE002A01018",
-  "NHPC":"NSE_EQ|INE848E01016",
-  "NIFTY 50":"NSE_INDEX|Nifty 50",
-  "BANK NIFTY":"NSE_INDEX|Nifty Bank",
-  "INDIA VIX":"NSE_INDEX|India VIX"
-};
-
-const watchItems=[
-  ["RELIANCE","NSE_EQ|INE002A01018"],
-  ["NHPC","NSE_EQ|INE848E01016"]
-];
-
-// Defined StockGyan large-cap basket used for Movers and Breadth.
-// This is NOT the entire NSE market breadth.
-const moverUniverse=[
-  ["RELIANCE","NSE_EQ|INE002A01018"],
-  ["HDFCBANK","NSE_EQ|INE040A01034"],
-  ["ICICIBANK","NSE_EQ|INE090A01021"],
-  ["BHARTIARTL","NSE_EQ|INE397D01024"],
-  ["INFY","NSE_EQ|INE009A01021"],
-  ["TCS","NSE_EQ|INE467B01029"],
-  ["SBIN","NSE_EQ|INE062A01020"],
-  ["LT","NSE_EQ|INE018A01030"],
-  ["AXISBANK","NSE_EQ|INE238A01034"],
-  ["KOTAKBANK","NSE_EQ|INE237A01028"],
-  ["M&M","NSE_EQ|INE101A01026"],
-  ["ITC","NSE_EQ|INE154A01025"],
-  ["HINDUNILVR","NSE_EQ|INE030A01027"],
-  ["BAJFINANCE","NSE_EQ|INE296A01024"],
-  ["SUNPHARMA","NSE_EQ|INE044A01036"],
-  ["NTPC","NSE_EQ|INE733E01010"],
-  ["TATASTEEL","NSE_EQ|INE081A01020"],
-  ["POWERGRID","NSE_EQ|INE752E01010"],
-  ["HCLTECH","NSE_EQ|INE860A01027"],
-  ["MARUTI","NSE_EQ|INE585B01010"],
-  ["TITAN","NSE_EQ|INE280A01028"],
-  ["BAJAJFINSV","NSE_EQ|INE918I01026"],
-  ["ADANIPORTS","NSE_EQ|INE742F01042"],
-  ["ULTRACEMCO","NSE_EQ|INE481G01011"],
-  ["ONGC","NSE_EQ|INE213A01029"],
-  ["COALINDIA","NSE_EQ|INE522F01014"],
-  ["JSWSTEEL","NSE_EQ|INE019A01038"],
-  ["HINDALCO","NSE_EQ|INE038A01020"],
-  ["BEL","NSE_EQ|INE263A01024"],
-  ["WIPRO","NSE_EQ|INE075A01022"]
-];
-
-let selectedKey=instruments.RELIANCE;
-let selectedName="RELIANCE";
-let allCandles=[];
-let currentRange="1M";
-let currentInterval="1m";
-let chart, candleSeries, volumeSeries;
-
-const $=id=>document.getElementById(id);
-const money=v=>Number.isFinite(Number(v))?"₹"+Number(v).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2}):"—";
-const num=v=>Number.isFinite(Number(v))?Number(v).toLocaleString("en-IN",{maximumFractionDigits:2}):"—";
-const volume=v=>{
-  const n=Number(v); if(!Number.isFinite(n)) return "—";
-  if(n>=1e7) return (n/1e7).toFixed(2)+" Cr";
-  if(n>=1e5) return (n/1e5).toFixed(2)+" L";
-  if(n>=1e3) return (n/1e3).toFixed(2)+" K";
-  return n.toLocaleString("en-IN");
-};
-const esc=s=>String(s??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
-
-function getQuoteObject(data){
-  if(data?.data && typeof data.data==="object"){
-    const vals=Object.values(data.data);
-    return vals[0] || null;
-  }
-  return null;
-}
-
-function renderQuote(q){
-  if(!q)return;
-  const price=Number(q.last_price);
-  const prev=Number(q.prev_close);
-  const chg=Number.isFinite(Number(q.change))?Number(q.change):(price-prev);
-  const pct=Number.isFinite(prev)&&prev?chg/prev*100:NaN;
-  $("stockTitle").textContent=selectedName;
-  $("stockKey").textContent=selectedKey;
-  $("stockPrice").textContent=money(price);
-  $("stockChange").textContent=Number.isFinite(chg)?`${chg>=0?"+":""}${money(chg)} (${pct>=0?"+":""}${pct.toFixed(2)}%)`:"—";
-  $("stockChange").className="change "+(chg>=0?"up":"down");
-  $("open").textContent=money(q.ohlc?.open);
-  $("high").textContent=money(q.ohlc?.high);
-  $("low").textContent=money(q.ohlc?.low);
-  $("prevClose").textContent=money(q.ohlc?.close ?? q.prev_close);
-  $("volume").textContent=volume(q.volume);
-  $("avgPrice").textContent=money(q.average_price);
-  $("yearHigh").textContent=money(q.year_high);
-  $("yearLow").textContent=money(q.year_low);
-  const rawTradeTime = q.last_trade_time ?? q.ohlc?.ts ?? null;
-  let tradeTimeText = "—";
-
-  if(rawTradeTime !== null && rawTradeTime !== ""){
-    const n = Number(rawTradeTime);
-    const d = Number.isFinite(n)
-      ? new Date(n < 100000000000 ? n * 1000 : n)
-      : new Date(rawTradeTime);
-
-    if(!Number.isNaN(d.getTime())){
-      tradeTimeText = d.toLocaleString("en-IN");
+    if (!token) {
+      return Response.json(
+        {
+          status: "error",
+          message: "Upstox token is not configured"
+        },
+        { status: 500 }
+      );
     }
-  }
 
-  $("tradeTime").textContent=tradeTimeText;
-  renderDepth(q.depth);
-}
+    const requestUrl = new URL(context.request.url);
 
-function renderDepth(depth){
-  const box=$("depthBox");
-  if(!depth){box.innerHTML='<div class="empty">Depth not available for this instrument.</div>';return}
-  const buy=Array.isArray(depth.buy)?depth.buy.slice(0,5):[];
-  const sell=Array.isArray(depth.sell)?depth.sell.slice(0,5):[];
-  if(!buy.length&&!sell.length){box.innerHTML='<div class="empty">Depth not available for this instrument.</div>';return}
-  let rows="";
-  for(let i=0;i<Math.max(buy.length,sell.length);i++){
-    const b=buy[i]||{},s=sell[i]||{};
-    rows+=`<div class="depth-row"><div class="depth-cell">${money(b.price)} · ${num(b.quantity??b.qty??0)}</div><div class="depth-cell">${money(s.price)} · ${num(s.quantity??s.qty??0)}</div></div>`;
-  }
-  box.innerHTML=rows;
-}
+    const instrumentKey =
+      requestUrl.searchParams.get("instrument_key")?.trim();
 
-async function quote(key,name=selectedName){
-  try{
-    const res=await fetch(API+"?instrument_key="+encodeURIComponent(key),{cache:"no-store"});
-    const data=await res.json();
-    if(!res.ok)throw new Error(data?.message||"Quote failed");
-    selectedKey=key;selectedName=name;
-    renderQuote(getQuoteObject(data));
-    return getQuoteObject(data);
-  }catch(e){
-    console.error(e);
-    return null;
-  }
-}
+    const interval =
+      requestUrl.searchParams.get("interval")?.trim() || "1d";
 
-async function loadIndex(id,key){
-  try{
-    const res=await fetch(API+"?instrument_key="+encodeURIComponent(key),{cache:"no-store"});
-    const data=await res.json();
-    const q=getQuoteObject(data); if(!q)return;
-    const p=Number(q.last_price),prev=Number(q.prev_close);
-    const chg=Number.isFinite(Number(q.change))?Number(q.change):(p-prev);
-    const pct=prev?chg/prev*100:NaN;
-    $(id+"Price").textContent=money(p);
-    $(id+"Change").textContent=Number.isFinite(pct)?`${chg>=0?"+":""}${pct.toFixed(2)}%`:"—";
-    $(id+"Change").className=chg>=0?"up":"down";
-  }catch(e){console.warn(e)}
-}
+    if (!instrumentKey) {
+      return Response.json(
+        {
+          status: "error",
+          message: "instrument_key is required"
+        },
+        { status: 400 }
+      );
+    }
 
-async function loadIndices(){
-  await Promise.all([
-    loadIndex("nifty","NSE_INDEX|Nifty 50"),
-    loadIndex("bank","NSE_INDEX|Nifty Bank"),
-    loadIndex("vix","NSE_INDEX|India VIX"),
-    loadIndex("sensex","BSE_INDEX|SENSEX")
-  ]);
-}
+    /*
+      StockGyan 1D chart:
+      1 Min
+      5 Min
+      15 Min
+      30 Min
+    */
 
-async function loadWatch(){
-  const body=$("watchBody");
-  body.innerHTML=watchItems.map(x=>`<tr data-key="${esc(x[1])}" data-name="${esc(x[0])}"><td><b>${esc(x[0])}</b></td><td>Loading…</td><td>—</td></tr>`).join("");
-  for(const [name,key] of watchItems){
-    try{
-      const data=await (await fetch(API+"?instrument_key="+encodeURIComponent(key),{cache:"no-store"})).json();
-      const q=getQuoteObject(data); if(!q)continue;
-      const tr=[...body.querySelectorAll("tr")].find(x=>x.dataset.key===key);
-      if(!tr)continue;
-      const p=Number(q.last_price),prev=Number(q.prev_close),chg=Number.isFinite(Number(q.change))?Number(q.change):(p-prev),pct=prev?chg/prev*100:NaN;
-      tr.children[1].textContent=money(p);
-      tr.children[2].textContent=Number.isFinite(pct)?`${chg>=0?"+":""}${pct.toFixed(2)}%`:"—";
-      tr.children[2].className=chg>=0?"up":"down";
-    }catch(e){}
-  }
-  body.querySelectorAll("tr").forEach(tr=>tr.addEventListener("click",()=>selectStock(tr.dataset.key,tr.dataset.name)));
-}
+    const intradayIntervals = ["1m", "5m", "15m", "30m"];
 
+    let upstoxUrl;
 
-function renderMovers(rows){
-  const valid=rows
-    .map(r=>{
-      const q=r.q;
-      const p=Number(q?.last_price);
-      const prev=Number(q?.prev_close);
-      const chg=Number.isFinite(Number(q?.change))?Number(q.change):(p-prev);
-      const pct=Number.isFinite(prev)&&prev?chg/prev*100:NaN;
-      return {...r,p,chg,pct};
-    })
-    .filter(r=>Number.isFinite(r.pct));
+    if (intradayIntervals.includes(interval)) {
 
-  const gainers=[...valid].filter(r=>r.pct>0).sort((a,b)=>b.pct-a.pct).slice(0,5);
-  const losers=[...valid].filter(r=>r.pct<0).sort((a,b)=>a.pct-b.pct).slice(0,5);
+      const minutes = interval.replace("m", "");
 
-  const item=(r)=>`<div class="mover-item" data-key="${esc(r.key)}" data-name="${esc(r.name)}">
-    <div class="mover-symbol">${esc(r.name)}</div>
-    <div class="mover-ltp">${money(r.p)}</div>
-    <div class="mover-pct ${r.chg>=0?"up":"down"}">${r.chg>=0?"+":""}${r.pct.toFixed(2)}%</div>
-  </div>`;
+      upstoxUrl =
+        "https://api.upstox.com/v3/historical-candle/intraday/" +
+        `${encodeURIComponent(instrumentKey)}/minutes/${minutes}`;
 
-  $("gainers").innerHTML=gainers.length?gainers.map(item).join(""):'<div class="empty">No gainers available.</div>';
-  $("losers").innerHTML=losers.length?losers.map(item).join(""):'<div class="empty">No losers available.</div>';
+    } else if (interval === "1d") {
 
-  document.querySelectorAll(".mover-item").forEach(el=>{
-    el.addEventListener("click",()=>selectStock(el.dataset.key,el.dataset.name));
-  });
+      /*
+        Daily candles for:
+        1W / 1M / 3M / 1Y / ALL
+      */
 
-  const advances=valid.filter(r=>r.pct>0).length;
-  const declines=valid.filter(r=>r.pct<0).length;
-  const unchanged=valid.filter(r=>r.pct===0).length;
-  const total=advances+declines+unchanged;
+      const today = new Date();
 
-  $("advanceCount").textContent=advances;
-  $("declineCount").textContent=declines;
-  $("unchangedCount").textContent=unchanged;
+      const toDate =
+        today.toISOString().slice(0, 10);
 
-  const a=total?advances/total*100:0;
-  const u=total?unchanged/total*100:0;
-  const d=total?declines/total*100:0;
-  $("advanceBar").style.width=a+"%";
-  $("unchangedBar").style.width=u+"%";
-  $("declineBar").style.width=d+"%";
-  $("breadthNote").textContent=total
-    ? `${advances} advancing • ${declines} declining • ${unchanged} unchanged • ${total} stocks checked`
-    : "Breadth unavailable";
-}
+      const from = new Date(today);
 
+      from.setFullYear(
+        from.getFullYear() - 10
+      );
 
-function renderHeatmap(rows){
-  const valid=rows
-    .map(r=>{
-      const q=r.q||{};
-      const p=Number(q.last_price);
-      const prev=Number(q.prev_close);
-      const chg=Number.isFinite(Number(q.change))
-        ? Number(q.change)
-        : (Number.isFinite(p)&&Number.isFinite(prev)?p-prev:NaN);
-      const pct=Number.isFinite(prev)&&prev?chg/prev*100:NaN;
-      return {...r,p,chg,pct};
-    })
-    .filter(r=>Number.isFinite(r.pct));
+      const fromDate =
+        from.toISOString().slice(0, 10);
 
-  // Keep a stable order so the heatmap doesn't jump around on every refresh.
-  const weight = name => {
-    const weights = {
-      RELIANCE:6,HDFCBANK:6,ICICIBANK:5,BHARTIARTL:5,INFY:4,TCS:4,
-      SBIN:4,LT:4,AXISBANK:3,KOTAKBANK:3,"M&M":3,ITC:3,HINDUNILVR:3,
-      BAJFINANCE:3,SUNPHARMA:3,NTPC:3,TATASTEEL:2,POWERGRID:2,HCLTECH:2,
-      MARUTI:2,TITAN:2,BAJAJFINSV:2,ADANIPORTS:2,ULTRACEMCO:2,ONGC:2,
-      COALINDIA:2,JSWSTEEL:2,HINDALCO:2,BEL:2,WIPRO:2
-    };
-    return weights[name]||1;
-  };
+      upstoxUrl =
+        "https://api.upstox.com/v3/historical-candle/" +
+        `${encodeURIComponent(instrumentKey)}/days/1/${toDate}/${fromDate}`;
 
-  valid.sort((a,b)=>weight(b.name)-weight(a.name));
+    } else {
 
-  const tile = r => {
-    const cls=r.pct>0?"up":r.pct<0?"down":"flat";
-    const size=weight(r.name)>=5?"hm-size-3":weight(r.name)>=3?"hm-size-2":"hm-size-1";
-    const sign=r.pct>0?"+":"";
-    return `<div class="hm-tile ${cls} ${size}" data-key="${esc(r.key)}" data-name="${esc(r.name)}" title="${esc(r.name)} ${sign}${r.pct.toFixed(2)}%">
-      <div>
-        <div class="hm-symbol">${esc(r.name)}</div>
-        <div class="hm-name">${esc(r.name)}</div>
-      </div>
-      <div class="hm-change">${sign}${r.pct.toFixed(2)}%</div>
-    </div>`;
-  };
+      return Response.json(
+        {
+          status: "error",
+          message:
+            "Invalid interval. Use 1m, 5m, 15m, 30m or 1d."
+        },
+        { status: 400 }
+      );
+    }
 
-  $("heatmap").innerHTML=valid.length
-    ? valid.map(tile).join("")
-    : '<div class="empty">Heatmap unavailable.</div>';
-
-  document.querySelectorAll(".hm-tile").forEach(el=>{
-    el.addEventListener("click",()=>selectStock(el.dataset.key,el.dataset.name));
-  });
-
-  $("heatmapStatus").textContent=`${valid.length} stocks`;
-}
-
-async function loadMovers(){
-  $("moversStatus").textContent="Updating…";
-  try{
-    const keys=moverUniverse.map(x=>x[1]).join(",");
-    const res=await fetch(BATCH+"?instrument_keys="+encodeURIComponent(keys),{cache:"no-store"});
-    const data=await res.json();
-    if(!res.ok)throw new Error(data?.message||"Batch quote failed");
-
-    const rows=[];
-    const returned = data?.data || {};
-
-    for(const [name,key] of moverUniverse){
-      const normalizedKey = key.replace("|", ":");
-
-      let q = returned[normalizedKey];
-
-      // Fallback: locate the quote by its instrument_token.
-      if(!q){
-        q = Object.values(returned).find(
-          item => item?.instrument_token === key
-        );
+    const response = await fetch(upstoxUrl, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`
       }
+    });
 
-      if(q)rows.push({name,key,q});
-    }
+    const data = await response.json();
 
-    renderMovers(rows);
-    renderHeatmap(rows);
-    const fallbackUsed = rows.some(r => r.q?._source === "ohlc-fallback");
-    $("moversStatus").textContent = fallbackUsed
-      ? `${rows.length}/${moverUniverse.length} • Last session`
-      : `${rows.length}/${moverUniverse.length} stocks`;
-
-    if(rows.length){
-      const hasLiveTrade = rows.some(r => {
-        const t = r.q?.last_trade_time;
-        return t !== undefined && t !== null && t !== "";
-      });
-
-      if(!hasLiveTrade){
-        $("moversStatus").textContent =
-          `${rows.length}/${moverUniverse.length} • Last session`;
+    return Response.json(
+      data,
+      {
+        status: response.status,
+        headers: {
+          "Cache-Control": "no-store"
+        }
       }
-    }
-  }catch(e){
-    console.error(e);
-    $("moversStatus").textContent="Unavailable";
-    $("gainers").innerHTML='<div class="empty">Unable to load movers.</div>';
-    $("losers").innerHTML='<div class="empty">Unable to load movers.</div>';
-    $("heatmap").innerHTML='<div class="empty">Heatmap unavailable.</div>';
-    $("heatmapStatus").textContent="Unavailable";
-    $("breadthNote").textContent="Breadth unavailable";
+    );
+
+  } catch (error) {
+
+    return Response.json(
+      {
+        status: "error",
+        message:
+          error.message ||
+          "Unable to fetch chart data"
+      },
+      { status: 500 }
+    );
+
   }
 }
-
-function createChart(){
-  const el=$("chart");
-  chart=LightweightCharts.createChart(el,{
-    width:el.clientWidth,height:470,
-    layout:{background:{type:"solid",color:"#ffffff"},textColor:"#64748b"},
-    grid:{vertLines:{color:"#eef2f7"},horzLines:{color:"#eef2f7"}},
-    rightPriceScale:{borderColor:"#e5eaf2"},
-    timeScale:{borderColor:"#e5eaf2",timeVisible:true,secondsVisible:false},
-    crosshair:{mode:LightweightCharts.CrosshairMode.Normal}
-  });
-  candleSeries=chart.addSeries(LightweightCharts.CandlestickSeries,{
-    upColor:"#159447",downColor:"#d94b4b",borderUpColor:"#159447",borderDownColor:"#d94b4b",
-    wickUpColor:"#159447",wickDownColor:"#d94b4b"
-  });
-  volumeSeries=chart.addSeries(LightweightCharts.HistogramSeries,{
-    priceFormat:{type:"volume"},priceScaleId:""
-  });
-  volumeSeries.priceScale().applyOptions({scaleMargins:{top:.78,bottom:0}});
-  new ResizeObserver(()=>chart.applyOptions({width:el.clientWidth})).observe(el);
-}
-
-function parseCandles(raw){
-  const arr=Array.isArray(raw)?raw:[];
-  const parsed=arr.map(c=>{
-    const rawTime=c?.[0];
-    const ms=typeof rawTime==="number"
-      ? (rawTime>1e12?rawTime:rawTime*1000)
-      : new Date(rawTime).getTime();
-
-    return {
-      time:Math.floor(ms/1000),
-      open:Number(c?.[1]),
-      high:Number(c?.[2]),
-      low:Number(c?.[3]),
-      close:Number(c?.[4]),
-      volume:Number(c?.[5]||0)
-    };
-  }).filter(c=>
-    Number.isFinite(c.time) &&
-    [c.open,c.high,c.low,c.close].every(Number.isFinite)
-  ).sort((a,b)=>a.time-b.time);
-
-  const unique=[];
-  for(const c of parsed){
-    if(!unique.length || unique[unique.length-1].time!==c.time){
-      unique.push(c);
-    }
-  }
-  return unique;
-}
-
-async function loadChart(){
-  const isIntraday=currentRange==="1D";
-  $("chartStatus").textContent=isIntraday?"Loading intraday data…":"Loading historical data…";
-  try{
-    const interval=currentRange==="1D"?currentInterval:"1d";
-    const res=await fetch(OHLC+"?instrument_key="+encodeURIComponent(selectedKey)+"&interval="+interval,{cache:"no-store"});
-    const data=await res.json();
-    if(!res.ok)throw new Error(data?.message||"Historical data failed");
-    allCandles=parseCandles(data?.data?.candles);
-    if(!allCandles.length) throw new Error("No candles returned");
-    if(currentRange==="1D") renderIntraday(); else renderRange();
-    $("chartStatus").textContent=currentRange==="1D"
-      ? `${allCandles.length} candles • ${currentInterval}`
-      : `${allCandles.length} candles • daily`;
-  }catch(e){
-    console.error(e);
-    candleSeries?.setData([]);
-    volumeSeries?.setData([]);
-    $("chartStatus").textContent="Chart data unavailable";
-  }
-}
-
-function renderIntraday(){
-  if(!candleSeries||!allCandles.length)return;
-  candleSeries.setData(allCandles.map(c=>({time:c.time,open:c.open,high:c.high,low:c.low,close:c.close})));
-  volumeSeries.setData(allCandles.map(c=>({time:c.time,value:c.volume,color:c.close>=c.open?"#159447":"#d94b4b"})));
-  chart.timeScale().fitContent();
-}
-
-function renderRange(){
-  if(!candleSeries||!allCandles.length)return;
-  const now=Date.now();
-  const days={ "1D":1,"1W":7,"1M":30,"3M":90,"1Y":365,"ALL":99999 };
-  const cutoff=now-days[currentRange]*86400000;
-  const filtered=currentRange==="ALL"?allCandles:allCandles.filter(c=>c.time*1000>=cutoff);
-  const data=filtered.map(c=>({time:c.time,open:c.open,high:c.high,low:c.low,close:c.close}));
-  const vols=filtered.map(c=>({time:c.time,value:c.volume,color:c.close>=c.open?"#159447":"#d94b4b"}));
-  candleSeries.setData(data);volumeSeries.setData(vols);chart.timeScale().fitContent();
-}
-
-async function selectStock(key,name){
-  selectedKey=key;selectedName=name;
-  $("results").style.display="none";$("searchInput").value=name;
-  await quote(key,name);await loadChart();
-}
-
-let searchTimer;
-$("searchInput").addEventListener("input",e=>{
-  clearTimeout(searchTimer);
-  const q=e.target.value.trim();
-  if(q.length<2){$("results").style.display="none";return}
-  searchTimer=setTimeout(async()=>{
-    try{
-      const res=await fetch(SEARCH+"?query="+encodeURIComponent(q),{cache:"no-store"});
-      const data=await res.json();
-      const rows=Array.isArray(data?.data)?data.data.slice(0,10):[];
-      const unique=rows.filter((r,i,a)=>i===a.findIndex(x=>x.instrument_key===r.instrument_key));
-      $("results").innerHTML=unique.map(r=>`<div class="result" data-key="${esc(r.instrument_key)}" data-name="${esc(r.trading_symbol||r.name||"Instrument")}"><b>${esc(r.trading_symbol||r.name||"Instrument")}</b><small>${esc(r.exchange||"")} • ${esc(r.segment||"")} • ${esc(r.name||"")}</small></div>`).join("") || '<div class="result"><small>No matching instruments found.</small></div>';
-      $("results").style.display="block";
-      $("results").querySelectorAll(".result[data-key]").forEach(x=>x.addEventListener("click",()=>selectStock(x.dataset.key,x.dataset.name)));
-    }catch(e){$("results").innerHTML='<div class="result"><small>Search unavailable.</small></div>';$("results").style.display="block"}
-  },300);
-});
-document.addEventListener("click",e=>{if(!e.target.closest(".search"))$("results").style.display="none"});
-document.querySelectorAll('.chart-tools button[data-range]').forEach(b=>b.addEventListener('click',async()=>{
-  document.querySelectorAll('.chart-tools button[data-range]').forEach(x=>x.classList.remove('active'));
-  b.classList.add('active');
-  currentRange=b.dataset.range;
-  $("intradayTools").style.display=currentRange==="1D"?"flex":"none";
-  await loadChart();
-}));
-
-document.querySelectorAll('.interval-btn').forEach(b=>b.addEventListener('click',async()=>{
-  document.querySelectorAll('.interval-btn').forEach(x=>x.classList.remove('active'));
-  b.classList.add('active');
-  currentInterval=b.dataset.interval;
-  if(currentRange==="1D") await loadChart();
-}));
-
-$("intradayTools").style.display="none";
-
-(async function init(){
-  createChart();
-  $("searchInput").value="RELIANCE";
-  await quote(selectedKey,"RELIANCE");
-  await Promise.all([loadIndices(),loadWatch(),loadMovers()]);
-  await loadChart();
-  setInterval(async()=>{await quote(selectedKey,selectedName);await loadIndices();await loadWatch();await loadMovers()},30000);
-})();
-</script>
-</body>
-</html>
