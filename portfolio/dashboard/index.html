@@ -2238,6 +2238,7 @@
             return row && (
               sameKey(row.instrument_key) ||
               sameKey(row.instrumentKey) ||
+              sameKey(row.instrument_token) ||
               sameKey(row.key)
             );
           });
@@ -2261,6 +2262,19 @@
         for (const key of Object.keys(source)) {
           if (sameKey(key)) {
             return source[key];
+          }
+
+          const candidate = source[key];
+
+          if (candidate && typeof candidate === "object") {
+            if (
+              sameKey(candidate.instrument_key) ||
+              sameKey(candidate.instrumentKey) ||
+              sameKey(candidate.instrument_token) ||
+              sameKey(candidate.key)
+            ) {
+              return candidate;
+            }
           }
         }
 
