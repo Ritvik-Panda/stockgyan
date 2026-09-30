@@ -559,6 +559,139 @@
       padding-top: 35px;
     }
 
+
+    /* =========================
+       MOVING AVERAGE MONITOR
+    ========================= */
+
+    .ma-monitor-card {
+      margin-top: 24px;
+    }
+
+    .ma-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .ma-summary-box {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      background: #f8fafc;
+    }
+
+    .ma-summary-label {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      margin-bottom: 7px;
+    }
+
+    .ma-summary-value {
+      font-size: 23px;
+      font-weight: 800;
+      color: var(--navy);
+    }
+
+    .ma-table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+
+    .ma-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+    }
+
+    .ma-table th,
+    .ma-table td {
+      padding: 13px 12px;
+      border-bottom: 1px solid #edf1f5;
+      text-align: left;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .ma-table th {
+      background: #f8fafc;
+      color: #667085;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    .ma-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .ma-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .ma-status.both {
+      background: #eaf8ef;
+      color: #167a3b;
+    }
+
+    .ma-status.above50 {
+      background: #eef6ff;
+      color: #175cd3;
+    }
+
+    .ma-status.above20 {
+      background: #fff7e8;
+      color: #b54708;
+    }
+
+    .ma-status.belowboth {
+      background: #fff0f1;
+      color: #c43245;
+    }
+
+    .ma-status.pending {
+      background: #f2f4f7;
+      color: #667085;
+    }
+
+    .ma-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px 16px;
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .ma-monitor-note {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 12px;
+    }
+
+    @media (max-width: 900px) {
+      .ma-summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 520px) {
+      .ma-summary-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
     /* =========================
        MODAL
     ========================= */
@@ -1103,6 +1236,97 @@
     </section>
 
 
+
+
+    <!-- =========================
+         MOVING AVERAGE MONITOR
+    ========================= -->
+
+    <section class="card ma-monitor-card">
+
+      <div class="card-header">
+        <div>
+          <div class="card-title">
+            📈 Technical Position — 20 / 50 DMA
+          </div>
+          <div class="card-subtitle">
+            See which stocks in your portfolio are trading above or below their 20-day and 50-day moving averages.
+            <span id="maStatus" style="margin-left:8px;font-weight:700;color:#667085;">
+              • Loading technical data...
+            </span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="btn btn-light"
+          onclick="refreshMovingAverages()"
+          id="maRefreshButton"
+        >
+          ↻ Refresh
+        </button>
+      </div>
+
+      <div class="card-body">
+
+        <div class="ma-summary-grid">
+          <div class="ma-summary-box">
+            <div class="ma-summary-label">Above 20 &amp; 50 DMA</div>
+            <div class="ma-summary-value" id="maBothCount">—</div>
+          </div>
+          <div class="ma-summary-box">
+            <div class="ma-summary-label">Above 50 / Below 20</div>
+            <div class="ma-summary-value" id="maAbove50Count">—</div>
+          </div>
+          <div class="ma-summary-box">
+            <div class="ma-summary-label">Above 20 / Below 50</div>
+            <div class="ma-summary-value" id="maAbove20Count">—</div>
+          </div>
+          <div class="ma-summary-box">
+            <div class="ma-summary-label">Below 20 &amp; 50 DMA</div>
+            <div class="ma-summary-value" id="maBelowBothCount">—</div>
+          </div>
+        </div>
+
+        <div class="ma-table-wrap">
+          <table class="ma-table">
+            <thead>
+              <tr>
+                <th>Stock</th>
+                <th>LTP</th>
+                <th>20 DMA</th>
+                <th>50 DMA</th>
+                <th>vs 20 DMA</th>
+                <th>vs 50 DMA</th>
+                <th>Position</th>
+              </tr>
+            </thead>
+            <tbody id="maMonitorBody">
+              <tr>
+                <td colspan="7" class="empty-table">
+                  <strong>Loading technical data...</strong><br>
+                  <span style="font-size:12px;">StockGyan is calculating the 20-day and 50-day moving averages.</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="ma-legend">
+          <span>🟢 Above both</span>
+          <span>🔵 Above 50 / below 20</span>
+          <span>🟠 Above 20 / below 50</span>
+          <span>🔴 Below both</span>
+        </div>
+
+        <div class="ma-monitor-note">
+          Moving averages are calculated from daily closing prices. The current LTP is compared with the latest available 20-day and 50-day averages. This is a technical-information view, not a buy/sell recommendation.
+        </div>
+
+      </div>
+    </section>
+
+
     <!-- =========================
          HOLDINGS
     ========================= -->
@@ -1556,6 +1780,9 @@
     let quoteSource = "";
     let quoteRefreshTimer = null;
     let quoteRequestInProgress = false;
+    let movingAverageCache = {};
+    let movingAverageRequestInProgress = false;
+    let movingAverageRefreshTimer = null;
 
     if (!portfolios || !Array.isArray(portfolios) || portfolios.length === 0) {
 
@@ -2912,6 +3139,266 @@
         '</div>';
     }
 
+
+
+    /* --------------------------------
+       MOVING AVERAGE MONITOR
+    -------------------------------- */
+
+    function parseDailyCandles(raw) {
+      const candles = Array.isArray(raw) ? raw : [];
+
+      return candles
+        .map(function(candle) {
+          return {
+            date: candle && candle[0] ? String(candle[0]) : "",
+            close: Number(candle && candle[4])
+          };
+        })
+        .filter(function(candle) {
+          return candle.date && Number.isFinite(candle.close) && candle.close > 0;
+        })
+        .sort(function(a, b) {
+          return new Date(a.date).getTime() - new Date(b.date).getTime();
+        });
+    }
+
+    function calculateMovingAverage(candles, period) {
+      if (!Array.isArray(candles) || candles.length < period) {
+        return null;
+      }
+
+      const recent = candles.slice(-period);
+      const total = recent.reduce(function(sum, candle) {
+        return sum + Number(candle.close || 0);
+      }, 0);
+
+      return total / period;
+    }
+
+    function movingAveragePosition(ltp, dma20, dma50) {
+      if (![ltp, dma20, dma50].every(function(value) { return Number.isFinite(value); })) {
+        return { key: "pending", label: "Calculating", className: "pending" };
+      }
+
+      const above20 = ltp >= dma20;
+      const above50 = ltp >= dma50;
+
+      if (above20 && above50) {
+        return { key: "both", label: "Above 20 & 50 DMA", className: "both" };
+      }
+
+      if (!above20 && above50) {
+        return { key: "above50", label: "Above 50 / Below 20", className: "above50" };
+      }
+
+      if (above20 && !above50) {
+        return { key: "above20", label: "Above 20 / Below 50", className: "above20" };
+      }
+
+      return { key: "belowboth", label: "Below 20 & 50 DMA", className: "belowboth" };
+    }
+
+    function formatDMA(value) {
+      if (!Number.isFinite(Number(value))) return "—";
+      return "₹" + formatMoney(value);
+    }
+
+    function formatDistance(ltp, dma) {
+      if (!Number.isFinite(Number(ltp)) || !Number.isFinite(Number(dma)) || Number(dma) <= 0) {
+        return "—";
+      }
+
+      const percent = ((Number(ltp) - Number(dma)) / Number(dma)) * 100;
+      const sign = percent > 0 ? "+" : "";
+      const className = percent > 0 ? "positive" : percent < 0 ? "negative" : "";
+
+      return '<span class="' + className + '" style="font-weight:800;">' +
+        sign + percent.toFixed(2) + "%" +
+        '</span>';
+    }
+
+    async function fetchMovingAverageForHolding(item) {
+      if (!item || !item.instrument_key) return null;
+
+      const key = item.instrument_key;
+
+      try {
+        const response = await fetch(
+          "/api/market/ohlc?instrument_key=" +
+          encodeURIComponent(key) +
+          "&interval=1d",
+          {
+            method: "GET",
+            cache: "no-store",
+            headers: { "Accept": "application/json" }
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data && data.message ? data.message : "Historical data unavailable");
+        }
+
+        const candles = parseDailyCandles(data && data.data ? data.data.candles : []);
+        const dma20 = calculateMovingAverage(candles, 20);
+        const dma50 = calculateMovingAverage(candles, 50);
+
+        return {
+          dma20: dma20,
+          dma50: dma50,
+          candleCount: candles.length,
+          latestDate: candles.length ? candles[candles.length - 1].date : null
+        };
+
+      } catch (error) {
+        console.warn("StockGyan: moving average fetch failed", key, error);
+        return null;
+      }
+    }
+
+    function renderMovingAverageMonitor() {
+      const body = document.getElementById("maMonitorBody");
+      if (!body) return;
+
+      const list = getCurrentPortfolioHoldings();
+
+      if (!list.length) {
+        body.innerHTML =
+          '<tr><td colspan="7" class="empty-table">' +
+          '<strong>No holdings added yet</strong><br>' +
+          '<span style="font-size:12px;">Add stocks to calculate 20-day and 50-day moving averages.</span>' +
+          '</td></tr>';
+
+        ["maBothCount", "maAbove50Count", "maAbove20Count", "maBelowBothCount"].forEach(function(id) {
+          const element = document.getElementById(id);
+          if (element) element.textContent = "0";
+        });
+
+        const status = document.getElementById("maStatus");
+        if (status) {
+          status.textContent = "• Add holdings to track technical position";
+          status.style.color = "#667085";
+        }
+        return;
+      }
+
+      let counts = { both: 0, above50: 0, above20: 0, belowboth: 0 };
+
+      body.innerHTML = list.map(function(item) {
+        const technical = movingAverageCache[item.instrument_key] || {};
+        const quote = quoteCache[item.instrument_key] || {};
+        const ltp = Number.isFinite(Number(quote.lastPrice)) ? Number(quote.lastPrice) : null;
+        const dma20 = Number.isFinite(Number(technical.dma20)) ? Number(technical.dma20) : null;
+        const dma50 = Number.isFinite(Number(technical.dma50)) ? Number(technical.dma50) : null;
+        const position = movingAveragePosition(ltp, dma20, dma50);
+
+        if (counts[position.key] !== undefined) {
+          counts[position.key] += 1;
+        }
+
+        const symbol = escapeHtml(item.symbol || "—");
+        const name = escapeHtml(item.name || "");
+
+        return
+          '<tr>' +
+            '<td>' +
+              '<div style="font-weight:800;color:#172033;">' + symbol + '</div>' +
+              '<div style="font-size:11px;color:#667085;margin-top:3px;">' + name + '</div>' +
+            '</td>' +
+            '<td style="font-weight:800;">' + (ltp !== null ? "₹" + formatMoney(ltp) : "—") + '</td>' +
+            '<td>' + formatDMA(dma20) + '</td>' +
+            '<td>' + formatDMA(dma50) + '</td>' +
+            '<td>' + formatDistance(ltp, dma20) + '</td>' +
+            '<td>' + formatDistance(ltp, dma50) + '</td>' +
+            '<td><span class="ma-status ' + position.className + '">' + position.label + '</span></td>' +
+          '</tr>';
+      }).join("");
+
+      document.getElementById("maBothCount").textContent = counts.both;
+      document.getElementById("maAbove50Count").textContent = counts.above50;
+      document.getElementById("maAbove20Count").textContent = counts.above20;
+      document.getElementById("maBelowBothCount").textContent = counts.belowboth;
+
+      const completeCount = list.filter(function(item) {
+        const t = movingAverageCache[item.instrument_key];
+        return t && Number.isFinite(Number(t.dma20)) && Number.isFinite(Number(t.dma50));
+      }).length;
+
+      const status = document.getElementById("maStatus");
+      if (status) {
+        if (completeCount === list.length) {
+          status.textContent = "• 20 / 50 DMA calculated";
+          status.style.color = "#159447";
+        } else {
+          status.textContent = "• Calculating " + completeCount + "/" + list.length + " stocks";
+          status.style.color = "#b54708";
+        }
+      }
+    }
+
+    async function refreshMovingAverages() {
+      const list = getCurrentPortfolioHoldings();
+      const status = document.getElementById("maStatus");
+      const button = document.getElementById("maRefreshButton");
+
+      if (!list.length) {
+        renderMovingAverageMonitor();
+        return;
+      }
+
+      if (movingAverageRequestInProgress) return;
+      movingAverageRequestInProgress = true;
+
+      if (button) {
+        button.disabled = true;
+        button.textContent = "↻ Loading...";
+      }
+
+      if (status) {
+        status.textContent = "• Loading 20 / 50 DMA...";
+        status.style.color = "#b54708";
+      }
+
+      try {
+        const results = await Promise.all(
+          list.map(function(item) {
+            return fetchMovingAverageForHolding(item).then(function(result) {
+              return { key: item.instrument_key, result: result };
+            });
+          })
+        );
+
+        results.forEach(function(entry) {
+          if (entry.result) {
+            movingAverageCache[entry.key] = entry.result;
+          }
+        });
+
+        renderMovingAverageMonitor();
+
+      } finally {
+        movingAverageRequestInProgress = false;
+        if (button) {
+          button.disabled = false;
+          button.textContent = "↻ Refresh";
+        }
+      }
+    }
+
+    function startMovingAverageRefresh() {
+      if (movingAverageRefreshTimer) {
+        clearInterval(movingAverageRefreshTimer);
+      }
+
+      // Daily moving averages only need periodic refresh. LTP is refreshed separately every 30 seconds.
+      movingAverageRefreshTimer = setInterval(function() {
+        refreshMovingAverages();
+      }, 15 * 60 * 1000);
+    }
+
+
     function updateMarketDataStatus(customMessage) {
       const element = document.getElementById("marketDataStatus");
       if (!element) return;
@@ -3002,8 +3489,11 @@
       function() {
         quoteCache = {};
         quoteSource = "";
+        movingAverageCache = {};
         renderHoldings();
+        renderMovingAverageMonitor();
         fetchPortfolioQuotes();
+        refreshMovingAverages();
       }
     );
 
@@ -3087,9 +3577,12 @@
 
       quoteCache = {};
       quoteSource = "";
+      movingAverageCache = {};
       renderHoldings();
       updateSummary();
+      renderMovingAverageMonitor();
       fetchPortfolioQuotes();
+      refreshMovingAverages();
 
     }
 
@@ -3183,9 +3676,12 @@
 
     renderHoldings();
     updateSummary();
+    renderMovingAverageMonitor();
     updateMarketDataStatus();
     startQuoteRefresh();
+    startMovingAverageRefresh();
     fetchPortfolioQuotes();
+    refreshMovingAverages();
 
 
     /* --------------------------------
