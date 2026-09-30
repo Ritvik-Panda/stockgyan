@@ -28,9 +28,7 @@ function getSessionEmail(request, env) {
   );
 }
 
-async function authenticate(context) {
-  const { request, env } = context;
-
+async function authenticate(request, env) {
   if (!env.DB) {
     return {
       error: Response.json(
@@ -73,43 +71,32 @@ async function authenticate(context) {
   }
 
   return {
-    env,
-    session
+    email: session.email
   };
 }
 
 
-/* =====================================================
-   GET HOLDINGS
-   /api/portfolio/holdings?portfolio_id=1
-===================================================== */
+/*
+--------------------------------------------------
+GET HOLDINGS
+/api/portfolio/holdings?portfolio_id=1
+--------------------------------------------------
+*/
 
 export async function onRequestGet(context) {
   try {
-    const auth = await authenticate(context);
+    const { request, env } = context;
+
+    const auth = await authenticate(
+      request,
+      env
+    );
 
     if (auth.error) {
       return auth.error;
     }
 
-    const { request, env, session } = auth;
-
-    await env.DB.prepare(`
-      CREATE TABLE IF NOT EXISTS portfolio_holdings (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        portfolio_id INTEGER NOT NULL,
-        user_email TEXT NOT NULL,
-        instrument_key TEXT NOT NULL,
-        symbol TEXT NOT NULL,
-        name TEXT,
-        exchange TEXT,
-        quantity REAL NOT NULL,
-        avg_price REAL NOT NULL,
-        created_at INTEGER NOT NULL,
-        updated_at INTEGER NOT NULL,
-        UNIQUE(portfolio_id, instrument_key)
-      )
-    `).run();
+    const userEmail = auth.email;
 
     const url = new URL(request.url);
 
@@ -127,16 +114,21 @@ export async function onRequestGet(context) {
       );
     }
 
+    /*
+      Make sure this portfolio belongs
+      to the logged-in user.
+    */
     const portfolio = await env.DB
       .prepare(`
-        SELECT id
+        SELECT id, name
         FROM portfolios
         WHERE id = ?
         AND user_email = ?
+        LIMIT 1
       `)
       .bind(
         portfolioId,
-        session.email
+        userEmail
       )
       .first();
 
@@ -157,7 +149,7 @@ export async function onRequestGet(context) {
           portfolio_id,
           instrument_key,
           symbol,
-          name,
+          company_name,
           exchange,
           quantity,
           avg_price,
@@ -166,17 +158,18 @@ export async function onRequestGet(context) {
         FROM portfolio_holdings
         WHERE portfolio_id = ?
         AND user_email = ?
-        ORDER BY created_at ASC
+        ORDER BY symbol ASC
       `)
       .bind(
         portfolioId,
-        session.email
+        userEmail
       )
       .all();
 
     return Response.json({
       status: "success",
-      holdings: result.results
+      portfolio,
+      holdings: result.results || []
     });
 
   } catch (error) {
@@ -185,7 +178,7 @@ export async function onRequestGet(context) {
         status: "error",
         message:
           error.message ||
-          "Unable to load holdings"
+          "Unable to load portfolio holdings"
       },
       { status: 500 }
     );
@@ -193,37 +186,27 @@ export async function onRequestGet(context) {
 }
 
 
-/* =====================================================
-   ADD HOLDING
-   POST /api/portfolio/holdings
-===================================================== */
+/*
+--------------------------------------------------
+POST HOLDING
+/api/portfolio/holdings
+--------------------------------------------------
+*/
 
 export async function onRequestPost(context) {
   try {
-    const auth = await authenticate(context);
+    const { request, env } = context;
+
+    const auth = await authenticate(
+      request,
+      env
+    );
 
     if (auth.error) {
       return auth.error;
     }
 
-    const { request, env, session } = auth;
-
-    await env.DB.prepare(`
-      CREATE TABLE IF NOT EXISTS portfolio_holdings (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        portfolio_id INTEGER NOT NULL,
-        user_email TEXT NOT NULL,
-        instrument_key TEXT NOT NULL,
-        symbol TEXT NOT NULL,
-        name TEXT,
-        exchange TEXT,
-        quantity REAL NOT NULL,
-        avg_price REAL NOT NULL,
-        created_at INTEGER NOT NULL,
-        updated_at INTEGER NOT NULL,
-        UNIQUE(portfolio_id, instrument_key)
-      )
-    `).run();
+    const userEmail = auth.email;
 
     const body = await request.json();
 
@@ -239,12 +222,12 @@ export async function onRequestPost(context) {
       body.symbol || ""
     ).trim();
 
-    const name = String(
-      body.name || ""
+    const companyName = String(
+      body.company_name || ""
     ).trim();
 
     const exchange = String(
-      body.exchange || ""
+      body.exchange || "NSE"
     ).trim();
 
     const quantity = Number(
@@ -255,6 +238,10 @@ export async function onRequestPost(context) {
       body.avg_price
     );
 
+
+    /*
+      Validate portfolio
+    */
     if (
       !Number.isInteger(portfolioId) ||
       portfolioId <= 0
@@ -268,6 +255,10 @@ export async function onRequestPost(context) {
       );
     }
 
+
+    /*
+      Validate stock
+    */
     if (!instrumentKey) {
       return Response.json(
         {
@@ -282,12 +273,16 @@ export async function onRequestPost(context) {
       return Response.json(
         {
           status: "error",
-          message: "Stock symbol is required"
+          message: "symbol is required"
         },
         { status: 400 }
       );
     }
 
+
+    /*
+      Validate quantity
+    */
     if (
       !Number.isFinite(quantity) ||
       quantity <= 0
@@ -301,6 +296,10 @@ export async function onRequestPost(context) {
       );
     }
 
+
+    /*
+      Validate average price
+    */
     if (
       !Number.isFinite(avgPrice) ||
       avgPrice <= 0
@@ -308,22 +307,29 @@ export async function onRequestPost(context) {
       return Response.json(
         {
           status: "error",
-          message: "Average price must be greater than zero"
+          message:
+            "Average price must be greater than zero"
         },
         { status: 400 }
       );
     }
 
+
+    /*
+      Make sure portfolio belongs
+      to logged-in user.
+    */
     const portfolio = await env.DB
       .prepare(`
-        SELECT id
+        SELECT id, name
         FROM portfolios
         WHERE id = ?
         AND user_email = ?
+        LIMIT 1
       `)
       .bind(
         portfolioId,
-        session.email
+        userEmail
       )
       .first();
 
@@ -337,6 +343,11 @@ export async function onRequestPost(context) {
       );
     }
 
+
+    /*
+      Check whether this stock already
+      exists in the portfolio.
+    */
     const existing = await env.DB
       .prepare(`
         SELECT
@@ -345,35 +356,41 @@ export async function onRequestPost(context) {
           avg_price
         FROM portfolio_holdings
         WHERE portfolio_id = ?
-        AND user_email = ?
         AND instrument_key = ?
+        AND user_email = ?
+        LIMIT 1
       `)
       .bind(
         portfolioId,
-        session.email,
-        instrumentKey
+        instrumentKey,
+        userEmail
       )
       .first();
 
-    const now = Date.now();
 
+    /*
+      If stock already exists,
+      combine quantities and calculate
+      weighted average price.
+    */
     if (existing) {
 
       const oldQuantity =
         Number(existing.quantity);
 
-      const oldAverage =
+      const oldAvgPrice =
         Number(existing.avg_price);
 
-      const totalQuantity =
+      const newQuantity =
         oldQuantity + quantity;
 
-      const totalCost =
-        (oldQuantity * oldAverage) +
-        (quantity * avgPrice);
+      const newAvgPrice =
+        (
+          (oldQuantity * oldAvgPrice) +
+          (quantity * avgPrice)
+        ) / newQuantity;
 
-      const newAverage =
-        totalCost / totalQuantity;
+      const now = Date.now();
 
       const updated = await env.DB
         .prepare(`
@@ -381,18 +398,18 @@ export async function onRequestPost(context) {
           SET
             quantity = ?,
             avg_price = ?,
-            symbol = ?,
-            name = ?,
+            company_name = ?,
             exchange = ?,
             updated_at = ?
           WHERE id = ?
+          AND portfolio_id = ?
           AND user_email = ?
           RETURNING
             id,
             portfolio_id,
             instrument_key,
             symbol,
-            name,
+            company_name,
             exchange,
             quantity,
             avg_price,
@@ -400,25 +417,31 @@ export async function onRequestPost(context) {
             updated_at
         `)
         .bind(
-          totalQuantity,
-          newAverage,
-          symbol,
-          name,
+          newQuantity,
+          newAvgPrice,
+          companyName,
           exchange,
           now,
           existing.id,
-          session.email
+          portfolioId,
+          userEmail
         )
         .first();
 
       return Response.json({
         status: "success",
-        action: "updated",
+        message: "Holding updated successfully",
         holding: updated
       });
     }
 
-    const inserted = await env.DB
+
+    /*
+      New holding
+    */
+    const now = Date.now();
+
+    const result = await env.DB
       .prepare(`
         INSERT INTO portfolio_holdings
         (
@@ -426,7 +449,7 @@ export async function onRequestPost(context) {
           user_email,
           instrument_key,
           symbol,
-          name,
+          company_name,
           exchange,
           quantity,
           avg_price,
@@ -439,7 +462,7 @@ export async function onRequestPost(context) {
           portfolio_id,
           instrument_key,
           symbol,
-          name,
+          company_name,
           exchange,
           quantity,
           avg_price,
@@ -448,10 +471,10 @@ export async function onRequestPost(context) {
       `)
       .bind(
         portfolioId,
-        session.email,
+        userEmail,
         instrumentKey,
         symbol,
-        name,
+        companyName,
         exchange,
         quantity,
         avgPrice,
@@ -462,126 +485,7 @@ export async function onRequestPost(context) {
 
     return Response.json({
       status: "success",
-      action: "created",
-      holding: inserted
-    });
-
-  } catch (error) {
-    return Response.json(
-      {
-        status: "error",
-        message:
-          error.message ||
-          "Unable to add holding"
-      },
-      { status: 500 }
-    );
-  }
-}
-
-
-/* =====================================================
-   EDIT HOLDING
-   PUT /api/portfolio/holdings
-===================================================== */
-
-export async function onRequestPut(context) {
-  try {
-    const auth = await authenticate(context);
-
-    if (auth.error) {
-      return auth.error;
-    }
-
-    const { request, env, session } = auth;
-
-    const body = await request.json();
-
-    const id = Number(body.id);
-    const quantity = Number(body.quantity);
-    const avgPrice = Number(body.avg_price);
-
-    if (
-      !Number.isInteger(id) ||
-      id <= 0
-    ) {
-      return Response.json(
-        {
-          status: "error",
-          message: "Valid holding id is required"
-        },
-        { status: 400 }
-      );
-    }
-
-    if (
-      !Number.isFinite(quantity) ||
-      quantity <= 0
-    ) {
-      return Response.json(
-        {
-          status: "error",
-          message: "Quantity must be greater than zero"
-        },
-        { status: 400 }
-      );
-    }
-
-    if (
-      !Number.isFinite(avgPrice) ||
-      avgPrice <= 0
-    ) {
-      return Response.json(
-        {
-          status: "error",
-          message: "Average price must be greater than zero"
-        },
-        { status: 400 }
-      );
-    }
-
-    const result = await env.DB
-      .prepare(`
-        UPDATE portfolio_holdings
-        SET
-          quantity = ?,
-          avg_price = ?,
-          updated_at = ?
-        WHERE id = ?
-        AND user_email = ?
-        RETURNING
-          id,
-          portfolio_id,
-          instrument_key,
-          symbol,
-          name,
-          exchange,
-          quantity,
-          avg_price,
-          created_at,
-          updated_at
-      `)
-      .bind(
-        quantity,
-        avgPrice,
-        Date.now(),
-        id,
-        session.email
-      )
-      .first();
-
-    if (!result) {
-      return Response.json(
-        {
-          status: "error",
-          message: "Holding not found"
-        },
-        { status: 404 }
-      );
-    }
-
-    return Response.json({
-      status: "success",
+      message: "Holding added successfully",
       holding: result
     });
 
@@ -591,83 +495,7 @@ export async function onRequestPut(context) {
         status: "error",
         message:
           error.message ||
-          "Unable to update holding"
-      },
-      { status: 500 }
-    );
-  }
-}
-
-
-/* =====================================================
-   DELETE HOLDING
-   DELETE /api/portfolio/holdings?id=123
-===================================================== */
-
-export async function onRequestDelete(context) {
-  try {
-    const auth = await authenticate(context);
-
-    if (auth.error) {
-      return auth.error;
-    }
-
-    const { request, env, session } = auth;
-
-    const url = new URL(request.url);
-
-    const id = Number(
-      url.searchParams.get("id")
-    );
-
-    if (
-      !Number.isInteger(id) ||
-      id <= 0
-    ) {
-      return Response.json(
-        {
-          status: "error",
-          message: "Valid holding id is required"
-        },
-        { status: 400 }
-      );
-    }
-
-    const result = await env.DB
-      .prepare(`
-        DELETE FROM portfolio_holdings
-        WHERE id = ?
-        AND user_email = ?
-        RETURNING id
-      `)
-      .bind(
-        id,
-        session.email
-      )
-      .first();
-
-    if (!result) {
-      return Response.json(
-        {
-          status: "error",
-          message: "Holding not found"
-        },
-        { status: 404 }
-      );
-    }
-
-    return Response.json({
-      status: "success",
-      message: "Holding removed successfully"
-    });
-
-  } catch (error) {
-    return Response.json(
-      {
-        status: "error",
-        message:
-          error.message ||
-          "Unable to remove holding"
+          "Unable to save portfolio holding"
       },
       { status: 500 }
     );
