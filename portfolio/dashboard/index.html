@@ -380,6 +380,26 @@
     .performance-stat-value.positive { color:var(--green); }
     .performance-stat-value.negative { color:#dc3545; }
 
+    .performance-definition {
+      margin: -4px 0 14px;
+      padding: 9px 11px;
+      border-radius: 9px;
+      background: #f7f9fc;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .performance-definition strong {
+      color: var(--navy);
+    }
+
+    .performance-definition span {
+      color: var(--navy);
+      font-weight: 700;
+    }
+
     .performance-chart-wrap {
       position:relative;
       width:100%;
@@ -1192,9 +1212,14 @@
               <div class="performance-stat-value" id="performanceEndValue">—</div>
             </div>
             <div class="performance-stat">
-              <div class="performance-stat-label">Period Change</div>
+              <div class="performance-stat-label">Growth Since Period Start</div>
               <div class="performance-stat-value" id="performanceChange">—</div>
             </div>
+          </div>
+
+          <div class="performance-definition">
+            <strong>Total Gain</strong> = Current Value − Total Invested.
+            <span>Growth Since Period Start</span> = Current Value − historical portfolio value at the start of the selected period.
           </div>
 
           <div class="performance-chart-wrap" id="performanceChartWrap">
@@ -1219,7 +1244,7 @@
 
           <div class="performance-note" id="performanceNote">
             The latest point uses the same live LTP valuation shown in the Current Value card.
-            Earlier points use daily closing prices for the current holdings. Period Change is the change from the selected period's starting value to the current live value.
+            Earlier points use daily closing prices for the current holdings. Growth Since Period Start is the change from the selected period's starting market value to the current live value.
             Transaction-level money-weighted returns will be added with the transaction history system.
           </div>
 
