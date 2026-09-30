@@ -346,161 +346,39 @@
        PERFORMANCE
     ========================= */
 
-    .performance-wrap { padding:18px 20px 20px; }
-
-    .performance-stats {
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:12px;
-      margin-bottom:16px;
-    }
-
-    .performance-stat {
-      background:#f8fafc;
-      border:1px solid var(--border);
-      border-radius:11px;
-      padding:12px 14px;
-    }
-
-    .performance-stat-label {
-      font-size:11px;
-      color:var(--muted);
-      font-weight:700;
-      text-transform:uppercase;
-      letter-spacing:.35px;
-    }
-
-    .performance-stat-value {
-      margin-top:5px;
-      font-size:17px;
-      font-weight:800;
-      color:var(--navy);
-    }
-
-    .performance-stat-value.positive { color:var(--green); }
-    .performance-stat-value.negative { color:#dc3545; }
-
-    .performance-definition {
-      margin: -4px 0 14px;
-      padding: 9px 11px;
-      border-radius: 9px;
-      background: #f7f9fc;
-      border: 1px solid var(--border);
-      color: var(--muted);
-      font-size: 11px;
-      line-height: 1.5;
-    }
-
-    .performance-definition strong {
-      color: var(--navy);
-    }
-
-    .performance-definition span {
-      color: var(--navy);
-      font-weight: 700;
-    }
-
-    .performance-chart-wrap {
-      position:relative;
-      width:100%;
-      height:300px;
-      border:1px solid var(--border);
-      border-radius:12px;
-      background:#fff;
-      overflow:hidden;
-    }
-
-    .performance-chart {
-      width:100%;
-      height:100%;
-      display:block;
-    }
-
-    .performance-axis-label {
-      font-size:10px;
-      fill:#98a2b3;
-    }
-
-    .performance-grid-line {
-      stroke:#edf0f4;
-      stroke-width:1;
-    }
-
-    .performance-line {
-      fill:none;
-      stroke:#082a63;
-      stroke-width:3;
-      stroke-linecap:round;
-      stroke-linejoin:round;
-    }
-
-    .performance-area { fill:rgba(8,42,99,.08); }
-
-    .performance-tooltip {
-      position:absolute;
-      min-width:145px;
-      padding:9px 10px;
-      background:#172033;
-      color:#fff;
-      border-radius:8px;
-      font-size:11px;
-      line-height:1.45;
-      pointer-events:none;
-      opacity:0;
-      transform:translate(-50%,-110%);
-      z-index:5;
-      white-space:nowrap;
-    }
-
-    .performance-note {
-      margin-top:10px;
-      color:var(--muted);
-      font-size:11px;
-      line-height:1.45;
-    }
-
-    .performance-loading,
     .performance-empty {
-      height:300px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-      color:var(--muted);
-      flex-direction:column;
-      gap:9px;
-      padding:20px;
+      height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: var(--muted);
+      flex-direction: column;
+      gap: 10px;
     }
 
-    .performance-empty .empty-icon,
-    .performance-loading .empty-icon {
-      width:58px;
-      height:58px;
-      border-radius:50%;
-      background:#edf3ff;
-      color:var(--navy);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:25px;
-      font-weight:800;
+    .empty-icon {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: #edf3ff;
+      color: var(--navy);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 25px;
+      font-weight: 800;
     }
 
-    .performance-empty .empty-title,
-    .performance-loading .empty-title {
-      font-weight:700;
-      color:var(--navy);
+    .empty-title {
+      font-weight: 700;
+      color: var(--navy);
     }
 
-    .performance-empty .empty-text,
-    .performance-loading .empty-text {
-      font-size:13px;
-      max-width:390px;
-      line-height:1.5;
-    }
-
-    @media (max-width:800px) {
-      .performance-stats { grid-template-columns:1fr; }
+    .empty-text {
+      font-size: 13px;
+      max-width: 360px;
+      line-height: 1.5;
     }
 
     /* =========================
@@ -692,15 +570,15 @@
 
     .ma-summary-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
       margin-bottom: 18px;
     }
 
     .ma-summary-box {
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 15px;
+      padding: 14px;
       background: #f8fafc;
     }
 
@@ -710,30 +588,13 @@
       color: var(--muted);
       text-transform: uppercase;
       letter-spacing: .04em;
-      margin-bottom: 8px;
+      margin-bottom: 7px;
     }
 
-    .ma-summary-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .ma-summary-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 13px;
+    .ma-summary-value {
+      font-size: 23px;
       font-weight: 800;
-    }
-
-    .ma-summary-item.above {
-      color: var(--green);
-    }
-
-    .ma-summary-item.below {
-      color: var(--danger);
+      color: var(--navy);
     }
 
     .ma-table-wrap {
@@ -745,7 +606,7 @@
     .ma-table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 1080px;
+      min-width: 760px;
     }
 
     .ma-table th,
@@ -779,12 +640,22 @@
       font-weight: 800;
     }
 
-    .ma-status.above {
+    .ma-status.both {
       background: #eaf8ef;
       color: #167a3b;
     }
 
-    .ma-status.below {
+    .ma-status.above50 {
+      background: #eef6ff;
+      color: #175cd3;
+    }
+
+    .ma-status.above20 {
+      background: #fff7e8;
+      color: #b54708;
+    }
+
+    .ma-status.belowboth {
       background: #fff0f1;
       color: #c43245;
     }
@@ -794,8 +665,13 @@
       color: #667085;
     }
 
-    .ma-value-cell {
-      font-weight: 700;
+    .ma-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px 16px;
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 12px;
     }
 
     .ma-monitor-note {
@@ -806,7 +682,13 @@
 
     @media (max-width: 900px) {
       .ma-summary-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 520px) {
+      .ma-summary-grid {
+        grid-template-columns: 1fr 1fr;
       }
     }
 
@@ -938,7 +820,120 @@
         font-size: 23px;
       }
     }
-  </style>
+  
+    .transactions-card {
+      margin-top: 24px;
+    }
+
+    .transaction-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .transaction-summary-box {
+      border: 1px solid #e5eaf1;
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 13px;
+    }
+
+    .transaction-summary-label {
+      font-size: 11px;
+      font-weight: 800;
+      color: #667085;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    .transaction-summary-value {
+      margin-top: 5px;
+      font-size: 18px;
+      font-weight: 900;
+      color: #172033;
+    }
+
+    .transaction-note {
+      margin-top: 16px;
+      padding: 11px 13px;
+      border-radius: 10px;
+      background: #f8fafc;
+      border: 1px solid #e5eaf1;
+      color: #667085;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .transaction-type-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin: 16px 0;
+    }
+
+    .transaction-type-btn {
+      border: 1px solid #dfe5ec;
+      background: #fff;
+      border-radius: 10px;
+      padding: 10px 7px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      color: #344054;
+    }
+
+    .transaction-type-btn.active {
+      border-color: #159447;
+      background: #effaf4;
+      color: #087a39;
+      box-shadow: 0 0 0 2px rgba(21,148,71,.08);
+    }
+
+    .transaction-form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .transaction-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: #344054;
+      margin-bottom: 7px;
+    }
+
+    .transaction-type-btn:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+
+    @media (max-width: 760px) {
+      .transaction-summary-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .transaction-type-grid {
+        grid-template-columns: 1fr 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .transaction-form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .transaction-type-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .transaction-summary-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+</style>
 </head>
 
 <body>
@@ -1038,6 +1033,13 @@
           onclick="deletePortfolio()"
         >
           Delete
+        </button>
+
+        <button
+          class="btn btn-green"
+          onclick="openTransactions()"
+        >
+          Transactions
         </button>
 
       </div>
@@ -1200,52 +1202,24 @@
 
         </div>
 
-        <div class="performance-wrap">
+        <div class="card-body">
 
-          <div class="performance-stats">
-            <div class="performance-stat">
-              <div class="performance-stat-label">Period Start Value</div>
-              <div class="performance-stat-value" id="performanceStartValue">—</div>
-            </div>
-            <div class="performance-stat">
-              <div class="performance-stat-label">Current Value</div>
-              <div class="performance-stat-value" id="performanceEndValue">—</div>
-            </div>
-            <div class="performance-stat">
-              <div class="performance-stat-label">Growth Since Period Start</div>
-              <div class="performance-stat-value" id="performanceChange">—</div>
-            </div>
-          </div>
+          <div class="performance-empty">
 
-          <div class="performance-definition">
-            <strong>Total Gain</strong> = Current Value − Total Invested.
-            <span>Growth Since Period Start</span> = Current Value − historical portfolio value at the start of the selected period.
-          </div>
-
-          <div class="performance-chart-wrap" id="performanceChartWrap">
-            <div class="performance-loading" id="performanceLoading">
-              <div class="empty-icon">↗</div>
-              <div class="empty-title">Loading portfolio performance...</div>
-              <div class="empty-text">
-                StockGyan is loading daily historical prices for your current holdings.
-              </div>
+            <div class="empty-icon">
+              ↗
             </div>
 
-            <svg
-              id="performanceChart"
-              class="performance-chart"
-              viewBox="0 0 900 300"
-              preserveAspectRatio="none"
-              style="display:none;"
-            ></svg>
+            <div class="empty-title">
+              Performance data will appear here
+            </div>
 
-            <div class="performance-tooltip" id="performanceTooltip"></div>
-          </div>
+            <div class="empty-text">
+              Once holdings and transactions are added,
+              StockGyan will calculate your portfolio
+              performance automatically.
+            </div>
 
-          <div class="performance-note" id="performanceNote">
-            The latest point uses the same live LTP valuation shown in the Current Value card.
-            Earlier points use daily closing prices for the current holdings. Growth Since Period Start is the change from the selected period's starting market value to the current live value.
-            Transaction-level money-weighted returns will be added with the transaction history system.
           </div>
 
         </div>
@@ -1384,6 +1358,111 @@
 
 
 
+
+    <!-- =========================
+         TRANSACTIONS
+    ========================= -->
+
+    <section class="card transactions-card" id="transactionsSection">
+
+      <div class="card-header">
+
+        <div>
+          <div class="card-title">
+            Transactions
+          </div>
+
+          <div class="card-subtitle">
+            Record buys, sells, dividends and portfolio cash flows.
+            <span id="transactionStatus"
+                  style="margin-left:8px;font-weight:700;color:#667085;">
+              • Transaction ledger
+            </span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="btn btn-green"
+          onclick="openTransactionModal()"
+        >
+          + Add Transaction
+        </button>
+
+      </div>
+
+      <div class="card-body">
+
+        <div class="transaction-summary-grid">
+
+          <div class="transaction-summary-box">
+            <div class="transaction-summary-label">Buys</div>
+            <div class="transaction-summary-value" id="transactionBuyTotal">₹0.00</div>
+          </div>
+
+          <div class="transaction-summary-box">
+            <div class="transaction-summary-label">Sells</div>
+            <div class="transaction-summary-value" id="transactionSellTotal">₹0.00</div>
+          </div>
+
+          <div class="transaction-summary-box">
+            <div class="transaction-summary-label">Dividends</div>
+            <div class="transaction-summary-value" id="transactionDividendTotal">₹0.00</div>
+          </div>
+
+          <div class="transaction-summary-box">
+            <div class="transaction-summary-label">Cash Flows</div>
+            <div class="transaction-summary-value" id="transactionCashFlowTotal">₹0.00</div>
+          </div>
+
+        </div>
+
+        <div class="table-wrap" style="margin-top:18px;">
+
+          <table>
+
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Stock</th>
+                <th>Qty</th>
+                <th>Price</th>
+                <th>Charges</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+
+            <tbody id="transactionsBody">
+
+              <tr>
+                <td colspan="9" class="empty-table">
+                  <strong>No transactions recorded yet</strong>
+                  <br>
+                  <span style="font-size:12px;">
+                    Add your first Buy, Sell, Dividend, Deposit or Withdrawal.
+                  </span>
+                </td>
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+        <div class="transaction-note">
+          <strong>Important:</strong> Transactions are being stored as the portfolio's activity ledger.
+          This will become the foundation for cost basis, realized/unrealized P&amp;L,
+          true performance and XIRR in the next stages.
+        </div>
+
+      </div>
+
+    </section>
+
     <!-- =========================
          MOVING AVERAGE MONITOR
     ========================= -->
@@ -1393,10 +1472,10 @@
       <div class="card-header">
         <div>
           <div class="card-title">
-            📈 Technical Position — Individual Moving Averages
+            📈 Technical Position — 20 / 50 / 200 DMA
           </div>
           <div class="card-subtitle">
-            Each moving average is shown independently for every stock in your portfolio.
+            See which stocks in your portfolio are trading above or below their 20-day, 50-day and 200-day moving averages.
             <span id="maStatus" style="margin-left:8px;font-weight:700;color:#667085;">
               • Loading technical data...
             </span>
@@ -1416,31 +1495,30 @@
       <div class="card-body">
 
         <div class="ma-summary-grid">
-
           <div class="ma-summary-box">
-            <div class="ma-summary-label">20 DMA</div>
-            <div class="ma-summary-row">
-              <span class="ma-summary-item above">🟢 Above <span id="ma20AboveCount">—</span></span>
-              <span class="ma-summary-item below">🔴 Below <span id="ma20BelowCount">—</span></span>
-            </div>
+            <div class="ma-summary-label">Above 20 &amp; 50 DMA</div>
+            <div class="ma-summary-value" id="maBothCount">—</div>
           </div>
-
           <div class="ma-summary-box">
-            <div class="ma-summary-label">50 DMA</div>
-            <div class="ma-summary-row">
-              <span class="ma-summary-item above">🟢 Above <span id="ma50AboveCount">—</span></span>
-              <span class="ma-summary-item below">🔴 Below <span id="ma50BelowCount">—</span></span>
-            </div>
+            <div class="ma-summary-label">Above 50 / Below 20</div>
+            <div class="ma-summary-value" id="maAbove50Count">—</div>
           </div>
-
           <div class="ma-summary-box">
-            <div class="ma-summary-label">200 DMA</div>
-            <div class="ma-summary-row">
-              <span class="ma-summary-item above">🟢 Above <span id="ma200AboveCount">—</span></span>
-              <span class="ma-summary-item below">🔴 Below <span id="ma200BelowCount">—</span></span>
-            </div>
+            <div class="ma-summary-label">Above 20 / Below 50</div>
+            <div class="ma-summary-value" id="maAbove20Count">—</div>
           </div>
-
+          <div class="ma-summary-box">
+            <div class="ma-summary-label">Below 20 &amp; 50 DMA</div>
+            <div class="ma-summary-value" id="maBelowBothCount">—</div>
+          </div>
+          <div class="ma-summary-box">
+            <div class="ma-summary-label">Above 200 DMA</div>
+            <div class="ma-summary-value" id="maAbove200Count">—</div>
+          </div>
+          <div class="ma-summary-box">
+            <div class="ma-summary-label">Below 200 DMA</div>
+            <div class="ma-summary-value" id="maBelow200Count">—</div>
+          </div>
         </div>
 
         <div class="ma-table-wrap">
@@ -1450,29 +1528,35 @@
                 <th>Stock</th>
                 <th>LTP</th>
                 <th>20 DMA</th>
-                <th>20 DMA Status</th>
                 <th>50 DMA</th>
-                <th>50 DMA Status</th>
                 <th>200 DMA</th>
-                <th>200 DMA Status</th>
+                <th>vs 20 DMA</th>
+                <th>vs 50 DMA</th>
+                <th>vs 200 DMA</th>
+                <th>Position</th>
               </tr>
             </thead>
-
             <tbody id="maMonitorBody">
               <tr>
-                <td colspan="8" class="empty-table">
+                <td colspan="9" class="empty-table">
                   <strong>Loading technical data...</strong><br>
-                  <span style="font-size:12px;">
-                    StockGyan is calculating the 20-day, 50-day and 200-day moving averages.
-                  </span>
+                  <span style="font-size:12px;">StockGyan is calculating the 20-day, 50-day and 200-day moving averages.</span>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
 
+        <div class="ma-legend">
+          <span>🟢 Above 20 &amp; 50</span>
+          <span>🔵 Above 50 / below 20</span>
+          <span>🟠 Above 20 / below 50</span>
+          <span>🔴 Below 20 &amp; 50</span>
+          <span>📈 / 📉 200 DMA shown separately</span>
+        </div>
+
         <div class="ma-monitor-note">
-          Moving averages are calculated from daily closing prices. The LTP is compared independently with the latest available 20-day, 50-day and 200-day averages. This is a technical-information view, not a buy/sell recommendation.
+          Moving averages are calculated from daily closing prices. The current LTP is compared with the latest available 20-day, 50-day and 200-day averages. This is a technical-information view, not a buy/sell recommendation.
         </div>
 
       </div>
@@ -1670,6 +1754,219 @@
 
   </main>
 
+
+
+  <!-- =========================
+       ADD TRANSACTION MODAL
+  ========================= -->
+
+  <div id="transactionModal" class="modal-overlay">
+
+    <div class="modal" style="max-width:620px;">
+
+      <h3>Add Transaction</h3>
+
+      <p>
+        Record an activity for the selected portfolio.
+      </p>
+
+      <div class="transaction-type-grid">
+
+        <button type="button" class="transaction-type-btn active"
+                data-transaction-type="BUY"
+                onclick="setTransactionType('BUY')">
+          🟢 Buy
+        </button>
+
+        <button type="button" class="transaction-type-btn"
+                data-transaction-type="SELL"
+                onclick="setTransactionType('SELL')">
+          🔴 Sell
+        </button>
+
+        <button type="button" class="transaction-type-btn"
+                data-transaction-type="DIVIDEND"
+                onclick="setTransactionType('DIVIDEND')">
+          💰 Dividend
+        </button>
+
+        <button type="button" class="transaction-type-btn"
+                data-transaction-type="DEPOSIT"
+                onclick="setTransactionType('DEPOSIT')">
+          💵 Deposit
+        </button>
+
+        <button type="button" class="transaction-type-btn"
+                data-transaction-type="WITHDRAWAL"
+                onclick="setTransactionType('WITHDRAWAL')">
+          💸 Withdrawal
+        </button>
+
+      </div>
+
+      <div class="transaction-form-grid">
+
+        <div>
+          <label class="transaction-label">Date</label>
+          <input id="transactionDate" type="date">
+        </div>
+
+        <div>
+          <label class="transaction-label">Notes (optional)</label>
+          <input id="transactionNotes" type="text"
+                 maxlength="120"
+                 placeholder="Example: Long term investment">
+        </div>
+
+      </div>
+
+      <div id="transactionStockArea">
+
+        <label class="transaction-label">Search Stock</label>
+
+        <input
+          id="transactionStockSearch"
+          type="text"
+          placeholder="Search company or symbol — e.g. Reliance, TCS"
+          autocomplete="off"
+        >
+
+        <div id="transactionStockStatus"
+             style="font-size:12px;color:#667085;margin:6px 0 8px;min-height:18px;">
+        </div>
+
+        <div id="transactionStockResults"
+             style="max-height:170px;overflow:auto;margin-bottom:14px;">
+        </div>
+
+        <div id="transactionSelectedStock"
+             style="display:none;background:#f8fafc;border:1px solid #e5eaf1;border-radius:10px;padding:11px 12px;margin-bottom:14px;">
+          <div id="transactionSelectedStockName"
+               style="font-weight:800;color:#082a63;"></div>
+          <div id="transactionSelectedStockDetails"
+               style="font-size:12px;color:#667085;margin-top:3px;"></div>
+        </div>
+
+      </div>
+
+      <div id="transactionTradeFields">
+
+        <div class="transaction-form-grid">
+
+          <div>
+            <label class="transaction-label">Quantity</label>
+            <input id="transactionQuantity"
+                   type="number"
+                   min="0.0001"
+                   step="any"
+                   placeholder="100">
+          </div>
+
+          <div>
+            <label class="transaction-label">Price / Share</label>
+            <input id="transactionPrice"
+                   type="number"
+                   min="0"
+                   step="0.01"
+                   placeholder="250.00">
+          </div>
+
+          <div>
+            <label class="transaction-label">Charges</label>
+            <input id="transactionCharges"
+                   type="number"
+                   min="0"
+                   step="0.01"
+                   value="0"
+                   placeholder="0.00">
+          </div>
+
+          <div>
+            <label class="transaction-label">Total Amount</label>
+            <input id="transactionAmount"
+                   type="number"
+                   readonly
+                   placeholder="0.00">
+          </div>
+
+        </div>
+
+      </div>
+
+      <div id="transactionDividendFields" style="display:none;">
+
+        <div class="transaction-form-grid">
+
+          <div>
+            <label class="transaction-label">Eligible Quantity</label>
+            <input id="transactionDividendQuantity"
+                   type="number"
+                   min="0.0001"
+                   step="any"
+                   placeholder="100">
+          </div>
+
+          <div>
+            <label class="transaction-label">Dividend / Share</label>
+            <input id="transactionDividendPerShare"
+                   type="number"
+                   min="0"
+                   step="0.0001"
+                   placeholder="8.50">
+          </div>
+
+          <div>
+            <label class="transaction-label">Dividend Amount</label>
+            <input id="transactionDividendAmount"
+                   type="number"
+                   readonly
+                   placeholder="0.00">
+          </div>
+
+          <div>
+            <label class="transaction-label">Status</label>
+            <select id="transactionDividendStatus">
+              <option value="Expected">Expected</option>
+              <option value="Received">Received</option>
+            </select>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div id="transactionCashFields" style="display:none;">
+
+        <div>
+          <label class="transaction-label">Amount</label>
+          <input id="transactionCashAmount"
+                 type="number"
+                 min="0.01"
+                 step="0.01"
+                 placeholder="10000.00">
+        </div>
+
+      </div>
+
+      <div id="transactionMessage"
+           style="display:none;margin-top:12px;padding:10px 12px;border-radius:9px;font-size:13px;">
+      </div>
+
+      <div class="modal-actions" style="margin-top:18px;">
+
+        <button class="btn btn-light" onclick="closeTransactionModal()">
+          Cancel
+        </button>
+
+        <button class="btn btn-green" onclick="saveTransaction()">
+          Save Transaction
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
 
   <!-- =========================
        ADD PORTFOLIO MODAL
@@ -2364,8 +2661,6 @@
       renderHoldings();
       updateSummary();
       fetchPortfolioQuotes();
-      performanceCache = {};
-      refreshPortfolioPerformance();
 
     }
 
@@ -2482,8 +2777,6 @@
       renderHoldings();
       updateSummary();
       fetchPortfolioQuotes();
-      performanceCache = {};
-      refreshPortfolioPerformance();
     }
 
 
@@ -2561,8 +2854,6 @@
       renderHoldings();
       updateSummary();
       fetchPortfolioQuotes();
-      performanceCache = {};
-      refreshPortfolioPerformance();
     }
 
 
@@ -3299,437 +3590,6 @@
 
 
 
-
-    /* --------------------------------
-       PORTFOLIO PERFORMANCE
-    -------------------------------- */
-
-    let performanceRequestInProgress = false;
-    let performanceCache = {};
-
-    function getPerformanceDays(period) {
-      return {
-        "1M":31,
-        "3M":93,
-        "6M":186,
-        "1Y":366,
-        "ALL":3650
-      }[period] || 31;
-    }
-
-    function formatPerformanceDate(value) {
-      const date = new Date(value);
-      if (Number.isNaN(date.getTime())) return String(value).slice(0,10);
-      return date.toLocaleDateString("en-IN", {
-        day:"2-digit", month:"short", year:"numeric"
-      });
-    }
-
-    function formatShortDate(value) {
-      const date = new Date(value);
-      if (Number.isNaN(date.getTime())) return String(value).slice(0,10);
-      return date.toLocaleDateString("en-IN", {
-        day:"2-digit", month:"short"
-      });
-    }
-
-    function formatCompactMoney(value) {
-      const n = Number(value || 0);
-      if (Math.abs(n) >= 10000000) return (n/10000000).toFixed(2) + "Cr";
-      if (Math.abs(n) >= 100000) return (n/100000).toFixed(2) + "L";
-      if (Math.abs(n) >= 1000) return (n/1000).toFixed(1) + "K";
-      return n.toFixed(0);
-    }
-
-    async function fetchPerformanceCandles(item) {
-      const response = await fetch(
-        "/api/market/ohlc?instrument_key=" +
-        encodeURIComponent(item.instrument_key) +
-        "&interval=1d",
-        {
-          method:"GET",
-          cache:"no-store",
-          headers:{ "Accept":"application/json" }
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          data && data.message
-            ? data.message
-            : "Historical data unavailable"
-        );
-      }
-
-      return parseDailyCandles(
-        data && data.data ? data.data.candles : []
-      );
-    }
-
-    function getLivePortfolioValue(list) {
-      let total = 0;
-      let hasValue = false;
-
-      list.forEach(function(item) {
-        const metrics = holdingMetrics(item);
-
-        if (
-          metrics &&
-          Number.isFinite(Number(metrics.currentValue))
-        ) {
-          total += Number(metrics.currentValue);
-          hasValue = true;
-        }
-      });
-
-      return hasValue ? total : null;
-    }
-
-    function buildPerformanceSeries(
-      list,
-      candleSets,
-      period,
-      livePortfolioValue
-    ) {
-      const maps = list.map(function(item, index) {
-        const prices = new Map();
-
-        (candleSets[index] || []).forEach(function(candle) {
-          prices.set(
-            String(candle.date).slice(0,10),
-            Number(candle.close)
-          );
-        });
-
-        return {
-          item:item,
-          prices:prices
-        };
-      });
-
-      const allDates = new Set();
-
-      maps.forEach(function(entry) {
-        entry.prices.forEach(function(_, date) {
-          allDates.add(date);
-        });
-      });
-
-      let dates = Array.from(allDates).sort();
-      const days = getPerformanceDays(period);
-
-      if (period !== "ALL" && dates.length > days) {
-        dates = dates.slice(-days);
-      }
-
-      const series = dates.map(function(date) {
-        let value = 0;
-        let available = 0;
-
-        maps.forEach(function(entry) {
-          const price = entry.prices.get(date);
-
-          if (Number.isFinite(price) && price > 0) {
-            value += price * Number(entry.item.quantity || 0);
-            available += 1;
-          }
-        });
-
-        return {
-          date:date,
-          value:value,
-          available:available
-        };
-      }).filter(function(point) {
-        return point.value > 0 && point.available > 0;
-      });
-
-      /*
-       * IMPORTANT:
-       * The dashboard summary uses the live LTP.
-       * Historical candles contain the previous closing price.
-       * Therefore the last performance point must use the same
-       * live portfolio valuation as the summary card.
-       */
-      if (
-        Number.isFinite(Number(livePortfolioValue)) &&
-        Number(livePortfolioValue) >= 0
-      ) {
-        const today = new Date().toLocaleDateString(
-          "en-CA",
-          { timeZone:"Asia/Kolkata" }
-        );
-
-        const last = series.length
-          ? series[series.length - 1]
-          : null;
-
-        if (last && last.date === today) {
-          last.value = Number(livePortfolioValue);
-          last.live = true;
-        } else {
-          series.push({
-            date:today,
-            value:Number(livePortfolioValue),
-            available:list.length,
-            live:true
-          });
-        }
-      }
-
-      return series;
-    }
-
-    function renderPerformanceEmpty(title, detail) {
-      const loading = document.getElementById("performanceLoading");
-      const chart = document.getElementById("performanceChart");
-
-      if (loading) {
-        loading.style.display = "flex";
-        loading.innerHTML =
-          '<div class="empty-icon">↗</div>' +
-          '<div class="empty-title">' + escapeHtml(title) + '</div>' +
-          '<div class="empty-text">' + escapeHtml(detail) + '</div>';
-      }
-
-      if (chart) {
-        chart.style.display = "none";
-        chart.innerHTML = "";
-      }
-
-      document.getElementById("performanceStartValue").textContent = "—";
-      document.getElementById("performanceEndValue").textContent = "—";
-
-      const change = document.getElementById("performanceChange");
-      change.textContent = "—";
-      change.className = "performance-stat-value";
-    }
-
-    function renderPerformanceChart(series) {
-      if (!series.length) {
-        renderPerformanceEmpty(
-          "Historical data unavailable",
-          "StockGyan could not build a daily value series for these holdings."
-        );
-        return;
-      }
-
-      const startValue = series[0].value;
-      const endValue = series[series.length - 1].value;
-      const change = endValue - startValue;
-      const changePercent = startValue > 0 ? (change/startValue)*100 : 0;
-
-      document.getElementById("performanceStartValue").textContent =
-        "₹" + formatMoney(startValue);
-
-      document.getElementById("performanceEndValue").textContent =
-        "₹" + formatMoney(endValue);
-
-      const changeEl = document.getElementById("performanceChange");
-      const sign = change >= 0 ? "+" : "";
-
-      changeEl.textContent =
-        sign + "₹" + formatMoney(Math.abs(change)) +
-        " (" + sign + changePercent.toFixed(2) + "%)";
-
-      changeEl.className =
-        "performance-stat-value " +
-        (change > 0 ? "positive" : change < 0 ? "negative" : "");
-
-      const chart = document.getElementById("performanceChart");
-      const loading = document.getElementById("performanceLoading");
-
-      const W = 900, H = 300, L = 52, R = 18, T = 20, B = 34;
-      const PW = W-L-R, PH = H-T-B;
-
-      const values = series.map(function(p){ return p.value; });
-      const min = Math.min.apply(null, values);
-      const max = Math.max.apply(null, values);
-      let range = max-min;
-      if (range <= 0) range = Math.max(max*0.01,1);
-
-      const lo = min-range*0.08;
-      const hi = max+range*0.08;
-
-      function x(i) {
-        return series.length === 1
-          ? L + PW/2
-          : L + (i/(series.length-1))*PW;
-      }
-
-      function y(v) {
-        return T + ((hi-v)/(hi-lo))*PH;
-      }
-
-      const pts = series.map(function(p,i) {
-        return { x:x(i), y:y(p.value), p:p };
-      });
-
-      const line = pts.map(function(pt,i) {
-        return (i ? "L" : "M") +
-          pt.x.toFixed(2) + " " + pt.y.toFixed(2);
-      }).join(" ");
-
-      const area =
-        line +
-        " L " + pts[pts.length-1].x.toFixed(2) + " " + (H-B) +
-        " L " + pts[0].x.toFixed(2) + " " + (H-B) + " Z";
-
-      let svg = "";
-
-      for (let i=0; i<=4; i++) {
-        const yy = T + (i/4)*PH;
-        const vv = hi - (i/4)*(hi-lo);
-
-        svg +=
-          '<line class="performance-grid-line" x1="' + L +
-          '" y1="' + yy.toFixed(2) +
-          '" x2="' + (W-R) +
-          '" y2="' + yy.toFixed(2) + '"></line>' +
-          '<text class="performance-axis-label" x="4" y="' +
-          (yy+3).toFixed(2) + '">' +
-          "₹" + formatCompactMoney(vv) + "</text>";
-      }
-
-      svg +=
-        '<path class="performance-area" d="' + area + '"></path>' +
-        '<path class="performance-line" d="' + line + '"></path>';
-
-      const indexes = Array.from(new Set([
-        0,
-        Math.floor((series.length-1)/3),
-        Math.floor((series.length-1)*2/3),
-        series.length-1
-      ]));
-
-      indexes.forEach(function(i) {
-        svg +=
-          '<text class="performance-axis-label" text-anchor="middle" x="' +
-          pts[i].x.toFixed(2) + '" y="' + (H-10) + '">' +
-          escapeHtml(formatShortDate(series[i].date)) +
-          "</text>";
-      });
-
-      chart.innerHTML = svg;
-      chart.style.display = "block";
-      loading.style.display = "none";
-
-      const tooltip = document.getElementById("performanceTooltip");
-      const wrap = document.getElementById("performanceChartWrap");
-
-      pts.forEach(function(pt,i) {
-        const hit = document.createElementNS(
-          "http://www.w3.org/2000/svg",
-          "circle"
-        );
-
-        hit.setAttribute("cx", pt.x);
-        hit.setAttribute("cy", pt.y);
-        hit.setAttribute("r", series.length > 100 ? "8" : "10");
-        hit.setAttribute("fill", "transparent");
-
-        function showTip() {
-          if (!tooltip) return;
-          const rect = wrap.getBoundingClientRect();
-          tooltip.style.left = (pt.x/W*rect.width) + "px";
-          tooltip.style.top = (pt.y/H*rect.height) + "px";
-          tooltip.innerHTML =
-            "<strong>" + escapeHtml(formatPerformanceDate(series[i].date)) +
-            "</strong><br>Portfolio value: ₹" +
-            formatMoney(series[i].value) +
-            (series[i].live
-              ? "<br><span style=\"opacity:.8;\">Live valuation</span>"
-              : "");
-          tooltip.style.opacity = "1";
-        }
-
-        hit.addEventListener("mouseenter", showTip);
-        hit.addEventListener("mouseleave", function() {
-          tooltip.style.opacity = "0";
-        });
-        hit.addEventListener("touchstart", showTip, {passive:true});
-
-        chart.appendChild(hit);
-      });
-    }
-
-    async function refreshPortfolioPerformance() {
-      const periodEl = document.getElementById("performancePeriod");
-      const period = periodEl ? periodEl.value : "1M";
-      const list = getCurrentPortfolioHoldings();
-
-      if (!list.length) {
-        renderPerformanceEmpty(
-          "Performance data will appear here",
-          "Add holdings to your portfolio to start tracking historical portfolio value."
-        );
-        return;
-      }
-
-      if (performanceRequestInProgress) return;
-      performanceRequestInProgress = true;
-
-      const loading = document.getElementById("performanceLoading");
-      if (loading) {
-        loading.style.display = "flex";
-        loading.innerHTML =
-          '<div class="empty-icon">↗</div>' +
-          '<div class="empty-title">Loading ' + escapeHtml(period) + ' performance...</div>' +
-          '<div class="empty-text">Fetching daily historical prices for ' +
-          list.length + ' holding' + (list.length === 1 ? "" : "s") + '.</div>';
-      }
-
-      try {
-        const livePortfolioValueForKey =
-          getLivePortfolioValue(list);
-
-        const key =
-          portfolioSelect.value + "|" + period + "|" +
-          list.map(function(item) {
-            return item.instrument_key + ":" + item.quantity;
-          }).join(",") +
-          "|LIVE:" +
-          (livePortfolioValueForKey === null
-            ? "NA"
-            : Number(livePortfolioValueForKey).toFixed(2));
-
-        if (performanceCache[key]) {
-          renderPerformanceChart(performanceCache[key]);
-          return;
-        }
-
-        const candles = await Promise.all(
-          list.map(function(item) {
-            return fetchPerformanceCandles(item);
-          })
-        );
-
-        const livePortfolioValue =
-          getLivePortfolioValue(list);
-
-        const series = buildPerformanceSeries(
-          list,
-          candles,
-          period,
-          livePortfolioValue
-        );
-
-        performanceCache[key] = series;
-        renderPerformanceChart(series);
-
-      } catch (error) {
-        console.warn("StockGyan: portfolio performance failed", error);
-        renderPerformanceEmpty(
-          "Unable to load performance",
-          error.message || "Please try again."
-        );
-      } finally {
-        performanceRequestInProgress = false;
-      }
-    }
-
     /* --------------------------------
        MOVING AVERAGE MONITOR
     -------------------------------- */
@@ -3745,9 +3605,7 @@
           };
         })
         .filter(function(candle) {
-          return candle.date &&
-            Number.isFinite(candle.close) &&
-            candle.close > 0;
+          return candle.date && Number.isFinite(candle.close) && candle.close > 0;
         })
         .sort(function(a, b) {
           return new Date(a.date).getTime() - new Date(b.date).getTime();
@@ -3760,7 +3618,6 @@
       }
 
       const recent = candles.slice(-period);
-
       const total = recent.reduce(function(sum, candle) {
         return sum + Number(candle.close || 0);
       }, 0);
@@ -3768,73 +3625,50 @@
       return total / period;
     }
 
-    function formatDMA(value) {
-      if (!Number.isFinite(Number(value))) {
-        return "—";
+    function movingAveragePosition(ltp, dma20, dma50) {
+      if (![ltp, dma20, dma50].every(function(value) { return Number.isFinite(value); })) {
+        return { key: "pending", label: "Calculating", className: "pending" };
       }
 
+      const above20 = ltp >= dma20;
+      const above50 = ltp >= dma50;
+
+      if (above20 && above50) {
+        return { key: "both", label: "Above 20 & 50 DMA", className: "both" };
+      }
+
+      if (!above20 && above50) {
+        return { key: "above50", label: "Above 50 / Below 20", className: "above50" };
+      }
+
+      if (above20 && !above50) {
+        return { key: "above20", label: "Above 20 / Below 50", className: "above20" };
+      }
+
+      return { key: "belowboth", label: "Below 20 & 50 DMA", className: "belowboth" };
+    }
+
+    function formatDMA(value) {
+      if (!Number.isFinite(Number(value))) return "—";
       return "₹" + formatMoney(value);
     }
 
-    function dmaStatus(ltp, dma) {
-      if (
-        !Number.isFinite(Number(ltp)) ||
-        !Number.isFinite(Number(dma)) ||
-        Number(dma) <= 0
-      ) {
-        return {
-          label: "Calculating",
-          className: "pending",
-          above: null
-        };
+    function formatDistance(ltp, dma) {
+      if (!Number.isFinite(Number(ltp)) || !Number.isFinite(Number(dma)) || Number(dma) <= 0) {
+        return "—";
       }
 
-      const above = Number(ltp) >= Number(dma);
+      const percent = ((Number(ltp) - Number(dma)) / Number(dma)) * 100;
+      const sign = percent > 0 ? "+" : "";
+      const className = percent > 0 ? "positive" : percent < 0 ? "negative" : "";
 
-      return {
-        label: above ? "Above DMA" : "Below DMA",
-        className: above ? "above" : "below",
-        above: above
-      };
-    }
-
-    function renderDMAStatus(ltp, dma) {
-      const status = dmaStatus(ltp, dma);
-
-      let distance = "";
-
-      if (
-        Number.isFinite(Number(ltp)) &&
-        Number.isFinite(Number(dma)) &&
-        Number(dma) > 0
-      ) {
-        const percent =
-          ((Number(ltp) - Number(dma)) / Number(dma)) * 100;
-
-        const sign = percent > 0 ? "+" : "";
-
-        distance =
-          '<span style="font-size:10px;margin-left:4px;opacity:.85;">' +
-          sign +
-          percent.toFixed(2) +
-          "%</span>";
-      }
-
-      return (
-        '<span class="ma-status ' +
-        status.className +
-        '">' +
-        (status.above === true ? "🟢 " : status.above === false ? "🔴 " : "") +
-        status.label +
-        distance +
-        "</span>"
-      );
+      return '<span class="' + className + '" style="font-weight:800;">' +
+        sign + percent.toFixed(2) + "%" +
+        '</span>';
     }
 
     async function fetchMovingAverageForHolding(item) {
-      if (!item || !item.instrument_key) {
-        return null;
-      }
+      if (!item || !item.instrument_key) return null;
 
       const key = item.instrument_key;
 
@@ -3846,283 +3680,183 @@
           {
             method: "GET",
             cache: "no-store",
-            headers: {
-              "Accept": "application/json"
-            }
+            headers: { "Accept": "application/json" }
           }
         );
 
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(
-            data && data.message
-              ? data.message
-              : "Historical data unavailable"
-          );
+          throw new Error(data && data.message ? data.message : "Historical data unavailable");
         }
 
-        const candles = parseDailyCandles(
-          data && data.data ? data.data.candles : []
-        );
+        const candles = parseDailyCandles(data && data.data ? data.data.candles : []);
+        const dma20 = calculateMovingAverage(candles, 20);
+        const dma50 = calculateMovingAverage(candles, 50);
+        const dma200 = calculateMovingAverage(candles, 200);
 
         return {
-          dma20: calculateMovingAverage(candles, 20),
-          dma50: calculateMovingAverage(candles, 50),
-          dma200: calculateMovingAverage(candles, 200),
+          dma20: dma20,
+          dma50: dma50,
+          dma200: dma200,
           candleCount: candles.length,
-          latestDate: candles.length
-            ? candles[candles.length - 1].date
-            : null
+          latestDate: candles.length ? candles[candles.length - 1].date : null
         };
 
       } catch (error) {
-        console.warn(
-          "StockGyan: moving average fetch failed",
-          key,
-          error
-        );
-
+        console.warn("StockGyan: moving average fetch failed", key, error);
         return null;
       }
     }
 
     function renderMovingAverageMonitor() {
       const body = document.getElementById("maMonitorBody");
-
-      if (!body) {
-        return;
-      }
+      if (!body) return;
 
       const list = getCurrentPortfolioHoldings();
 
       if (!list.length) {
         body.innerHTML =
-          '<tr>' +
-            '<td colspan="8" class="empty-table">' +
-              '<strong>No holdings added yet</strong><br>' +
-              '<span style="font-size:12px;">Add holdings to calculate individual 20 DMA, 50 DMA and 200 DMA positions.</span>' +
-            '</td>' +
-          '</tr>';
+          '<tr><td colspan="9" class="empty-table">' +
+          '<strong>No holdings added yet</strong><br>' +
+          '<span style="font-size:12px;">Add holdings to calculate 20-day, 50-day and 200-day moving averages.</span>' +
+          '</td></tr>';
 
-        [
-          "ma20AboveCount",
-          "ma20BelowCount",
-          "ma50AboveCount",
-          "ma50BelowCount",
-          "ma200AboveCount",
-          "ma200BelowCount"
-        ].forEach(function(id) {
+        ["maBothCount", "maAbove50Count", "maAbove20Count", "maBelowBothCount",
+         "maAbove200Count", "maBelow200Count"].forEach(function(id) {
           const element = document.getElementById(id);
-
-          if (element) {
-            element.textContent = "0";
-          }
+          if (element) element.textContent = "0";
         });
 
         const status = document.getElementById("maStatus");
-
         if (status) {
-          status.textContent =
-            "• Add holdings to track technical position";
+          status.textContent = "• Add holdings to track technical position";
           status.style.color = "#667085";
         }
-
         return;
       }
 
       let counts = {
-        above20: 0,
-        below20: 0,
+        both: 0,
         above50: 0,
-        below50: 0,
+        above20: 0,
+        belowboth: 0,
         above200: 0,
         below200: 0
       };
 
       body.innerHTML = list.map(function(item) {
+        const technical = movingAverageCache[item.instrument_key] || {};
+        const quote = quoteCache[item.instrument_key] || {};
 
-        const technical =
-          movingAverageCache[item.instrument_key] || {};
+        const ltp = Number.isFinite(Number(quote.lastPrice))
+          ? Number(quote.lastPrice)
+          : null;
 
-        const quote =
-          quoteCache[item.instrument_key] || {};
+        const dma20 = Number.isFinite(Number(technical.dma20))
+          ? Number(technical.dma20)
+          : null;
 
-        const ltp =
-          Number.isFinite(Number(quote.lastPrice))
-            ? Number(quote.lastPrice)
-            : null;
+        const dma50 = Number.isFinite(Number(technical.dma50))
+          ? Number(technical.dma50)
+          : null;
 
-        const dma20 =
-          Number.isFinite(Number(technical.dma20))
-            ? Number(technical.dma20)
-            : null;
+        const dma200 = Number.isFinite(Number(technical.dma200))
+          ? Number(technical.dma200)
+          : null;
 
-        const dma50 =
-          Number.isFinite(Number(technical.dma50))
-            ? Number(technical.dma50)
-            : null;
+        const position = movingAveragePosition(ltp, dma20, dma50);
 
-        const dma200 =
-          Number.isFinite(Number(technical.dma200))
-            ? Number(technical.dma200)
-            : null;
-
-        const status20 = dmaStatus(ltp, dma20);
-        const status50 = dmaStatus(ltp, dma50);
-        const status200 = dmaStatus(ltp, dma200);
-
-        if (status20.above === true) {
-          counts.above20 += 1;
-        } else if (status20.above === false) {
-          counts.below20 += 1;
+        if (counts[position.key] !== undefined) {
+          counts[position.key] += 1;
         }
 
-        if (status50.above === true) {
-          counts.above50 += 1;
-        } else if (status50.above === false) {
-          counts.below50 += 1;
+        let longTermLabel = "200 DMA pending";
+        let longTermClass = "pending";
+
+        if (ltp !== null && dma200 !== null) {
+          if (ltp >= dma200) {
+            counts.above200 += 1;
+            longTermLabel = "Above 200 DMA";
+            longTermClass = "both";
+          } else {
+            counts.below200 += 1;
+            longTermLabel = "Below 200 DMA";
+            longTermClass = "belowboth";
+          }
         }
 
-        if (status200.above === true) {
-          counts.above200 += 1;
-        } else if (status200.above === false) {
-          counts.below200 += 1;
-        }
-
-        const symbol =
-          escapeHtml(item.symbol || "—");
-
-        const name =
-          escapeHtml(item.name || "");
+        const symbol = escapeHtml(item.symbol || "—");
+        const name = escapeHtml(item.name || "");
 
         return (
-          "<tr>" +
-
-            "<td>" +
-              '<div style="font-weight:800;color:#172033;">' +
-                symbol +
-              "</div>" +
-              '<div style="font-size:11px;color:#667085;margin-top:3px;">' +
-                name +
-              "</div>" +
-            "</td>" +
-
-            '<td class="ma-value-cell">' +
-              (
-                ltp !== null
-                  ? "₹" + formatMoney(ltp)
-                  : "—"
-              ) +
-            "</td>" +
-
-            "<td>" +
-              formatDMA(dma20) +
-            "</td>" +
-
-            "<td>" +
-              renderDMAStatus(ltp, dma20) +
-            "</td>" +
-
-            "<td>" +
-              formatDMA(dma50) +
-            "</td>" +
-
-            "<td>" +
-              renderDMAStatus(ltp, dma50) +
-            "</td>" +
-
-            "<td>" +
-              formatDMA(dma200) +
-            "</td>" +
-
-            "<td>" +
-              renderDMAStatus(ltp, dma200) +
-            "</td>" +
-
-          "</tr>"
+          '<tr>' +
+            '<td>' +
+              '<div style="font-weight:800;color:#172033;">' + symbol + '</div>' +
+              '<div style="font-size:11px;color:#667085;margin-top:3px;">' + name + '</div>' +
+            '</td>' +
+            '<td style="font-weight:800;">' +
+              (ltp !== null ? "₹" + formatMoney(ltp) : "—") +
+            '</td>' +
+            '<td>' + formatDMA(dma20) + '</td>' +
+            '<td>' + formatDMA(dma50) + '</td>' +
+            '<td>' + formatDMA(dma200) + '</td>' +
+            '<td>' + formatDistance(ltp, dma20) + '</td>' +
+            '<td>' + formatDistance(ltp, dma50) + '</td>' +
+            '<td>' + formatDistance(ltp, dma200) + '</td>' +
+            '<td>' +
+              '<div style="display:flex;flex-direction:column;align-items:flex-start;gap:5px;">' +
+                '<span class="ma-status ' + position.className + '">' +
+                  position.label +
+                '</span>' +
+                '<span class="ma-status ' + longTermClass + '" style="font-size:10px;padding:4px 8px;">' +
+                  longTermLabel +
+                '</span>' +
+              '</div>' +
+            '</td>' +
+          '</tr>'
         );
-
       }).join("");
 
-      document.getElementById("ma20AboveCount").textContent =
-        counts.above20;
-
-      document.getElementById("ma20BelowCount").textContent =
-        counts.below20;
-
-      document.getElementById("ma50AboveCount").textContent =
-        counts.above50;
-
-      document.getElementById("ma50BelowCount").textContent =
-        counts.below50;
-
-      document.getElementById("ma200AboveCount").textContent =
-        counts.above200;
-
-      document.getElementById("ma200BelowCount").textContent =
-        counts.below200;
+      document.getElementById("maBothCount").textContent = counts.both;
+      document.getElementById("maAbove50Count").textContent = counts.above50;
+      document.getElementById("maAbove20Count").textContent = counts.above20;
+      document.getElementById("maBelowBothCount").textContent = counts.belowboth;
+      document.getElementById("maAbove200Count").textContent = counts.above200;
+      document.getElementById("maBelow200Count").textContent = counts.below200;
 
       const completeCount = list.filter(function(item) {
-        const technical =
-          movingAverageCache[item.instrument_key];
-
-        return technical &&
-          Number.isFinite(Number(technical.dma20)) &&
-          Number.isFinite(Number(technical.dma50)) &&
-          Number.isFinite(Number(technical.dma200));
+        const t = movingAverageCache[item.instrument_key];
+        return t &&
+          Number.isFinite(Number(t.dma20)) &&
+          Number.isFinite(Number(t.dma50)) &&
+          Number.isFinite(Number(t.dma200));
       }).length;
 
-      const status =
-        document.getElementById("maStatus");
-
+      const status = document.getElementById("maStatus");
       if (status) {
-
         if (completeCount === list.length) {
-
-          status.textContent =
-            "• 20 / 50 / 200 DMA calculated";
-
-          status.style.color =
-            "#159447";
-
+          status.textContent = "• 20 / 50 / 200 DMA calculated";
+          status.style.color = "#159447";
         } else {
-
           status.textContent =
-            "• Calculating " +
-            completeCount +
-            "/" +
-            list.length +
-            " stocks";
-
-          status.style.color =
-            "#b54708";
+            "• Calculating " + completeCount + "/" + list.length + " stocks";
+          status.style.color = "#b54708";
         }
       }
     }
 
     async function refreshMovingAverages() {
-
-      const list =
-        getCurrentPortfolioHoldings();
-
-      const status =
-        document.getElementById("maStatus");
-
-      const button =
-        document.getElementById("maRefreshButton");
+      const list = getCurrentPortfolioHoldings();
+      const status = document.getElementById("maStatus");
+      const button = document.getElementById("maRefreshButton");
 
       if (!list.length) {
-
         renderMovingAverageMonitor();
-
         return;
       }
 
-      if (movingAverageRequestInProgress) {
-        return;
-      }
-
+      if (movingAverageRequestInProgress) return;
       movingAverageRequestInProgress = true;
 
       if (button) {
@@ -4131,48 +3865,29 @@
       }
 
       if (status) {
-        status.textContent =
-          "• Loading individual 20 / 50 / 200 DMA...";
-
-        status.style.color =
-          "#b54708";
+        status.textContent = "• Loading 20 / 50 / 200 DMA...";
+        status.style.color = "#b54708";
       }
 
       try {
-
-        const results =
-          await Promise.all(
-            list.map(function(item) {
-
-              return fetchMovingAverageForHolding(item)
-                .then(function(result) {
-
-                  return {
-                    key: item.instrument_key,
-                    result: result
-                  };
-
-                });
-
-            })
-          );
+        const results = await Promise.all(
+          list.map(function(item) {
+            return fetchMovingAverageForHolding(item).then(function(result) {
+              return { key: item.instrument_key, result: result };
+            });
+          })
+        );
 
         results.forEach(function(entry) {
-
           if (entry.result) {
-            movingAverageCache[entry.key] =
-              entry.result;
+            movingAverageCache[entry.key] = entry.result;
           }
-
         });
 
         renderMovingAverageMonitor();
 
       } finally {
-
-        movingAverageRequestInProgress =
-          false;
-
+        movingAverageRequestInProgress = false;
         if (button) {
           button.disabled = false;
           button.textContent = "↻ Refresh";
@@ -4181,21 +3896,16 @@
     }
 
     function startMovingAverageRefresh() {
-
       if (movingAverageRefreshTimer) {
         clearInterval(movingAverageRefreshTimer);
       }
 
-      // Daily moving averages only need periodic refresh.
-      // LTP is refreshed separately every 30 seconds.
-      movingAverageRefreshTimer =
-        setInterval(
-          function() {
-            refreshMovingAverages();
-          },
-          15 * 60 * 1000
-        );
+      // Daily moving averages only need periodic refresh. LTP is refreshed separately every 30 seconds.
+      movingAverageRefreshTimer = setInterval(function() {
+        refreshMovingAverages();
+      }, 15 * 60 * 1000);
     }
+
 
     function updateMarketDataStatus(customMessage) {
       const element = document.getElementById("marketDataStatus");
@@ -4288,19 +3998,11 @@
         quoteCache = {};
         quoteSource = "";
         movingAverageCache = {};
-        performanceCache = {};
         renderHoldings();
         renderMovingAverageMonitor();
         fetchPortfolioQuotes();
         refreshMovingAverages();
-        refreshPortfolioPerformance();
-      }
-    );
-
-    document.getElementById("performancePeriod").addEventListener(
-      "change",
-      function() {
-        refreshPortfolioPerformance();
+        renderTransactions();
       }
     );
 
@@ -4485,11 +4187,12 @@
     updateSummary();
     renderMovingAverageMonitor();
     updateMarketDataStatus();
+    renderTransactions();
+
     startQuoteRefresh();
     startMovingAverageRefresh();
     fetchPortfolioQuotes();
     refreshMovingAverages();
-    refreshPortfolioPerformance();
 
 
     /* --------------------------------
@@ -4512,6 +4215,657 @@
 
       }
     );
+
+
+    /* --------------------------------
+       TRANSACTIONS MODULE
+    -------------------------------- */
+
+    let transactions =
+      JSON.parse(
+        localStorage.getItem("stockgyan_transactions") || "{}"
+      );
+
+    let transactionType = "BUY";
+    let selectedTransactionStock = null;
+    let transactionSearchTimer = null;
+
+    function saveTransactions() {
+      localStorage.setItem(
+        "stockgyan_transactions",
+        JSON.stringify(transactions)
+      );
+    }
+
+    function getCurrentPortfolioTransactions() {
+      const portfolioId = portfolioSelect.value || "default";
+      if (!Array.isArray(transactions[portfolioId])) {
+        transactions[portfolioId] = [];
+      }
+      return transactions[portfolioId];
+    }
+
+    function openTransactions() {
+      const section = document.getElementById("transactionsSection");
+      if (section) {
+        section.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+      }
+    }
+
+    function todayISO() {
+      const now = new Date();
+      const local = new Date(
+        now.getTime() - now.getTimezoneOffset() * 60000
+      );
+      return local.toISOString().slice(0, 10);
+    }
+
+    function openTransactionModal() {
+      document.getElementById("transactionModal").classList.add("show");
+
+      transactionType = "BUY";
+      selectedTransactionStock = null;
+
+      document.getElementById("transactionDate").value = todayISO();
+      document.getElementById("transactionNotes").value = "";
+      document.getElementById("transactionStockSearch").value = "";
+      document.getElementById("transactionStockResults").innerHTML = "";
+      document.getElementById("transactionStockStatus").textContent = "";
+      document.getElementById("transactionQuantity").value = "";
+      document.getElementById("transactionPrice").value = "";
+      document.getElementById("transactionCharges").value = "0";
+      document.getElementById("transactionAmount").value = "";
+      document.getElementById("transactionDividendQuantity").value = "";
+      document.getElementById("transactionDividendPerShare").value = "";
+      document.getElementById("transactionDividendAmount").value = "";
+      document.getElementById("transactionDividendStatus").value = "Expected";
+      document.getElementById("transactionCashAmount").value = "";
+
+      hideTransactionMessage();
+      clearTransactionSelectedStock();
+      setTransactionType("BUY");
+
+      setTimeout(function() {
+        document.getElementById("transactionStockSearch").focus();
+      }, 100);
+    }
+
+    function closeTransactionModal() {
+      document.getElementById("transactionModal").classList.remove("show");
+    }
+
+    function hideTransactionMessage() {
+      const element = document.getElementById("transactionMessage");
+      if (!element) return;
+      element.style.display = "none";
+      element.textContent = "";
+    }
+
+    function showTransactionMessage(message, isError) {
+      const element = document.getElementById("transactionMessage");
+      if (!element) return;
+
+      element.textContent = message;
+      element.style.display = "block";
+      element.style.background = isError ? "#fff0f1" : "#effaf4";
+      element.style.border = isError
+        ? "1px solid #f3c2c7"
+        : "1px solid #b7e2c7";
+      element.style.color = isError ? "#b42318" : "#087a39";
+    }
+
+    function clearTransactionSelectedStock() {
+      selectedTransactionStock = null;
+
+      const box = document.getElementById("transactionSelectedStock");
+      if (box) box.style.display = "none";
+
+      document.getElementById("transactionSelectedStockName").textContent = "";
+      document.getElementById("transactionSelectedStockDetails").textContent = "";
+    }
+
+    function setTransactionType(type) {
+      transactionType = type;
+
+      document.querySelectorAll(".transaction-type-btn").forEach(function(button) {
+        button.classList.toggle(
+          "active",
+          button.getAttribute("data-transaction-type") === type
+        );
+      });
+
+      const stockArea = document.getElementById("transactionStockArea");
+      const tradeFields = document.getElementById("transactionTradeFields");
+      const dividendFields = document.getElementById("transactionDividendFields");
+      const cashFields = document.getElementById("transactionCashFields");
+
+      const isTrade = type === "BUY" || type === "SELL";
+      const isDividend = type === "DIVIDEND";
+      const isCash = type === "DEPOSIT" || type === "WITHDRAWAL";
+
+      stockArea.style.display = isTrade || isDividend ? "block" : "none";
+      tradeFields.style.display = isTrade ? "block" : "none";
+      dividendFields.style.display = isDividend ? "block" : "none";
+      cashFields.style.display = isCash ? "block" : "none";
+
+      hideTransactionMessage();
+
+      if (type === "SELL") {
+        document.getElementById("transactionPrice").placeholder = "Sale price";
+      } else {
+        document.getElementById("transactionPrice").placeholder = "250.00";
+      }
+    }
+
+    function calculateTransactionAmount() {
+      const quantity =
+        Number(document.getElementById("transactionQuantity").value) || 0;
+
+      const price =
+        Number(document.getElementById("transactionPrice").value) || 0;
+
+      const charges =
+        Number(document.getElementById("transactionCharges").value) || 0;
+
+      const base = quantity * price;
+
+      document.getElementById("transactionAmount").value =
+        base > 0 ? (base + charges).toFixed(2) : "";
+    }
+
+    function calculateDividendAmount() {
+      const quantity =
+        Number(document.getElementById("transactionDividendQuantity").value) || 0;
+
+      const dividend =
+        Number(document.getElementById("transactionDividendPerShare").value) || 0;
+
+      document.getElementById("transactionDividendAmount").value =
+        quantity > 0 && dividend > 0
+          ? (quantity * dividend).toFixed(2)
+          : "";
+    }
+
+    async function searchTransactionStocks() {
+      const input =
+        document.getElementById("transactionStockSearch");
+
+      const query = input.value.trim();
+
+      const status =
+        document.getElementById("transactionStockStatus");
+
+      const results =
+        document.getElementById("transactionStockResults");
+
+      if (query.length < 2) {
+        results.innerHTML = "";
+        status.textContent = "";
+        return;
+      }
+
+      status.textContent = "Searching...";
+      status.style.color = "#667085";
+
+      try {
+        const response = await fetch(
+          "/api/market/search?q=" +
+          encodeURIComponent(query),
+          {
+            method: "GET",
+            cache: "no-store",
+            headers: { "Accept": "application/json" }
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            data && data.message
+              ? data.message
+              : "Search failed"
+          );
+        }
+
+        const list =
+          Array.isArray(data.results)
+            ? data.results
+            : Array.isArray(data.data)
+              ? data.data
+              : [];
+
+        if (!list.length) {
+          results.innerHTML =
+            '<div style="font-size:12px;color:#667085;padding:8px;">No stocks found.</div>';
+          status.textContent = "No results";
+          return;
+        }
+
+        results.innerHTML = list.slice(0, 10).map(function(item) {
+          const instrumentKey =
+            item.instrument_key ||
+            item.instrumentKey ||
+            item.instrument_token ||
+            item.key ||
+            "";
+
+          const symbol =
+            item.trading_symbol ||
+            item.tradingSymbol ||
+            item.symbol ||
+            "";
+
+          const name =
+            item.name ||
+            item.company_name ||
+            item.companyName ||
+            symbol;
+
+          return (
+            '<button type="button" ' +
+              'style="display:block;width:100%;text-align:left;background:#fff;border:1px solid #e5eaf1;border-radius:9px;padding:9px 10px;margin-bottom:6px;cursor:pointer;" ' +
+              'onclick=\'selectTransactionStock(' +
+                JSON.stringify({
+                  instrument_key: instrumentKey,
+                  symbol: symbol,
+                  name: name
+                }).replace(/'/g, "&#39;") +
+              ')\'>'
+              +
+              '<div style="font-weight:800;color:#172033;">' +
+                escapeHtml(symbol || name) +
+              '</div>' +
+              '<div style="font-size:11px;color:#667085;margin-top:2px;">' +
+                escapeHtml(name) +
+              '</div>' +
+            '</button>'
+          );
+        }).join("");
+
+        status.textContent =
+          "Select the stock from the results.";
+
+        status.style.color = "#667085";
+
+      } catch (error) {
+        console.error("StockGyan transaction search error:", error);
+        status.textContent = "Unable to search stocks right now.";
+        status.style.color = "#b42318";
+      }
+    }
+
+    function selectTransactionStock(stock) {
+      selectedTransactionStock = stock;
+
+      document.getElementById("transactionSelectedStockName").textContent =
+        stock.symbol || stock.name || "Selected stock";
+
+      document.getElementById("transactionSelectedStockDetails").textContent =
+        (stock.name || "") +
+        (stock.instrument_key ? " • " + stock.instrument_key : "");
+
+      document.getElementById("transactionSelectedStock").style.display = "block";
+
+      document.getElementById("transactionStockResults").innerHTML = "";
+      document.getElementById("transactionStockStatus").textContent =
+        "Stock selected";
+      document.getElementById("transactionStockStatus").style.color = "#159447";
+    }
+
+    function saveTransaction() {
+      hideTransactionMessage();
+
+      const date =
+        document.getElementById("transactionDate").value;
+
+      const notes =
+        document.getElementById("transactionNotes").value.trim();
+
+      if (!date) {
+        showTransactionMessage("Please select a transaction date.", true);
+        return;
+      }
+
+      const transaction = {
+        id: "txn_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8),
+        portfolio_id: portfolioSelect.value || "default",
+        type: transactionType,
+        date: date,
+        notes: notes,
+        created_at: new Date().toISOString()
+      };
+
+      if (transactionType === "BUY" || transactionType === "SELL") {
+
+        if (!selectedTransactionStock ||
+            !selectedTransactionStock.instrument_key) {
+          showTransactionMessage("Please select a stock.", true);
+          return;
+        }
+
+        const quantity =
+          Number(document.getElementById("transactionQuantity").value);
+
+        const price =
+          Number(document.getElementById("transactionPrice").value);
+
+        const charges =
+          Number(document.getElementById("transactionCharges").value) || 0;
+
+        if (!(quantity > 0)) {
+          showTransactionMessage("Please enter a valid quantity.", true);
+          return;
+        }
+
+        if (!(price >= 0)) {
+          showTransactionMessage("Please enter a valid price.", true);
+          return;
+        }
+
+        transaction.instrument_key =
+          selectedTransactionStock.instrument_key;
+
+        transaction.symbol =
+          selectedTransactionStock.symbol || "";
+
+        transaction.name =
+          selectedTransactionStock.name || "";
+
+        transaction.quantity = quantity;
+        transaction.price = price;
+        transaction.charges = charges;
+
+        const gross = quantity * price;
+
+        transaction.amount =
+          transactionType === "BUY"
+            ? gross + charges
+            : gross - charges;
+
+      } else if (transactionType === "DIVIDEND") {
+
+        if (!selectedTransactionStock ||
+            !selectedTransactionStock.instrument_key) {
+          showTransactionMessage("Please select a stock.", true);
+          return;
+        }
+
+        const quantity =
+          Number(document.getElementById("transactionDividendQuantity").value);
+
+        const dividendPerShare =
+          Number(document.getElementById("transactionDividendPerShare").value);
+
+        const status =
+          document.getElementById("transactionDividendStatus").value;
+
+        if (!(quantity > 0)) {
+          showTransactionMessage("Please enter eligible quantity.", true);
+          return;
+        }
+
+        if (!(dividendPerShare > 0)) {
+          showTransactionMessage("Please enter dividend per share.", true);
+          return;
+        }
+
+        transaction.instrument_key =
+          selectedTransactionStock.instrument_key;
+
+        transaction.symbol =
+          selectedTransactionStock.symbol || "";
+
+        transaction.name =
+          selectedTransactionStock.name || "";
+
+        transaction.quantity = quantity;
+        transaction.dividend_per_share = dividendPerShare;
+        transaction.amount = quantity * dividendPerShare;
+        transaction.status = status;
+
+      } else {
+
+        const amount =
+          Number(document.getElementById("transactionCashAmount").value);
+
+        if (!(amount > 0)) {
+          showTransactionMessage("Please enter a valid amount.", true);
+          return;
+        }
+
+        transaction.amount = amount;
+      }
+
+      const portfolioId = portfolioSelect.value || "default";
+
+      if (!Array.isArray(transactions[portfolioId])) {
+        transactions[portfolioId] = [];
+      }
+
+      transactions[portfolioId].push(transaction);
+
+      transactions[portfolioId].sort(function(a, b) {
+        return String(b.date).localeCompare(String(a.date));
+      });
+
+      saveTransactions();
+      renderTransactions();
+
+      closeTransactionModal();
+    }
+
+    function deleteTransaction(id) {
+      const portfolioId = portfolioSelect.value || "default";
+      const list = getCurrentPortfolioTransactions();
+
+      const transaction = list.find(function(item) {
+        return item.id === id;
+      });
+
+      if (!transaction) return;
+
+      const label =
+        transaction.type +
+        " • " +
+        transaction.date +
+        " • " +
+        (transaction.symbol || "");
+
+      if (!confirm("Delete this transaction?\n\n" + label)) {
+        return;
+      }
+
+      transactions[portfolioId] =
+        list.filter(function(item) {
+          return item.id !== id;
+        });
+
+      saveTransactions();
+      renderTransactions();
+    }
+
+    function transactionTypeLabel(type) {
+      const labels = {
+        BUY: "Buy",
+        SELL: "Sell",
+        DIVIDEND: "Dividend",
+        DEPOSIT: "Deposit",
+        WITHDRAWAL: "Withdrawal"
+      };
+      return labels[type] || type;
+    }
+
+    function transactionTypeClass(type) {
+      if (type === "BUY" || type === "DEPOSIT" || type === "DIVIDEND") {
+        return "positive";
+      }
+      if (type === "SELL" || type === "WITHDRAWAL") {
+        return "negative";
+      }
+      return "";
+    }
+
+    function renderTransactions() {
+      const body = document.getElementById("transactionsBody");
+      if (!body) return;
+
+      const list = getCurrentPortfolioTransactions();
+
+      if (!list.length) {
+        body.innerHTML =
+          '<tr><td colspan="9" class="empty-table">' +
+          '<strong>No transactions recorded yet</strong><br>' +
+          '<span style="font-size:12px;">Add your first Buy, Sell, Dividend, Deposit or Withdrawal.</span>' +
+          '</td></tr>';
+      } else {
+        body.innerHTML = list.map(function(item) {
+
+          const isStock =
+            item.type === "BUY" ||
+            item.type === "SELL" ||
+            item.type === "DIVIDEND";
+
+          const quantity =
+            item.quantity !== undefined
+              ? formatNumber(item.quantity)
+              : "—";
+
+          const price =
+            item.type === "DIVIDEND"
+              ? "₹" + formatMoney(item.dividend_per_share)
+              : item.price !== undefined
+                ? "₹" + formatMoney(item.price)
+                : "—";
+
+          const status =
+            item.type === "DIVIDEND"
+              ? (item.status || "Expected")
+              : "Recorded";
+
+          return (
+            '<tr>' +
+              '<td>' + escapeHtml(item.date || "—") + '</td>' +
+              '<td><span class="ma-status ' + transactionTypeClass(item.type) + '">' +
+                escapeHtml(transactionTypeLabel(item.type)) +
+              '</span></td>' +
+              '<td>' +
+                (isStock
+                  ? '<div style="font-weight:800;color:#172033;">' +
+                      escapeHtml(item.symbol || "—") +
+                    '</div>' +
+                    '<div style="font-size:11px;color:#667085;margin-top:2px;">' +
+                      escapeHtml(item.name || "") +
+                    '</div>'
+                  : "—") +
+              '</td>' +
+              '<td>' + quantity + '</td>' +
+              '<td>' + price + '</td>' +
+              '<td>' +
+                (item.charges !== undefined
+                  ? "₹" + formatMoney(item.charges)
+                  : "—") +
+              '</td>' +
+              '<td class="' + transactionTypeClass(item.type) + '" style="font-weight:800;">' +
+                (item.amount !== undefined
+                  ? "₹" + formatMoney(item.amount)
+                  : "—") +
+              '</td>' +
+              '<td>' + escapeHtml(status) + '</td>' +
+              '<td>' +
+                '<button type="button" class="btn btn-light" style="padding:7px 9px;color:#dc3545;" ' +
+                  'onclick=\'deleteTransaction(' +
+                    JSON.stringify(item.id).replace(/'/g, "&#39;") +
+                  ')\'>Delete</button>' +
+              '</td>' +
+            '</tr>'
+          );
+
+        }).join("");
+      }
+
+      let buyTotal = 0;
+      let sellTotal = 0;
+      let dividendTotal = 0;
+      let cashFlowTotal = 0;
+
+      list.forEach(function(item) {
+        const amount = Number(item.amount) || 0;
+
+        if (item.type === "BUY") buyTotal += amount;
+        if (item.type === "SELL") sellTotal += amount;
+        if (item.type === "DIVIDEND") dividendTotal += amount;
+        if (item.type === "DEPOSIT") cashFlowTotal += amount;
+        if (item.type === "WITHDRAWAL") cashFlowTotal -= amount;
+      });
+
+      document.getElementById("transactionBuyTotal").textContent =
+        "₹" + formatMoney(buyTotal);
+
+      document.getElementById("transactionSellTotal").textContent =
+        "₹" + formatMoney(sellTotal);
+
+      document.getElementById("transactionDividendTotal").textContent =
+        "₹" + formatMoney(dividendTotal);
+
+      document.getElementById("transactionCashFlowTotal").textContent =
+        "₹" + formatMoney(cashFlowTotal);
+
+      const status = document.getElementById("transactionStatus");
+      if (status) {
+        status.textContent =
+          "• " + list.length + " transaction" +
+          (list.length === 1 ? "" : "s") +
+          " recorded";
+        status.style.color = list.length ? "#159447" : "#667085";
+      }
+    }
+
+    document.getElementById("transactionQuantity").addEventListener(
+      "input",
+      calculateTransactionAmount
+    );
+
+    document.getElementById("transactionPrice").addEventListener(
+      "input",
+      calculateTransactionAmount
+    );
+
+    document.getElementById("transactionCharges").addEventListener(
+      "input",
+      calculateTransactionAmount
+    );
+
+    document.getElementById("transactionDividendQuantity").addEventListener(
+      "input",
+      calculateDividendAmount
+    );
+
+    document.getElementById("transactionDividendPerShare").addEventListener(
+      "input",
+      calculateDividendAmount
+    );
+
+    document.getElementById("transactionStockSearch").addEventListener(
+      "input",
+      function() {
+        clearTimeout(transactionSearchTimer);
+
+        transactionSearchTimer = setTimeout(
+          searchTransactionStocks,
+          350
+        );
+      }
+    );
+
+    /* Render transactions whenever the selected portfolio changes. */
+    const originalTransactionPortfolioChangeHandler =
+      portfolioSelect.onchange;
+
+    renderTransactions();
 
   </script>
 
