@@ -346,39 +346,141 @@
        PERFORMANCE
     ========================= */
 
+    .performance-wrap { padding:18px 20px 20px; }
+
+    .performance-stats {
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:12px;
+      margin-bottom:16px;
+    }
+
+    .performance-stat {
+      background:#f8fafc;
+      border:1px solid var(--border);
+      border-radius:11px;
+      padding:12px 14px;
+    }
+
+    .performance-stat-label {
+      font-size:11px;
+      color:var(--muted);
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:.35px;
+    }
+
+    .performance-stat-value {
+      margin-top:5px;
+      font-size:17px;
+      font-weight:800;
+      color:var(--navy);
+    }
+
+    .performance-stat-value.positive { color:var(--green); }
+    .performance-stat-value.negative { color:#dc3545; }
+
+    .performance-chart-wrap {
+      position:relative;
+      width:100%;
+      height:300px;
+      border:1px solid var(--border);
+      border-radius:12px;
+      background:#fff;
+      overflow:hidden;
+    }
+
+    .performance-chart {
+      width:100%;
+      height:100%;
+      display:block;
+    }
+
+    .performance-axis-label {
+      font-size:10px;
+      fill:#98a2b3;
+    }
+
+    .performance-grid-line {
+      stroke:#edf0f4;
+      stroke-width:1;
+    }
+
+    .performance-line {
+      fill:none;
+      stroke:#082a63;
+      stroke-width:3;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+    }
+
+    .performance-area { fill:rgba(8,42,99,.08); }
+
+    .performance-tooltip {
+      position:absolute;
+      min-width:145px;
+      padding:9px 10px;
+      background:#172033;
+      color:#fff;
+      border-radius:8px;
+      font-size:11px;
+      line-height:1.45;
+      pointer-events:none;
+      opacity:0;
+      transform:translate(-50%,-110%);
+      z-index:5;
+      white-space:nowrap;
+    }
+
+    .performance-note {
+      margin-top:10px;
+      color:var(--muted);
+      font-size:11px;
+      line-height:1.45;
+    }
+
+    .performance-loading,
     .performance-empty {
-      height: 300px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      color: var(--muted);
-      flex-direction: column;
-      gap: 10px;
+      height:300px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      color:var(--muted);
+      flex-direction:column;
+      gap:9px;
+      padding:20px;
     }
 
-    .empty-icon {
-      width: 58px;
-      height: 58px;
-      border-radius: 50%;
-      background: #edf3ff;
-      color: var(--navy);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 25px;
-      font-weight: 800;
+    .performance-empty .empty-icon,
+    .performance-loading .empty-icon {
+      width:58px;
+      height:58px;
+      border-radius:50%;
+      background:#edf3ff;
+      color:var(--navy);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:25px;
+      font-weight:800;
     }
 
-    .empty-title {
-      font-weight: 700;
-      color: var(--navy);
+    .performance-empty .empty-title,
+    .performance-loading .empty-title {
+      font-weight:700;
+      color:var(--navy);
     }
 
-    .empty-text {
-      font-size: 13px;
-      max-width: 360px;
-      line-height: 1.5;
+    .performance-empty .empty-text,
+    .performance-loading .empty-text {
+      font-size:13px;
+      max-width:390px;
+      line-height:1.5;
+    }
+
+    @media (max-width:800px) {
+      .performance-stats { grid-template-columns:1fr; }
     }
 
     /* =========================
@@ -1078,24 +1180,46 @@
 
         </div>
 
-        <div class="card-body">
+        <div class="performance-wrap">
 
-          <div class="performance-empty">
+          <div class="performance-stats">
+            <div class="performance-stat">
+              <div class="performance-stat-label">Period Start Value</div>
+              <div class="performance-stat-value" id="performanceStartValue">—</div>
+            </div>
+            <div class="performance-stat">
+              <div class="performance-stat-label">Current Value</div>
+              <div class="performance-stat-value" id="performanceEndValue">—</div>
+            </div>
+            <div class="performance-stat">
+              <div class="performance-stat-label">Period Change</div>
+              <div class="performance-stat-value" id="performanceChange">—</div>
+            </div>
+          </div>
 
-            <div class="empty-icon">
-              ↗
+          <div class="performance-chart-wrap" id="performanceChartWrap">
+            <div class="performance-loading" id="performanceLoading">
+              <div class="empty-icon">↗</div>
+              <div class="empty-title">Loading portfolio performance...</div>
+              <div class="empty-text">
+                StockGyan is loading daily historical prices for your current holdings.
+              </div>
             </div>
 
-            <div class="empty-title">
-              Performance data will appear here
-            </div>
+            <svg
+              id="performanceChart"
+              class="performance-chart"
+              viewBox="0 0 900 300"
+              preserveAspectRatio="none"
+              style="display:none;"
+            ></svg>
 
-            <div class="empty-text">
-              Once holdings and transactions are added,
-              StockGyan will calculate your portfolio
-              performance automatically.
-            </div>
+            <div class="performance-tooltip" id="performanceTooltip"></div>
+          </div>
 
+          <div class="performance-note" id="performanceNote">
+            Historical value is calculated from the current holdings and their daily closing prices.
+            This is a portfolio-value trend; transaction-level money-weighted returns will be added with the transaction history system.
           </div>
 
         </div>
@@ -2214,6 +2338,8 @@
       renderHoldings();
       updateSummary();
       fetchPortfolioQuotes();
+      performanceCache = {};
+      refreshPortfolioPerformance();
 
     }
 
@@ -2330,6 +2456,8 @@
       renderHoldings();
       updateSummary();
       fetchPortfolioQuotes();
+      performanceCache = {};
+      refreshPortfolioPerformance();
     }
 
 
@@ -2407,6 +2535,8 @@
       renderHoldings();
       updateSummary();
       fetchPortfolioQuotes();
+      performanceCache = {};
+      refreshPortfolioPerformance();
     }
 
 
@@ -3143,6 +3273,350 @@
 
 
 
+
+    /* --------------------------------
+       PORTFOLIO PERFORMANCE
+    -------------------------------- */
+
+    let performanceRequestInProgress = false;
+    let performanceCache = {};
+
+    function getPerformanceDays(period) {
+      return {
+        "1M":31,
+        "3M":93,
+        "6M":186,
+        "1Y":366,
+        "ALL":3650
+      }[period] || 31;
+    }
+
+    function formatPerformanceDate(value) {
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return String(value).slice(0,10);
+      return date.toLocaleDateString("en-IN", {
+        day:"2-digit", month:"short", year:"numeric"
+      });
+    }
+
+    function formatShortDate(value) {
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return String(value).slice(0,10);
+      return date.toLocaleDateString("en-IN", {
+        day:"2-digit", month:"short"
+      });
+    }
+
+    function formatCompactMoney(value) {
+      const n = Number(value || 0);
+      if (Math.abs(n) >= 10000000) return (n/10000000).toFixed(2) + "Cr";
+      if (Math.abs(n) >= 100000) return (n/100000).toFixed(2) + "L";
+      if (Math.abs(n) >= 1000) return (n/1000).toFixed(1) + "K";
+      return n.toFixed(0);
+    }
+
+    async function fetchPerformanceCandles(item) {
+      const response = await fetch(
+        "/api/market/ohlc?instrument_key=" +
+        encodeURIComponent(item.instrument_key) +
+        "&interval=1d",
+        {
+          method:"GET",
+          cache:"no-store",
+          headers:{ "Accept":"application/json" }
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data && data.message
+            ? data.message
+            : "Historical data unavailable"
+        );
+      }
+
+      return parseDailyCandles(
+        data && data.data ? data.data.candles : []
+      );
+    }
+
+    function buildPerformanceSeries(list, candleSets, period) {
+      const maps = list.map(function(item, index) {
+        const prices = new Map();
+        (candleSets[index] || []).forEach(function(candle) {
+          prices.set(String(candle.date).slice(0,10), Number(candle.close));
+        });
+        return { item:item, prices:prices };
+      });
+
+      const allDates = new Set();
+      maps.forEach(function(entry) {
+        entry.prices.forEach(function(_, date) {
+          allDates.add(date);
+        });
+      });
+
+      let dates = Array.from(allDates).sort();
+      const days = getPerformanceDays(period);
+
+      if (period !== "ALL" && dates.length > days) {
+        dates = dates.slice(-days);
+      }
+
+      return dates.map(function(date) {
+        let value = 0;
+        let available = 0;
+
+        maps.forEach(function(entry) {
+          const price = entry.prices.get(date);
+          if (Number.isFinite(price) && price > 0) {
+            value += price * Number(entry.item.quantity || 0);
+            available += 1;
+          }
+        });
+
+        return {
+          date:date,
+          value:value,
+          available:available
+        };
+      }).filter(function(point) {
+        return point.value > 0 && point.available > 0;
+      });
+    }
+
+    function renderPerformanceEmpty(title, detail) {
+      const loading = document.getElementById("performanceLoading");
+      const chart = document.getElementById("performanceChart");
+
+      if (loading) {
+        loading.style.display = "flex";
+        loading.innerHTML =
+          '<div class="empty-icon">↗</div>' +
+          '<div class="empty-title">' + escapeHtml(title) + '</div>' +
+          '<div class="empty-text">' + escapeHtml(detail) + '</div>';
+      }
+
+      if (chart) {
+        chart.style.display = "none";
+        chart.innerHTML = "";
+      }
+
+      document.getElementById("performanceStartValue").textContent = "—";
+      document.getElementById("performanceEndValue").textContent = "—";
+
+      const change = document.getElementById("performanceChange");
+      change.textContent = "—";
+      change.className = "performance-stat-value";
+    }
+
+    function renderPerformanceChart(series) {
+      if (!series.length) {
+        renderPerformanceEmpty(
+          "Historical data unavailable",
+          "StockGyan could not build a daily value series for these holdings."
+        );
+        return;
+      }
+
+      const startValue = series[0].value;
+      const endValue = series[series.length - 1].value;
+      const change = endValue - startValue;
+      const changePercent = startValue > 0 ? (change/startValue)*100 : 0;
+
+      document.getElementById("performanceStartValue").textContent =
+        "₹" + formatMoney(startValue);
+
+      document.getElementById("performanceEndValue").textContent =
+        "₹" + formatMoney(endValue);
+
+      const changeEl = document.getElementById("performanceChange");
+      const sign = change >= 0 ? "+" : "";
+
+      changeEl.textContent =
+        sign + "₹" + formatMoney(Math.abs(change)) +
+        " (" + sign + changePercent.toFixed(2) + "%)";
+
+      changeEl.className =
+        "performance-stat-value " +
+        (change > 0 ? "positive" : change < 0 ? "negative" : "");
+
+      const chart = document.getElementById("performanceChart");
+      const loading = document.getElementById("performanceLoading");
+
+      const W = 900, H = 300, L = 52, R = 18, T = 20, B = 34;
+      const PW = W-L-R, PH = H-T-B;
+
+      const values = series.map(function(p){ return p.value; });
+      const min = Math.min.apply(null, values);
+      const max = Math.max.apply(null, values);
+      let range = max-min;
+      if (range <= 0) range = Math.max(max*0.01,1);
+
+      const lo = min-range*0.08;
+      const hi = max+range*0.08;
+
+      function x(i) {
+        return series.length === 1
+          ? L + PW/2
+          : L + (i/(series.length-1))*PW;
+      }
+
+      function y(v) {
+        return T + ((hi-v)/(hi-lo))*PH;
+      }
+
+      const pts = series.map(function(p,i) {
+        return { x:x(i), y:y(p.value), p:p };
+      });
+
+      const line = pts.map(function(pt,i) {
+        return (i ? "L" : "M") +
+          pt.x.toFixed(2) + " " + pt.y.toFixed(2);
+      }).join(" ");
+
+      const area =
+        line +
+        " L " + pts[pts.length-1].x.toFixed(2) + " " + (H-B) +
+        " L " + pts[0].x.toFixed(2) + " " + (H-B) + " Z";
+
+      let svg = "";
+
+      for (let i=0; i<=4; i++) {
+        const yy = T + (i/4)*PH;
+        const vv = hi - (i/4)*(hi-lo);
+
+        svg +=
+          '<line class="performance-grid-line" x1="' + L +
+          '" y1="' + yy.toFixed(2) +
+          '" x2="' + (W-R) +
+          '" y2="' + yy.toFixed(2) + '"></line>' +
+          '<text class="performance-axis-label" x="4" y="' +
+          (yy+3).toFixed(2) + '">' +
+          "₹" + formatCompactMoney(vv) + "</text>";
+      }
+
+      svg +=
+        '<path class="performance-area" d="' + area + '"></path>' +
+        '<path class="performance-line" d="' + line + '"></path>';
+
+      const indexes = Array.from(new Set([
+        0,
+        Math.floor((series.length-1)/3),
+        Math.floor((series.length-1)*2/3),
+        series.length-1
+      ]));
+
+      indexes.forEach(function(i) {
+        svg +=
+          '<text class="performance-axis-label" text-anchor="middle" x="' +
+          pts[i].x.toFixed(2) + '" y="' + (H-10) + '">' +
+          escapeHtml(formatShortDate(series[i].date)) +
+          "</text>";
+      });
+
+      chart.innerHTML = svg;
+      chart.style.display = "block";
+      loading.style.display = "none";
+
+      const tooltip = document.getElementById("performanceTooltip");
+      const wrap = document.getElementById("performanceChartWrap");
+
+      pts.forEach(function(pt,i) {
+        const hit = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "circle"
+        );
+
+        hit.setAttribute("cx", pt.x);
+        hit.setAttribute("cy", pt.y);
+        hit.setAttribute("r", series.length > 100 ? "8" : "10");
+        hit.setAttribute("fill", "transparent");
+
+        function showTip() {
+          if (!tooltip) return;
+          const rect = wrap.getBoundingClientRect();
+          tooltip.style.left = (pt.x/W*rect.width) + "px";
+          tooltip.style.top = (pt.y/H*rect.height) + "px";
+          tooltip.innerHTML =
+            "<strong>" + escapeHtml(formatPerformanceDate(series[i].date)) +
+            "</strong><br>Portfolio value: ₹" +
+            formatMoney(series[i].value);
+          tooltip.style.opacity = "1";
+        }
+
+        hit.addEventListener("mouseenter", showTip);
+        hit.addEventListener("mouseleave", function() {
+          tooltip.style.opacity = "0";
+        });
+        hit.addEventListener("touchstart", showTip, {passive:true});
+
+        chart.appendChild(hit);
+      });
+    }
+
+    async function refreshPortfolioPerformance() {
+      const periodEl = document.getElementById("performancePeriod");
+      const period = periodEl ? periodEl.value : "1M";
+      const list = getCurrentPortfolioHoldings();
+
+      if (!list.length) {
+        renderPerformanceEmpty(
+          "Performance data will appear here",
+          "Add holdings to your portfolio to start tracking historical portfolio value."
+        );
+        return;
+      }
+
+      if (performanceRequestInProgress) return;
+      performanceRequestInProgress = true;
+
+      const loading = document.getElementById("performanceLoading");
+      if (loading) {
+        loading.style.display = "flex";
+        loading.innerHTML =
+          '<div class="empty-icon">↗</div>' +
+          '<div class="empty-title">Loading ' + escapeHtml(period) + ' performance...</div>' +
+          '<div class="empty-text">Fetching daily historical prices for ' +
+          list.length + ' holding' + (list.length === 1 ? "" : "s") + '.</div>';
+      }
+
+      try {
+        const key =
+          portfolioSelect.value + "|" + period + "|" +
+          list.map(function(item) {
+            return item.instrument_key + ":" + item.quantity;
+          }).join(",");
+
+        if (performanceCache[key]) {
+          renderPerformanceChart(performanceCache[key]);
+          return;
+        }
+
+        const candles = await Promise.all(
+          list.map(function(item) {
+            return fetchPerformanceCandles(item);
+          })
+        );
+
+        const series = buildPerformanceSeries(list, candles, period);
+
+        performanceCache[key] = series;
+        renderPerformanceChart(series);
+
+      } catch (error) {
+        console.warn("StockGyan: portfolio performance failed", error);
+        renderPerformanceEmpty(
+          "Unable to load performance",
+          error.message || "Please try again."
+        );
+      } finally {
+        performanceRequestInProgress = false;
+      }
+    }
+
     /* --------------------------------
        MOVING AVERAGE MONITOR
     -------------------------------- */
@@ -3701,10 +4175,19 @@
         quoteCache = {};
         quoteSource = "";
         movingAverageCache = {};
+        performanceCache = {};
         renderHoldings();
         renderMovingAverageMonitor();
         fetchPortfolioQuotes();
         refreshMovingAverages();
+        refreshPortfolioPerformance();
+      }
+    );
+
+    document.getElementById("performancePeriod").addEventListener(
+      "change",
+      function() {
+        refreshPortfolioPerformance();
       }
     );
 
@@ -3893,6 +4376,7 @@
     startMovingAverageRefresh();
     fetchPortfolioQuotes();
     refreshMovingAverages();
+    refreshPortfolioPerformance();
 
 
     /* --------------------------------
