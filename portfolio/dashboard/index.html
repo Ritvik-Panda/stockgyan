@@ -1119,6 +1119,9 @@
 
           <div class="card-subtitle">
             Stocks held in the selected portfolio
+            <span id="marketDataStatus" style="margin-left:8px;font-weight:700;color:#667085;">
+              • Loading live prices...
+            </span>
           </div>
 
         </div>
@@ -1530,7 +1533,7 @@
 
 
     /* --------------------------------
-       PORTFOLIO STORAGE
+       PORTFOLIO STORAGE + LIVE MARKET DATA
     -------------------------------- */
 
     let portfolios =
@@ -1546,6 +1549,13 @@
     let selectedStock = null;
     let editingHoldingKey = null;
     let removingHoldingKey = null;
+
+    // Live quote cache for the selected portfolio.
+    // Prices come from StockGyan's secure server-side Upstox proxy.
+    let quoteCache = {};
+    let quoteSource = "";
+    let quoteRefreshTimer = null;
+    let quoteRequestInProgress = false;
 
     if (!portfolios || !Array.isArray(portfolios) || portfolios.length === 0) {
 
@@ -1974,6 +1984,7 @@
       closeHoldingModal();
       renderHoldings();
       updateSummary();
+      fetchPortfolioQuotes();
 
     }
 
@@ -2089,6 +2100,7 @@
       closeEditHoldingModal();
       renderHoldings();
       updateSummary();
+      fetchPortfolioQuotes();
     }
 
 
@@ -2165,6 +2177,7 @@
       closeRemoveHoldingModal();
       renderHoldings();
       updateSummary();
+      fetchPortfolioQuotes();
     }
 
 
@@ -2187,16 +2200,248 @@
 
     }
 
-    function renderHoldings() {
-
-      const body = document.getElementById("holdingsBody");
+    function getCurrentPortfolioHoldings() {
       const portfolioId = portfolioSelect.value;
-      const list = holdings[portfolioId] || [];
+      return holdings[portfolioId] || [];
+    }
+
+    function getQuoteFromResponse(data, instrumentKey) {
+      if (!data) return null;
+
+      let item = null;
+
+      // Common Upstox shape: data.data[instrument_key]
+      if (data.data && !Array.isArray(data.data)) {
+        item = data.data[instrumentKey];
+      }
+
+      // Some normalized/proxy responses may return an array.
+      if (!item && Array.isArray(data.data)) {
+        item = data.data.find(function(row) {
+          return (
+            row.instrument_key === instrumentKey ||
+            row.instrumentKey === instrumentKey ||
+            row.key === instrumentKey
+          );
+        });
+      }
+
+      // Also support a direct keyed response.
+      if (!item && data[instrumentKey]) {
+        item = data[instrumentKey];
+      }
+
+      if (!item) return null;
+
+      const ohlc = item.ohlc || {};
+      const lastPrice = Number(
+        item.last_price ??
+        item.lastPrice ??
+        item.ltp ??
+        ohlc.close
+      );
+
+      let previousClose = Number(
+        item.prev_close ??
+        item.prev_close_price ??
+        item.previous_close ??
+        item.previousClose
+      );
+
+      if (!Number.isFinite(previousClose) || previousClose <= 0) {
+        previousClose = Number(ohlc.prev_close);
+      }
+
+      let dailyChange = Number(
+        item.net_change ??
+        item.change ??
+        item.netChange
+      );
+
+      if (!Number.isFinite(dailyChange) && Number.isFinite(lastPrice) && Number.isFinite(previousClose)) {
+        dailyChange = lastPrice - previousClose;
+      }
+
+      let dailyPercent = Number(
+        item.change_percent ??
+        item.changePercent ??
+        item.percent_change
+      );
+
+      if (!Number.isFinite(dailyPercent) && Number.isFinite(dailyChange) && previousClose > 0) {
+        dailyPercent = (dailyChange / previousClose) * 100;
+      }
+
+      return {
+        lastPrice: Number.isFinite(lastPrice) ? lastPrice : null,
+        previousClose: Number.isFinite(previousClose) ? previousClose : null,
+        dailyChange: Number.isFinite(dailyChange) ? dailyChange : 0,
+        dailyPercent: Number.isFinite(dailyPercent) ? dailyPercent : 0
+      };
+    }
+
+    async function fetchPortfolioQuotes() {
+      const list = getCurrentPortfolioHoldings();
+
+      if (!list.length) {
+        quoteCache = {};
+        quoteSource = "";
+        renderHoldings();
+        updateMarketDataStatus();
+        return;
+      }
+
+      const keys = list
+        .map(function(item) {
+          return item.instrument_key;
+        })
+        .filter(Boolean);
+
+      if (!keys.length || quoteRequestInProgress) {
+        return;
+      }
+
+      quoteRequestInProgress = true;
+
+      try {
+        const response = await fetch(
+          "/api/market/batch?instrument_keys=" +
+          keys.map(encodeURIComponent).join(","),
+          {
+            method: "GET",
+            cache: "no-store"
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || data.status === "error") {
+          throw new Error(
+            data.message || "Unable to fetch live market prices."
+          );
+        }
+
+        const nextCache = {};
+
+        keys.forEach(function(key) {
+          const quote = getQuoteFromResponse(data, key);
+          if (quote) {
+            nextCache[key] = quote;
+          }
+        });
+
+        quoteCache = nextCache;
+        quoteSource = data.source || "";
+
+        renderHoldings();
+        updateMarketDataStatus();
+
+      } catch (error) {
+        console.error("Portfolio quote error:", error);
+        quoteSource = "";
+
+        // Keep the portfolio usable even if a temporary quote request fails.
+        renderHoldings();
+        updateMarketDataStatus("Live price update unavailable");
+      } finally {
+        quoteRequestInProgress = false;
+      }
+    }
+
+    function holdingMetrics(item) {
+      const quantity = Number(item.quantity) || 0;
+      const avgPrice = Number(item.avg_price) || 0;
+      const invested = quantity * avgPrice;
+
+      const quote = quoteCache[item.instrument_key] || null;
+      const ltp = quote && Number.isFinite(quote.lastPrice)
+        ? quote.lastPrice
+        : null;
+
+      const previousClose = quote && Number.isFinite(quote.previousClose)
+        ? quote.previousClose
+        : null;
+
+      const dailyChange = quote && Number.isFinite(quote.dailyChange)
+        ? quote.dailyChange
+        : null;
+
+      const dailyPercent = quote && Number.isFinite(quote.dailyPercent)
+        ? quote.dailyPercent
+        : null;
+
+      const currentValue = ltp !== null
+        ? quantity * ltp
+        : null;
+
+      const gain = currentValue !== null
+        ? currentValue - invested
+        : null;
+
+      const gainPercent =
+        gain !== null && invested > 0
+          ? (gain / invested) * 100
+          : null;
+
+      const todayGain =
+        dailyChange !== null
+          ? quantity * dailyChange
+          : null;
+
+      const previousValue =
+        previousClose !== null
+          ? quantity * previousClose
+          : null;
+
+      return {
+        quantity,
+        avgPrice,
+        invested,
+        ltp,
+        previousClose,
+        dailyChange,
+        dailyPercent,
+        currentValue,
+        gain,
+        gainPercent,
+        todayGain,
+        previousValue
+      };
+    }
+
+    function valueClass(value) {
+      if (value > 0) return "positive";
+      if (value < 0) return "negative";
+      return "";
+    }
+
+    function formatSignedMoney(value) {
+      if (value === null || !Number.isFinite(Number(value))) {
+        return "—";
+      }
+
+      const number = Number(value);
+      const sign = number > 0 ? "+" : number < 0 ? "-" : "";
+      return sign + "₹" + formatMoney(Math.abs(number));
+    }
+
+    function formatSignedPercent(value) {
+      if (value === null || !Number.isFinite(Number(value))) {
+        return "—";
+      }
+
+      const number = Number(value);
+      const sign = number > 0 ? "+" : number < 0 ? "-" : "";
+      return sign + Math.abs(number).toFixed(2) + "%";
+    }
+
+    function renderHoldings() {
+      const body = document.getElementById("holdingsBody");
+      const list = getCurrentPortfolioHoldings();
 
       body.innerHTML = "";
 
       if (!list.length) {
-
         body.innerHTML =
           '<tr>' +
             '<td colspan="9" class="empty-table">' +
@@ -2210,12 +2455,31 @@
       }
 
       list.forEach(function(item) {
-
-        const invested =
-          Number(item.quantity) *
-          Number(item.avg_price);
+        const metrics = holdingMetrics(item);
+        const gainClass = valueClass(metrics.gain);
+        const percentClass = valueClass(metrics.gainPercent);
 
         const row = document.createElement("tr");
+
+        const ltpHtml =
+          metrics.ltp !== null
+            ? "₹" + formatMoney(metrics.ltp)
+            : "—";
+
+        const currentValueHtml =
+          metrics.currentValue !== null
+            ? "₹" + formatMoney(metrics.currentValue)
+            : "—";
+
+        const gainHtml =
+          metrics.gain !== null
+            ? formatSignedMoney(metrics.gain)
+            : "—";
+
+        const percentHtml =
+          metrics.gainPercent !== null
+            ? formatSignedPercent(metrics.gainPercent)
+            : "—";
 
         row.innerHTML =
           '<td>' +
@@ -2234,13 +2498,17 @@
               '</div>' +
             '</div>' +
           '</td>' +
-          '<td>' + formatNumber(item.quantity) + '</td>' +
-          '<td>₹' + formatMoney(item.avg_price) + '</td>' +
-          '<td>—</td>' +
-          '<td>₹' + formatMoney(invested) + '</td>' +
-          '<td>—</td>' +
-          '<td>—</td>' +
-          '<td>—</td>' +
+          '<td>' + formatNumber(metrics.quantity) + '</td>' +
+          '<td>₹' + formatMoney(metrics.avgPrice) + '</td>' +
+          '<td>' + ltpHtml + '</td>' +
+          '<td>₹' + formatMoney(metrics.invested) + '</td>' +
+          '<td>' + currentValueHtml + '</td>' +
+          '<td class="' + gainClass + '" style="font-weight:800;">' +
+            gainHtml +
+          '</td>' +
+          '<td class="' + percentClass + '" style="font-weight:800;">' +
+            percentHtml +
+          '</td>' +
           '<td>' +
             '<div style="display:flex;gap:7px;align-items:center;">' +
               '<button type="button" class="btn btn-light" ' +
@@ -2257,37 +2525,253 @@
           '</td>';
 
         body.appendChild(row);
-
       });
 
       updateSummary();
-
     }
 
     function updateSummary() {
-
-      const portfolioId = portfolioSelect.value;
-      const list = holdings[portfolioId] || [];
+      const list = getCurrentPortfolioHoldings();
 
       let invested = 0;
+      let currentValue = 0;
+      let todayGain = 0;
+      let previousValue = 0;
+
+      let hasCurrentValue = false;
+      let hasTodayValue = false;
+
+      const movers = [];
 
       list.forEach(function(item) {
-        invested +=
-          Number(item.quantity) *
-          Number(item.avg_price);
+        const metrics = holdingMetrics(item);
+
+        invested += metrics.invested;
+
+        if (metrics.currentValue !== null) {
+          currentValue += metrics.currentValue;
+          hasCurrentValue = true;
+        }
+
+        if (metrics.todayGain !== null) {
+          todayGain += metrics.todayGain;
+          hasTodayValue = true;
+        }
+
+        if (metrics.previousValue !== null) {
+          previousValue += metrics.previousValue;
+        }
+
+        movers.push({
+          item: item,
+          metrics: metrics
+        });
       });
+
+      const totalGain =
+        hasCurrentValue
+          ? currentValue - invested
+          : null;
+
+      const totalGainPercent =
+        totalGain !== null && invested > 0
+          ? (totalGain / invested) * 100
+          : null;
+
+      const todayGainPercent =
+        hasTodayValue && previousValue > 0
+          ? (todayGain / previousValue) * 100
+          : null;
 
       document.getElementById("totalInvested").textContent =
         "₹" + formatMoney(invested);
 
-      document.getElementById("currentValue").textContent =
-        "₹" + formatMoney(invested);
+      const currentValueElement =
+        document.getElementById("currentValue");
 
-      document.getElementById("totalGain").textContent = "₹0";
-      document.getElementById("totalGainPercent").textContent = "—";
-      document.getElementById("todayGain").textContent = "₹0";
-      document.getElementById("todayGainPercent").textContent = "—";
+      currentValueElement.textContent =
+        hasCurrentValue
+          ? "₹" + formatMoney(currentValue)
+          : "—";
 
+      const totalGainElement =
+        document.getElementById("totalGain");
+
+      totalGainElement.textContent =
+        totalGain !== null
+          ? formatSignedMoney(totalGain)
+          : "—";
+
+      totalGainElement.className =
+        "summary-value " + valueClass(totalGain);
+
+      const totalGainPercentElement =
+        document.getElementById("totalGainPercent");
+
+      totalGainPercentElement.textContent =
+        totalGainPercent !== null
+          ? formatSignedPercent(totalGainPercent)
+          : "Waiting for live price";
+
+      totalGainPercentElement.className =
+        "summary-change " + valueClass(totalGainPercent);
+
+      const todayGainElement =
+        document.getElementById("todayGain");
+
+      todayGainElement.textContent =
+        hasTodayValue
+          ? formatSignedMoney(todayGain)
+          : "—";
+
+      todayGainElement.className =
+        "summary-value " + valueClass(todayGain);
+
+      const todayGainPercentElement =
+        document.getElementById("todayGainPercent");
+
+      todayGainPercentElement.textContent =
+        todayGainPercent !== null
+          ? formatSignedPercent(todayGainPercent)
+          : "Waiting for market data";
+
+      todayGainPercentElement.className =
+        "summary-change " + valueClass(todayGainPercent);
+
+      renderPortfolioMovers(movers);
+    }
+
+    function renderPortfolioMovers(movers) {
+      const gainers = movers
+        .filter(function(entry) {
+          return entry.metrics.dailyPercent !== null;
+        })
+        .sort(function(a, b) {
+          return b.metrics.dailyPercent - a.metrics.dailyPercent;
+        });
+
+      const losers = movers
+        .filter(function(entry) {
+          return entry.metrics.dailyPercent !== null;
+        })
+        .sort(function(a, b) {
+          return a.metrics.dailyPercent - b.metrics.dailyPercent;
+        });
+
+      const topGainer = gainers.length ? gainers[0] : null;
+      const topLoser = losers.length ? losers[0] : null;
+
+      const leaderItems =
+        document.querySelectorAll(".leader-list .leader-item");
+
+      if (leaderItems.length < 2) return;
+
+      updateLeaderItem(
+        leaderItems[0],
+        topGainer,
+        true
+      );
+
+      updateLeaderItem(
+        leaderItems[1],
+        topLoser,
+        false
+      );
+    }
+
+    function updateLeaderItem(element, entry, isGainer) {
+      if (!entry) {
+        element.innerHTML =
+          '<div class="leader-left">' +
+            '<div class="stock-avatar"' +
+              (isGainer
+                ? ""
+                : ' style="background:#fff0f1;color:#dc3545;"') +
+            '>—</div>' +
+            '<div>' +
+              '<div class="stock-name">No market data</div>' +
+              '<div class="stock-qty">Waiting for live prices</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="leader-value ' +
+            (isGainer ? "positive" : "negative") +
+          '">—</div>';
+
+        return;
+      }
+
+      const item = entry.item;
+      const metrics = entry.metrics;
+
+      const percent = metrics.dailyPercent;
+      const gain = metrics.todayGain;
+
+      element.innerHTML =
+        '<div class="leader-left">' +
+          '<div class="stock-avatar"' +
+            (isGainer
+              ? ""
+              : ' style="background:#fff0f1;color:#dc3545;"') +
+          '>' +
+            escapeHtml((item.symbol || "?").substring(0, 2)) +
+          '</div>' +
+          '<div>' +
+            '<div class="stock-name">' +
+              escapeHtml(item.symbol || "—") +
+            '</div>' +
+            '<div class="stock-qty">' +
+              formatNumber(item.quantity) +
+              ' shares • ' +
+              (gain !== null
+                ? formatSignedMoney(gain) + " today"
+                : "live data") +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="leader-value ' +
+          (isGainer ? "positive" : "negative") +
+        '">' +
+          formatSignedPercent(percent) +
+        '</div>';
+    }
+
+    function updateMarketDataStatus(customMessage) {
+      const element = document.getElementById("marketDataStatus");
+      if (!element) return;
+
+      if (customMessage) {
+        element.textContent = "• " + customMessage;
+        element.style.color = "#b54708";
+        return;
+      }
+
+      if (!getCurrentPortfolioHoldings().length) {
+        element.textContent = "• Add holdings to track live prices";
+        element.style.color = "#667085";
+        return;
+      }
+
+      if (quoteSource === "historical-fallback") {
+        element.textContent = "• Previous trading session prices";
+        element.style.color = "#b54708";
+      } else if (Object.keys(quoteCache).length) {
+        element.textContent = "• Live market prices";
+        element.style.color = "#159447";
+      } else {
+        element.textContent = "• Loading live prices...";
+        element.style.color = "#667085";
+      }
+    }
+
+    function startQuoteRefresh() {
+      if (quoteRefreshTimer) {
+        clearInterval(quoteRefreshTimer);
+      }
+
+      // Refresh live prices every 30 seconds.
+      quoteRefreshTimer = setInterval(function() {
+        fetchPortfolioQuotes();
+      }, 30000);
     }
 
     function formatMoney(value) {
@@ -2339,7 +2823,10 @@
     portfolioSelect.addEventListener(
       "change",
       function() {
+        quoteCache = {};
+        quoteSource = "";
         renderHoldings();
+        fetchPortfolioQuotes();
       }
     );
 
@@ -2421,8 +2908,11 @@
 
       closeDeletePortfolioModal();
 
+      quoteCache = {};
+      quoteSource = "";
       renderHoldings();
       updateSummary();
+      fetchPortfolioQuotes();
 
     }
 
@@ -2516,6 +3006,9 @@
 
     renderHoldings();
     updateSummary();
+    updateMarketDataStatus();
+    startQuoteRefresh();
+    fetchPortfolioQuotes();
 
 
     /* --------------------------------
