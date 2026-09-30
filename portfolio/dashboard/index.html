@@ -570,15 +570,15 @@
 
     .ma-summary-grid {
       display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 12px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
       margin-bottom: 18px;
     }
 
     .ma-summary-box {
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 14px;
+      padding: 15px;
       background: #f8fafc;
     }
 
@@ -588,13 +588,30 @@
       color: var(--muted);
       text-transform: uppercase;
       letter-spacing: .04em;
-      margin-bottom: 7px;
+      margin-bottom: 8px;
     }
 
-    .ma-summary-value {
-      font-size: 23px;
+    .ma-summary-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .ma-summary-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
       font-weight: 800;
-      color: var(--navy);
+    }
+
+    .ma-summary-item.above {
+      color: var(--green);
+    }
+
+    .ma-summary-item.below {
+      color: var(--danger);
     }
 
     .ma-table-wrap {
@@ -606,7 +623,7 @@
     .ma-table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 760px;
+      min-width: 1080px;
     }
 
     .ma-table th,
@@ -640,22 +657,12 @@
       font-weight: 800;
     }
 
-    .ma-status.both {
+    .ma-status.above {
       background: #eaf8ef;
       color: #167a3b;
     }
 
-    .ma-status.above50 {
-      background: #eef6ff;
-      color: #175cd3;
-    }
-
-    .ma-status.above20 {
-      background: #fff7e8;
-      color: #b54708;
-    }
-
-    .ma-status.belowboth {
+    .ma-status.below {
       background: #fff0f1;
       color: #c43245;
     }
@@ -665,13 +672,8 @@
       color: #667085;
     }
 
-    .ma-legend {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 9px 16px;
-      margin-top: 14px;
-      color: var(--muted);
-      font-size: 12px;
+    .ma-value-cell {
+      font-weight: 700;
     }
 
     .ma-monitor-note {
@@ -682,13 +684,7 @@
 
     @media (max-width: 900px) {
       .ma-summary-grid {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
-
-    @media (max-width: 520px) {
-      .ma-summary-grid {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr;
       }
     }
 
@@ -1247,10 +1243,10 @@
       <div class="card-header">
         <div>
           <div class="card-title">
-            📈 Technical Position — 20 / 50 / 200 DMA
+            📈 Technical Position — Individual Moving Averages
           </div>
           <div class="card-subtitle">
-            See which stocks in your portfolio are trading above or below their 20-day, 50-day and 200-day moving averages.
+            Each moving average is shown independently for every stock in your portfolio.
             <span id="maStatus" style="margin-left:8px;font-weight:700;color:#667085;">
               • Loading technical data...
             </span>
@@ -1270,30 +1266,31 @@
       <div class="card-body">
 
         <div class="ma-summary-grid">
+
           <div class="ma-summary-box">
-            <div class="ma-summary-label">Above 20 &amp; 50 DMA</div>
-            <div class="ma-summary-value" id="maBothCount">—</div>
+            <div class="ma-summary-label">20 DMA</div>
+            <div class="ma-summary-row">
+              <span class="ma-summary-item above">🟢 Above <span id="ma20AboveCount">—</span></span>
+              <span class="ma-summary-item below">🔴 Below <span id="ma20BelowCount">—</span></span>
+            </div>
           </div>
+
           <div class="ma-summary-box">
-            <div class="ma-summary-label">Above 50 / Below 20</div>
-            <div class="ma-summary-value" id="maAbove50Count">—</div>
+            <div class="ma-summary-label">50 DMA</div>
+            <div class="ma-summary-row">
+              <span class="ma-summary-item above">🟢 Above <span id="ma50AboveCount">—</span></span>
+              <span class="ma-summary-item below">🔴 Below <span id="ma50BelowCount">—</span></span>
+            </div>
           </div>
+
           <div class="ma-summary-box">
-            <div class="ma-summary-label">Above 20 / Below 50</div>
-            <div class="ma-summary-value" id="maAbove20Count">—</div>
+            <div class="ma-summary-label">200 DMA</div>
+            <div class="ma-summary-row">
+              <span class="ma-summary-item above">🟢 Above <span id="ma200AboveCount">—</span></span>
+              <span class="ma-summary-item below">🔴 Below <span id="ma200BelowCount">—</span></span>
+            </div>
           </div>
-          <div class="ma-summary-box">
-            <div class="ma-summary-label">Below 20 &amp; 50 DMA</div>
-            <div class="ma-summary-value" id="maBelowBothCount">—</div>
-          </div>
-          <div class="ma-summary-box">
-            <div class="ma-summary-label">Above 200 DMA</div>
-            <div class="ma-summary-value" id="maAbove200Count">—</div>
-          </div>
-          <div class="ma-summary-box">
-            <div class="ma-summary-label">Below 200 DMA</div>
-            <div class="ma-summary-value" id="maBelow200Count">—</div>
-          </div>
+
         </div>
 
         <div class="ma-table-wrap">
@@ -1303,35 +1300,29 @@
                 <th>Stock</th>
                 <th>LTP</th>
                 <th>20 DMA</th>
+                <th>20 DMA Status</th>
                 <th>50 DMA</th>
+                <th>50 DMA Status</th>
                 <th>200 DMA</th>
-                <th>vs 20 DMA</th>
-                <th>vs 50 DMA</th>
-                <th>vs 200 DMA</th>
-                <th>Position</th>
+                <th>200 DMA Status</th>
               </tr>
             </thead>
+
             <tbody id="maMonitorBody">
               <tr>
-                <td colspan="9" class="empty-table">
+                <td colspan="8" class="empty-table">
                   <strong>Loading technical data...</strong><br>
-                  <span style="font-size:12px;">StockGyan is calculating the 20-day, 50-day and 200-day moving averages.</span>
+                  <span style="font-size:12px;">
+                    StockGyan is calculating the 20-day, 50-day and 200-day moving averages.
+                  </span>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        <div class="ma-legend">
-          <span>🟢 Above 20 &amp; 50</span>
-          <span>🔵 Above 50 / below 20</span>
-          <span>🟠 Above 20 / below 50</span>
-          <span>🔴 Below 20 &amp; 50</span>
-          <span>📈 / 📉 200 DMA shown separately</span>
-        </div>
-
         <div class="ma-monitor-note">
-          Moving averages are calculated from daily closing prices. The current LTP is compared with the latest available 20-day, 50-day and 200-day averages. This is a technical-information view, not a buy/sell recommendation.
+          Moving averages are calculated from daily closing prices. The LTP is compared independently with the latest available 20-day, 50-day and 200-day averages. This is a technical-information view, not a buy/sell recommendation.
         </div>
 
       </div>
@@ -3167,7 +3158,9 @@
           };
         })
         .filter(function(candle) {
-          return candle.date && Number.isFinite(candle.close) && candle.close > 0;
+          return candle.date &&
+            Number.isFinite(candle.close) &&
+            candle.close > 0;
         })
         .sort(function(a, b) {
           return new Date(a.date).getTime() - new Date(b.date).getTime();
@@ -3180,6 +3173,7 @@
       }
 
       const recent = candles.slice(-period);
+
       const total = recent.reduce(function(sum, candle) {
         return sum + Number(candle.close || 0);
       }, 0);
@@ -3187,50 +3181,73 @@
       return total / period;
     }
 
-    function movingAveragePosition(ltp, dma20, dma50) {
-      if (![ltp, dma20, dma50].every(function(value) { return Number.isFinite(value); })) {
-        return { key: "pending", label: "Calculating", className: "pending" };
-      }
-
-      const above20 = ltp >= dma20;
-      const above50 = ltp >= dma50;
-
-      if (above20 && above50) {
-        return { key: "both", label: "Above 20 & 50 DMA", className: "both" };
-      }
-
-      if (!above20 && above50) {
-        return { key: "above50", label: "Above 50 / Below 20", className: "above50" };
-      }
-
-      if (above20 && !above50) {
-        return { key: "above20", label: "Above 20 / Below 50", className: "above20" };
-      }
-
-      return { key: "belowboth", label: "Below 20 & 50 DMA", className: "belowboth" };
-    }
-
     function formatDMA(value) {
-      if (!Number.isFinite(Number(value))) return "—";
-      return "₹" + formatMoney(value);
-    }
-
-    function formatDistance(ltp, dma) {
-      if (!Number.isFinite(Number(ltp)) || !Number.isFinite(Number(dma)) || Number(dma) <= 0) {
+      if (!Number.isFinite(Number(value))) {
         return "—";
       }
 
-      const percent = ((Number(ltp) - Number(dma)) / Number(dma)) * 100;
-      const sign = percent > 0 ? "+" : "";
-      const className = percent > 0 ? "positive" : percent < 0 ? "negative" : "";
+      return "₹" + formatMoney(value);
+    }
 
-      return '<span class="' + className + '" style="font-weight:800;">' +
-        sign + percent.toFixed(2) + "%" +
-        '</span>';
+    function dmaStatus(ltp, dma) {
+      if (
+        !Number.isFinite(Number(ltp)) ||
+        !Number.isFinite(Number(dma)) ||
+        Number(dma) <= 0
+      ) {
+        return {
+          label: "Calculating",
+          className: "pending",
+          above: null
+        };
+      }
+
+      const above = Number(ltp) >= Number(dma);
+
+      return {
+        label: above ? "Above DMA" : "Below DMA",
+        className: above ? "above" : "below",
+        above: above
+      };
+    }
+
+    function renderDMAStatus(ltp, dma) {
+      const status = dmaStatus(ltp, dma);
+
+      let distance = "";
+
+      if (
+        Number.isFinite(Number(ltp)) &&
+        Number.isFinite(Number(dma)) &&
+        Number(dma) > 0
+      ) {
+        const percent =
+          ((Number(ltp) - Number(dma)) / Number(dma)) * 100;
+
+        const sign = percent > 0 ? "+" : "";
+
+        distance =
+          '<span style="font-size:10px;margin-left:4px;opacity:.85;">' +
+          sign +
+          percent.toFixed(2) +
+          "%</span>";
+      }
+
+      return (
+        '<span class="ma-status ' +
+        status.className +
+        '">' +
+        (status.above === true ? "🟢 " : status.above === false ? "🔴 " : "") +
+        status.label +
+        distance +
+        "</span>"
+      );
     }
 
     async function fetchMovingAverageForHolding(item) {
-      if (!item || !item.instrument_key) return null;
+      if (!item || !item.instrument_key) {
+        return null;
+      }
 
       const key = item.instrument_key;
 
@@ -3242,183 +3259,283 @@
           {
             method: "GET",
             cache: "no-store",
-            headers: { "Accept": "application/json" }
+            headers: {
+              "Accept": "application/json"
+            }
           }
         );
 
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data && data.message ? data.message : "Historical data unavailable");
+          throw new Error(
+            data && data.message
+              ? data.message
+              : "Historical data unavailable"
+          );
         }
 
-        const candles = parseDailyCandles(data && data.data ? data.data.candles : []);
-        const dma20 = calculateMovingAverage(candles, 20);
-        const dma50 = calculateMovingAverage(candles, 50);
-        const dma200 = calculateMovingAverage(candles, 200);
+        const candles = parseDailyCandles(
+          data && data.data ? data.data.candles : []
+        );
 
         return {
-          dma20: dma20,
-          dma50: dma50,
-          dma200: dma200,
+          dma20: calculateMovingAverage(candles, 20),
+          dma50: calculateMovingAverage(candles, 50),
+          dma200: calculateMovingAverage(candles, 200),
           candleCount: candles.length,
-          latestDate: candles.length ? candles[candles.length - 1].date : null
+          latestDate: candles.length
+            ? candles[candles.length - 1].date
+            : null
         };
 
       } catch (error) {
-        console.warn("StockGyan: moving average fetch failed", key, error);
+        console.warn(
+          "StockGyan: moving average fetch failed",
+          key,
+          error
+        );
+
         return null;
       }
     }
 
     function renderMovingAverageMonitor() {
       const body = document.getElementById("maMonitorBody");
-      if (!body) return;
+
+      if (!body) {
+        return;
+      }
 
       const list = getCurrentPortfolioHoldings();
 
       if (!list.length) {
         body.innerHTML =
-          '<tr><td colspan="9" class="empty-table">' +
-          '<strong>No holdings added yet</strong><br>' +
-          '<span style="font-size:12px;">Add holdings to calculate 20-day, 50-day and 200-day moving averages.</span>' +
-          '</td></tr>';
+          '<tr>' +
+            '<td colspan="8" class="empty-table">' +
+              '<strong>No holdings added yet</strong><br>' +
+              '<span style="font-size:12px;">Add holdings to calculate individual 20 DMA, 50 DMA and 200 DMA positions.</span>' +
+            '</td>' +
+          '</tr>';
 
-        ["maBothCount", "maAbove50Count", "maAbove20Count", "maBelowBothCount",
-         "maAbove200Count", "maBelow200Count"].forEach(function(id) {
+        [
+          "ma20AboveCount",
+          "ma20BelowCount",
+          "ma50AboveCount",
+          "ma50BelowCount",
+          "ma200AboveCount",
+          "ma200BelowCount"
+        ].forEach(function(id) {
           const element = document.getElementById(id);
-          if (element) element.textContent = "0";
+
+          if (element) {
+            element.textContent = "0";
+          }
         });
 
         const status = document.getElementById("maStatus");
+
         if (status) {
-          status.textContent = "• Add holdings to track technical position";
+          status.textContent =
+            "• Add holdings to track technical position";
           status.style.color = "#667085";
         }
+
         return;
       }
 
       let counts = {
-        both: 0,
-        above50: 0,
         above20: 0,
-        belowboth: 0,
+        below20: 0,
+        above50: 0,
+        below50: 0,
         above200: 0,
         below200: 0
       };
 
       body.innerHTML = list.map(function(item) {
-        const technical = movingAverageCache[item.instrument_key] || {};
-        const quote = quoteCache[item.instrument_key] || {};
 
-        const ltp = Number.isFinite(Number(quote.lastPrice))
-          ? Number(quote.lastPrice)
-          : null;
+        const technical =
+          movingAverageCache[item.instrument_key] || {};
 
-        const dma20 = Number.isFinite(Number(technical.dma20))
-          ? Number(technical.dma20)
-          : null;
+        const quote =
+          quoteCache[item.instrument_key] || {};
 
-        const dma50 = Number.isFinite(Number(technical.dma50))
-          ? Number(technical.dma50)
-          : null;
+        const ltp =
+          Number.isFinite(Number(quote.lastPrice))
+            ? Number(quote.lastPrice)
+            : null;
 
-        const dma200 = Number.isFinite(Number(technical.dma200))
-          ? Number(technical.dma200)
-          : null;
+        const dma20 =
+          Number.isFinite(Number(technical.dma20))
+            ? Number(technical.dma20)
+            : null;
 
-        const position = movingAveragePosition(ltp, dma20, dma50);
+        const dma50 =
+          Number.isFinite(Number(technical.dma50))
+            ? Number(technical.dma50)
+            : null;
 
-        if (counts[position.key] !== undefined) {
-          counts[position.key] += 1;
+        const dma200 =
+          Number.isFinite(Number(technical.dma200))
+            ? Number(technical.dma200)
+            : null;
+
+        const status20 = dmaStatus(ltp, dma20);
+        const status50 = dmaStatus(ltp, dma50);
+        const status200 = dmaStatus(ltp, dma200);
+
+        if (status20.above === true) {
+          counts.above20 += 1;
+        } else if (status20.above === false) {
+          counts.below20 += 1;
         }
 
-        let longTermLabel = "200 DMA pending";
-        let longTermClass = "pending";
-
-        if (ltp !== null && dma200 !== null) {
-          if (ltp >= dma200) {
-            counts.above200 += 1;
-            longTermLabel = "Above 200 DMA";
-            longTermClass = "both";
-          } else {
-            counts.below200 += 1;
-            longTermLabel = "Below 200 DMA";
-            longTermClass = "belowboth";
-          }
+        if (status50.above === true) {
+          counts.above50 += 1;
+        } else if (status50.above === false) {
+          counts.below50 += 1;
         }
 
-        const symbol = escapeHtml(item.symbol || "—");
-        const name = escapeHtml(item.name || "");
+        if (status200.above === true) {
+          counts.above200 += 1;
+        } else if (status200.above === false) {
+          counts.below200 += 1;
+        }
+
+        const symbol =
+          escapeHtml(item.symbol || "—");
+
+        const name =
+          escapeHtml(item.name || "");
 
         return (
-          '<tr>' +
-            '<td>' +
-              '<div style="font-weight:800;color:#172033;">' + symbol + '</div>' +
-              '<div style="font-size:11px;color:#667085;margin-top:3px;">' + name + '</div>' +
-            '</td>' +
-            '<td style="font-weight:800;">' +
-              (ltp !== null ? "₹" + formatMoney(ltp) : "—") +
-            '</td>' +
-            '<td>' + formatDMA(dma20) + '</td>' +
-            '<td>' + formatDMA(dma50) + '</td>' +
-            '<td>' + formatDMA(dma200) + '</td>' +
-            '<td>' + formatDistance(ltp, dma20) + '</td>' +
-            '<td>' + formatDistance(ltp, dma50) + '</td>' +
-            '<td>' + formatDistance(ltp, dma200) + '</td>' +
-            '<td>' +
-              '<div style="display:flex;flex-direction:column;align-items:flex-start;gap:5px;">' +
-                '<span class="ma-status ' + position.className + '">' +
-                  position.label +
-                '</span>' +
-                '<span class="ma-status ' + longTermClass + '" style="font-size:10px;padding:4px 8px;">' +
-                  longTermLabel +
-                '</span>' +
-              '</div>' +
-            '</td>' +
-          '</tr>'
+          "<tr>" +
+
+            "<td>" +
+              '<div style="font-weight:800;color:#172033;">' +
+                symbol +
+              "</div>" +
+              '<div style="font-size:11px;color:#667085;margin-top:3px;">' +
+                name +
+              "</div>" +
+            "</td>" +
+
+            '<td class="ma-value-cell">' +
+              (
+                ltp !== null
+                  ? "₹" + formatMoney(ltp)
+                  : "—"
+              ) +
+            "</td>" +
+
+            "<td>" +
+              formatDMA(dma20) +
+            "</td>" +
+
+            "<td>" +
+              renderDMAStatus(ltp, dma20) +
+            "</td>" +
+
+            "<td>" +
+              formatDMA(dma50) +
+            "</td>" +
+
+            "<td>" +
+              renderDMAStatus(ltp, dma50) +
+            "</td>" +
+
+            "<td>" +
+              formatDMA(dma200) +
+            "</td>" +
+
+            "<td>" +
+              renderDMAStatus(ltp, dma200) +
+            "</td>" +
+
+          "</tr>"
         );
+
       }).join("");
 
-      document.getElementById("maBothCount").textContent = counts.both;
-      document.getElementById("maAbove50Count").textContent = counts.above50;
-      document.getElementById("maAbove20Count").textContent = counts.above20;
-      document.getElementById("maBelowBothCount").textContent = counts.belowboth;
-      document.getElementById("maAbove200Count").textContent = counts.above200;
-      document.getElementById("maBelow200Count").textContent = counts.below200;
+      document.getElementById("ma20AboveCount").textContent =
+        counts.above20;
+
+      document.getElementById("ma20BelowCount").textContent =
+        counts.below20;
+
+      document.getElementById("ma50AboveCount").textContent =
+        counts.above50;
+
+      document.getElementById("ma50BelowCount").textContent =
+        counts.below50;
+
+      document.getElementById("ma200AboveCount").textContent =
+        counts.above200;
+
+      document.getElementById("ma200BelowCount").textContent =
+        counts.below200;
 
       const completeCount = list.filter(function(item) {
-        const t = movingAverageCache[item.instrument_key];
-        return t &&
-          Number.isFinite(Number(t.dma20)) &&
-          Number.isFinite(Number(t.dma50)) &&
-          Number.isFinite(Number(t.dma200));
+        const technical =
+          movingAverageCache[item.instrument_key];
+
+        return technical &&
+          Number.isFinite(Number(technical.dma20)) &&
+          Number.isFinite(Number(technical.dma50)) &&
+          Number.isFinite(Number(technical.dma200));
       }).length;
 
-      const status = document.getElementById("maStatus");
+      const status =
+        document.getElementById("maStatus");
+
       if (status) {
+
         if (completeCount === list.length) {
-          status.textContent = "• 20 / 50 / 200 DMA calculated";
-          status.style.color = "#159447";
-        } else {
+
           status.textContent =
-            "• Calculating " + completeCount + "/" + list.length + " stocks";
-          status.style.color = "#b54708";
+            "• 20 / 50 / 200 DMA calculated";
+
+          status.style.color =
+            "#159447";
+
+        } else {
+
+          status.textContent =
+            "• Calculating " +
+            completeCount +
+            "/" +
+            list.length +
+            " stocks";
+
+          status.style.color =
+            "#b54708";
         }
       }
     }
 
     async function refreshMovingAverages() {
-      const list = getCurrentPortfolioHoldings();
-      const status = document.getElementById("maStatus");
-      const button = document.getElementById("maRefreshButton");
+
+      const list =
+        getCurrentPortfolioHoldings();
+
+      const status =
+        document.getElementById("maStatus");
+
+      const button =
+        document.getElementById("maRefreshButton");
 
       if (!list.length) {
+
         renderMovingAverageMonitor();
+
         return;
       }
 
-      if (movingAverageRequestInProgress) return;
+      if (movingAverageRequestInProgress) {
+        return;
+      }
+
       movingAverageRequestInProgress = true;
 
       if (button) {
@@ -3427,29 +3544,48 @@
       }
 
       if (status) {
-        status.textContent = "• Loading 20 / 50 / 200 DMA...";
-        status.style.color = "#b54708";
+        status.textContent =
+          "• Loading individual 20 / 50 / 200 DMA...";
+
+        status.style.color =
+          "#b54708";
       }
 
       try {
-        const results = await Promise.all(
-          list.map(function(item) {
-            return fetchMovingAverageForHolding(item).then(function(result) {
-              return { key: item.instrument_key, result: result };
-            });
-          })
-        );
+
+        const results =
+          await Promise.all(
+            list.map(function(item) {
+
+              return fetchMovingAverageForHolding(item)
+                .then(function(result) {
+
+                  return {
+                    key: item.instrument_key,
+                    result: result
+                  };
+
+                });
+
+            })
+          );
 
         results.forEach(function(entry) {
+
           if (entry.result) {
-            movingAverageCache[entry.key] = entry.result;
+            movingAverageCache[entry.key] =
+              entry.result;
           }
+
         });
 
         renderMovingAverageMonitor();
 
       } finally {
-        movingAverageRequestInProgress = false;
+
+        movingAverageRequestInProgress =
+          false;
+
         if (button) {
           button.disabled = false;
           button.textContent = "↻ Refresh";
@@ -3458,16 +3594,21 @@
     }
 
     function startMovingAverageRefresh() {
+
       if (movingAverageRefreshTimer) {
         clearInterval(movingAverageRefreshTimer);
       }
 
-      // Daily moving averages only need periodic refresh. LTP is refreshed separately every 30 seconds.
-      movingAverageRefreshTimer = setInterval(function() {
-        refreshMovingAverages();
-      }, 15 * 60 * 1000);
+      // Daily moving averages only need periodic refresh.
+      // LTP is refreshed separately every 30 seconds.
+      movingAverageRefreshTimer =
+        setInterval(
+          function() {
+            refreshMovingAverages();
+          },
+          15 * 60 * 1000
+        );
     }
-
 
     function updateMarketDataStatus(customMessage) {
       const element = document.getElementById("marketDataStatus");
