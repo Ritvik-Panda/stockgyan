@@ -938,7 +938,133 @@
         font-size: 23px;
       }
     }
-  </style>
+  
+    .download-portfolio-card {
+      margin-top: 24px;
+    }
+
+    .download-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .download-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 13px;
+      width: 100%;
+      text-align: left;
+      padding: 16px;
+      border: 1px solid #e5eaf1;
+      background: #fff;
+      border-radius: 13px;
+      cursor: pointer;
+      transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+    }
+
+    .download-option:hover {
+      transform: translateY(-1px);
+      border-color: #b9c5d6;
+      box-shadow: 0 6px 18px rgba(16,24,40,.07);
+    }
+
+    .download-option-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: #f1f6ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex: 0 0 40px;
+    }
+
+    .download-option-title {
+      font-weight: 900;
+      color: #172033;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .download-option-text {
+      color: #667085;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .download-note {
+      margin-top: 14px;
+      padding: 11px 13px;
+      border-radius: 10px;
+      background: #f8fafc;
+      border: 1px solid #e5eaf1;
+      color: #667085;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 700px) {
+      .download-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media print {
+      body {
+        background: #fff !important;
+      }
+
+      .portfolio-controls,
+      .quick-actions,
+      .footer,
+      .ma-monitor-card,
+      .download-portfolio-card,
+      .page-header,
+      .summary-grid,
+      .main-grid {
+        display: none !important;
+      }
+
+      .holdings-card {
+        display: block !important;
+        box-shadow: none !important;
+        border: 0 !important;
+      }
+
+      .holdings-card .card-header {
+        border-bottom: 1px solid #ddd;
+      }
+
+      .holdings-card .btn,
+      .holdings-card .actions {
+        display: none !important;
+      }
+
+      .table-wrap {
+        overflow: visible !important;
+      }
+
+      table {
+        width: 100% !important;
+      }
+
+      th:last-child,
+      td:last-child {
+        display: none !important;
+      }
+
+      .print-report-title {
+        display: block !important;
+      }
+    }
+
+    .print-report-title {
+      display: none;
+    }
+
+</style>
 </head>
 
 <body>
@@ -1038,6 +1164,13 @@
           onclick="deletePortfolio()"
         >
           Delete
+        </button>
+
+        <button
+          class="btn btn-green"
+          onclick="openDownloadPortfolio()"
+        >
+          📥 Download Portfolio
         </button>
 
       </div>
@@ -1657,6 +1790,67 @@
         <div class="quick-text">
           Portfolio health, sector allocation,
           diversification and risk analysis.
+        </div>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- =========================
+         DOWNLOAD PORTFOLIO
+    ========================= -->
+
+    <section class="card download-portfolio-card" id="downloadPortfolioSection">
+
+      <div class="card-header">
+
+        <div>
+          <div class="card-title">
+            Download Portfolio
+          </div>
+
+          <div class="card-subtitle">
+            Create a clean report or download your current holdings.
+          </div>
+        </div>
+
+      </div>
+
+      <div class="card-body">
+
+        <div class="download-grid">
+
+          <button type="button"
+                  class="download-option"
+                  onclick="downloadPortfolioCSV()">
+            <div class="download-option-icon">📊</div>
+            <div>
+              <div class="download-option-title">Download CSV</div>
+              <div class="download-option-text">
+                Holdings with quantity, average price, LTP, value and gain/loss.
+              </div>
+            </div>
+          </button>
+
+          <button type="button"
+                  class="download-option"
+                  onclick="printPortfolioReport()">
+            <div class="download-option-icon">📄</div>
+            <div>
+              <div class="download-option-title">PDF / Print Report</div>
+              <div class="download-option-text">
+                Open a professional print-ready portfolio report and save it as PDF.
+              </div>
+            </div>
+          </button>
+
+        </div>
+
+        <div class="download-note">
+          <strong>Report uses the selected portfolio.</strong>
+          Live valuation is included when live market prices are available.
         </div>
 
       </div>
@@ -4512,6 +4706,181 @@
 
       }
     );
+
+
+    /* --------------------------------
+       DOWNLOAD PORTFOLIO
+    -------------------------------- */
+
+    function openDownloadPortfolio() {
+      const section = document.getElementById("downloadPortfolioSection");
+
+      if (section) {
+        section.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+      }
+    }
+
+    function csvEscape(value) {
+      const text = String(value ?? "");
+      return '"' + text.replace(/"/g, '""') + '"';
+    }
+
+    function downloadPortfolioCSV() {
+      const portfolio =
+        portfolios.find(function(item) {
+          return item.id === portfolioSelect.value;
+        }) || { name: "My Portfolio" };
+
+      const list = getCurrentPortfolioHoldings();
+
+      const rows = [];
+
+      rows.push([
+        "Portfolio",
+        portfolio.name
+      ]);
+
+      rows.push([]);
+
+      rows.push([
+        "Stock",
+        "Company",
+        "Quantity",
+        "Average Price",
+        "LTP",
+        "Invested",
+        "Current Value",
+        "Gain/Loss",
+        "Gain/Loss %"
+      ]);
+
+      list.forEach(function(item) {
+        const metrics = holdingMetrics(item);
+
+        rows.push([
+          item.symbol || "",
+          item.name || "",
+          metrics.quantity,
+          metrics.avgPrice,
+          metrics.ltp !== null ? metrics.ltp : "",
+          metrics.invested,
+          metrics.currentValue !== null ? metrics.currentValue : "",
+          metrics.gain !== null ? metrics.gain : "",
+          metrics.gainPercent !== null ? metrics.gainPercent : ""
+        ]);
+      });
+
+      const lines = rows.map(function(row) {
+        return row.map(csvEscape).join(",");
+      });
+
+      const csv = "\uFEFF" + lines.join("\r\n");
+
+      const blob = new Blob(
+        [csv],
+        { type: "text/csv;charset=utf-8;" }
+      );
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = url;
+
+      link.download =
+        (portfolio.name || "StockGyan_Portfolio")
+          .replace(/[^\w\-]+/g, "_")
+        + "_Holdings.csv";
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      setTimeout(function() {
+        URL.revokeObjectURL(url);
+      }, 1000);
+    }
+
+    function printPortfolioReport() {
+      const portfolio =
+        portfolios.find(function(item) {
+          return item.id === portfolioSelect.value;
+        }) || { name: "My Portfolio" };
+
+      const list = getCurrentPortfolioHoldings();
+
+      let invested = 0;
+      let currentValue = 0;
+      let totalGain = 0;
+
+      list.forEach(function(item) {
+        const metrics = holdingMetrics(item);
+
+        invested += metrics.invested;
+
+        if (metrics.currentValue !== null) {
+          currentValue += metrics.currentValue;
+        }
+
+        if (metrics.gain !== null) {
+          totalGain += metrics.gain;
+        }
+      });
+
+      const generated =
+        new Date().toLocaleString(
+          "en-IN",
+          {
+            dateStyle: "medium",
+            timeStyle: "short"
+          }
+        );
+
+      const oldTitle =
+        document.title;
+
+      const oldPrintTitle =
+        document.querySelector(".print-report-title");
+
+      let printTitle = oldPrintTitle;
+
+      if (!printTitle) {
+        printTitle = document.createElement("div");
+        printTitle.className = "print-report-title";
+        document.querySelector("main").prepend(printTitle);
+      }
+
+      printTitle.innerHTML =
+        '<div style="font-size:24px;font-weight:900;color:#082a63;margin-bottom:5px;">' +
+          'StockGyan Portfolio Report' +
+        '</div>' +
+        '<div style="font-size:16px;font-weight:800;color:#172033;">' +
+          escapeHtml(portfolio.name) +
+        '</div>' +
+        '<div style="font-size:12px;color:#667085;margin:4px 0 18px;">' +
+          'Generated: ' + escapeHtml(generated) +
+        '</div>' +
+        '<div style="display:flex;gap:28px;flex-wrap:wrap;margin-bottom:18px;">' +
+          '<div><strong>Total Invested</strong><br>₹' + formatMoney(invested) + '</div>' +
+          '<div><strong>Current Value</strong><br>₹' + formatMoney(currentValue) + '</div>' +
+          '<div><strong>Total Gain</strong><br>₹' + formatMoney(totalGain) + '</div>' +
+        '</div>';
+
+      document.title =
+        "StockGyan - " + portfolio.name + " - Portfolio Report";
+
+      window.print();
+
+      setTimeout(function() {
+        document.title = oldTitle;
+
+        if (printTitle && printTitle.parentNode) {
+          printTitle.parentNode.removeChild(printTitle);
+        }
+      }, 500);
+    }
 
   </script>
 
