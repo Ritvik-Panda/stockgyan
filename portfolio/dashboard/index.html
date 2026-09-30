@@ -1218,8 +1218,9 @@
           </div>
 
           <div class="performance-note" id="performanceNote">
-            Historical value is calculated from the current holdings and their daily closing prices.
-            This is a portfolio-value trend; transaction-level money-weighted returns will be added with the transaction history system.
+            The latest point uses the same live LTP valuation shown in the Current Value card.
+            Earlier points use daily closing prices for the current holdings. Period Change is the change from the selected period's starting value to the current live value.
+            Transaction-level money-weighted returns will be added with the transaction history system.
           </div>
 
         </div>
@@ -3342,16 +3343,49 @@
       );
     }
 
-    function buildPerformanceSeries(list, candleSets, period) {
+    function getLivePortfolioValue(list) {
+      let total = 0;
+      let hasValue = false;
+
+      list.forEach(function(item) {
+        const metrics = holdingMetrics(item);
+
+        if (
+          metrics &&
+          Number.isFinite(Number(metrics.currentValue))
+        ) {
+          total += Number(metrics.currentValue);
+          hasValue = true;
+        }
+      });
+
+      return hasValue ? total : null;
+    }
+
+    function buildPerformanceSeries(
+      list,
+      candleSets,
+      period,
+      livePortfolioValue
+    ) {
       const maps = list.map(function(item, index) {
         const prices = new Map();
+
         (candleSets[index] || []).forEach(function(candle) {
-          prices.set(String(candle.date).slice(0,10), Number(candle.close));
+          prices.set(
+            String(candle.date).slice(0,10),
+            Number(candle.close)
+          );
         });
-        return { item:item, prices:prices };
+
+        return {
+          item:item,
+          prices:prices
+        };
       });
 
       const allDates = new Set();
+
       maps.forEach(function(entry) {
         entry.prices.forEach(function(_, date) {
           allDates.add(date);
@@ -3365,12 +3399,13 @@
         dates = dates.slice(-days);
       }
 
-      return dates.map(function(date) {
+      const series = dates.map(function(date) {
         let value = 0;
         let available = 0;
 
         maps.forEach(function(entry) {
           const price = entry.prices.get(date);
+
           if (Number.isFinite(price) && price > 0) {
             value += price * Number(entry.item.quantity || 0);
             available += 1;
@@ -3385,6 +3420,41 @@
       }).filter(function(point) {
         return point.value > 0 && point.available > 0;
       });
+
+      /*
+       * IMPORTANT:
+       * The dashboard summary uses the live LTP.
+       * Historical candles contain the previous closing price.
+       * Therefore the last performance point must use the same
+       * live portfolio valuation as the summary card.
+       */
+      if (
+        Number.isFinite(Number(livePortfolioValue)) &&
+        Number(livePortfolioValue) >= 0
+      ) {
+        const today = new Date().toLocaleDateString(
+          "en-CA",
+          { timeZone:"Asia/Kolkata" }
+        );
+
+        const last = series.length
+          ? series[series.length - 1]
+          : null;
+
+        if (last && last.date === today) {
+          last.value = Number(livePortfolioValue);
+          last.live = true;
+        } else {
+          series.push({
+            date:today,
+            value:Number(livePortfolioValue),
+            available:list.length,
+            live:true
+          });
+        }
+      }
+
+      return series;
     }
 
     function renderPerformanceEmpty(title, detail) {
@@ -3543,7 +3613,10 @@
           tooltip.innerHTML =
             "<strong>" + escapeHtml(formatPerformanceDate(series[i].date)) +
             "</strong><br>Portfolio value: ₹" +
-            formatMoney(series[i].value);
+            formatMoney(series[i].value) +
+            (series[i].live
+              ? "<br><span style=\"opacity:.8;\">Live valuation</span>"
+              : "");
           tooltip.style.opacity = "1";
         }
 
@@ -3584,11 +3657,18 @@
       }
 
       try {
+        const livePortfolioValueForKey =
+          getLivePortfolioValue(list);
+
         const key =
           portfolioSelect.value + "|" + period + "|" +
           list.map(function(item) {
             return item.instrument_key + ":" + item.quantity;
-          }).join(",");
+          }).join(",") +
+          "|LIVE:" +
+          (livePortfolioValueForKey === null
+            ? "NA"
+            : Number(livePortfolioValueForKey).toFixed(2));
 
         if (performanceCache[key]) {
           renderPerformanceChart(performanceCache[key]);
@@ -3601,7 +3681,15 @@
           })
         );
 
-        const series = buildPerformanceSeries(list, candles, period);
+        const livePortfolioValue =
+          getLivePortfolioValue(list);
+
+        const series = buildPerformanceSeries(
+          list,
+          candles,
+          period,
+          livePortfolioValue
+        );
 
         performanceCache[key] = series;
         renderPerformanceChart(series);
