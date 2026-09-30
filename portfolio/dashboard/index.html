@@ -2206,77 +2206,177 @@
     }
 
     function getQuoteFromResponse(data, instrumentKey) {
-      if (!data) return null;
+      if (!data || !instrumentKey) return null;
 
       let item = null;
 
-      // Common Upstox shape: data.data[instrument_key]
-      if (data.data && !Array.isArray(data.data)) {
-        item = data.data[instrumentKey];
+      function sameKey(value) {
+        if (!value) return false;
+
+        const a = String(value);
+
+        if (a === instrumentKey) return true;
+
+        try {
+          if (decodeURIComponent(a) === instrumentKey) return true;
+        } catch (error) {}
+
+        try {
+          if (encodeURIComponent(a) === encodeURIComponent(instrumentKey)) {
+            return true;
+          }
+        } catch (error) {}
+
+        return false;
       }
 
-      // Some normalized/proxy responses may return an array.
-      if (!item && Array.isArray(data.data)) {
-        item = data.data.find(function(row) {
-          return (
-            row.instrument_key === instrumentKey ||
-            row.instrumentKey === instrumentKey ||
-            row.key === instrumentKey
-          );
-        });
+      function findInObject(source) {
+        if (!source || typeof source !== "object") return null;
+
+        if (Array.isArray(source)) {
+          const direct = source.find(function(row) {
+            return row && (
+              sameKey(row.instrument_key) ||
+              sameKey(row.instrumentKey) ||
+              sameKey(row.key)
+            );
+          });
+
+          if (direct) return direct;
+
+          for (const row of source) {
+            if (row && typeof row === "object") {
+              const nested = findInObject(row);
+              if (nested) return nested;
+            }
+          }
+
+          return null;
+        }
+
+        if (source[instrumentKey]) {
+          return source[instrumentKey];
+        }
+
+        for (const key of Object.keys(source)) {
+          if (sameKey(key)) {
+            return source[key];
+          }
+        }
+
+        return null;
       }
 
-      // Also support a direct keyed response.
-      if (!item && data[instrumentKey]) {
-        item = data[instrumentKey];
+      // Check the most common StockGyan / Upstox response containers.
+      const containers = [
+        data.data,
+        data.quotes,
+        data.results,
+        data.payload,
+        data
+      ];
+
+      for (const container of containers) {
+        item = findInObject(container);
+        if (item) break;
       }
 
-      if (!item) return null;
+      if (!item) {
+        console.warn(
+          "StockGyan: quote not found for",
+          instrumentKey,
+          data
+        );
+        return null;
+      }
+
+      // Some APIs wrap the actual quote inside quote/market_data.
+      if (item.quote && typeof item.quote === "object") {
+        item = item.quote;
+      } else if (
+        item.market_data &&
+        typeof item.market_data === "object"
+      ) {
+        item = item.market_data;
+      }
 
       const ohlc = item.ohlc || {};
+
       const lastPrice = Number(
         item.last_price ??
         item.lastPrice ??
         item.ltp ??
-        ohlc.close
+        item.last_traded_price ??
+        item.close ??
+        ohlc.close ??
+        item.lp
       );
 
       let previousClose = Number(
         item.prev_close ??
         item.prev_close_price ??
         item.previous_close ??
-        item.previousClose
+        item.previousClose ??
+        item.prevClose ??
+        ohlc.prev_close
       );
 
       if (!Number.isFinite(previousClose) || previousClose <= 0) {
-        previousClose = Number(ohlc.prev_close);
+        previousClose = null;
       }
 
       let dailyChange = Number(
         item.net_change ??
         item.change ??
-        item.netChange
+        item.netChange ??
+        item.change_value
       );
 
-      if (!Number.isFinite(dailyChange) && Number.isFinite(lastPrice) && Number.isFinite(previousClose)) {
+      if (
+        !Number.isFinite(dailyChange) &&
+        Number.isFinite(lastPrice) &&
+        previousClose !== null
+      ) {
         dailyChange = lastPrice - previousClose;
       }
 
       let dailyPercent = Number(
         item.change_percent ??
         item.changePercent ??
-        item.percent_change
+        item.percent_change ??
+        item.percentChange ??
+        item.change_percentage
       );
 
-      if (!Number.isFinite(dailyPercent) && Number.isFinite(dailyChange) && previousClose > 0) {
-        dailyPercent = (dailyChange / previousClose) * 100;
+      if (
+        !Number.isFinite(dailyPercent) &&
+        Number.isFinite(dailyChange) &&
+        previousClose > 0
+      ) {
+        dailyPercent =
+          (dailyChange / previousClose) * 100;
       }
 
       return {
-        lastPrice: Number.isFinite(lastPrice) ? lastPrice : null,
-        previousClose: Number.isFinite(previousClose) ? previousClose : null,
-        dailyChange: Number.isFinite(dailyChange) ? dailyChange : 0,
-        dailyPercent: Number.isFinite(dailyPercent) ? dailyPercent : 0
+        lastPrice:
+          Number.isFinite(lastPrice)
+            ? lastPrice
+            : null,
+
+        previousClose:
+          Number.isFinite(previousClose)
+            ? previousClose
+            : null,
+
+        dailyChange:
+          Number.isFinite(dailyChange)
+            ? dailyChange
+            : 0,
+
+        dailyPercent:
+          Number.isFinite(dailyPercent)
+            ? dailyPercent
+            : 0
       };
     }
 
@@ -2309,7 +2409,10 @@
           keys.map(encodeURIComponent).join(","),
           {
             method: "GET",
-            cache: "no-store"
+            cache: "no-store",
+            headers: {
+              "Accept": "application/json"
+            }
           }
         );
 
@@ -2323,12 +2426,65 @@
 
         const nextCache = {};
 
+        // First use the batch response.
         keys.forEach(function(key) {
           const quote = getQuoteFromResponse(data, key);
-          if (quote) {
+
+          if (quote && quote.lastPrice !== null) {
             nextCache[key] = quote;
           }
         });
+
+        // If a quote is missing from the batch response, use the
+        // existing secure single-stock quote endpoint as a fallback.
+        // This does not expose the Upstox token to the browser.
+        const missingKeys = keys.filter(function(key) {
+          return !nextCache[key];
+        });
+
+        if (missingKeys.length) {
+          await Promise.all(
+            missingKeys.map(async function(key) {
+              try {
+                const singleResponse = await fetch(
+                  "/api/market/quote?instrument_key=" +
+                  encodeURIComponent(key),
+                  {
+                    method: "GET",
+                    cache: "no-store",
+                    headers: {
+                      "Accept": "application/json"
+                    }
+                  }
+                );
+
+                if (!singleResponse.ok) return;
+
+                const singleData =
+                  await singleResponse.json();
+
+                const quote =
+                  getQuoteFromResponse(
+                    singleData,
+                    key
+                  );
+
+                if (
+                  quote &&
+                  quote.lastPrice !== null
+                ) {
+                  nextCache[key] = quote;
+                }
+              } catch (error) {
+                console.warn(
+                  "StockGyan: single quote fallback failed",
+                  key,
+                  error
+                );
+              }
+            })
+          );
+        }
 
         quoteCache = nextCache;
         quoteSource = data.source || "";
@@ -2337,12 +2493,19 @@
         updateMarketDataStatus();
 
       } catch (error) {
-        console.error("Portfolio quote error:", error);
+        console.error(
+          "StockGyan portfolio quote error:",
+          error
+        );
+
         quoteSource = "";
 
         // Keep the portfolio usable even if a temporary quote request fails.
         renderHoldings();
-        updateMarketDataStatus("Live price update unavailable");
+        updateMarketDataStatus(
+          "Live price update unavailable"
+        );
+
       } finally {
         quoteRequestInProgress = false;
       }
