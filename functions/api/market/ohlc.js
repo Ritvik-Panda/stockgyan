@@ -30,20 +30,11 @@ export async function onRequestGet(context) {
       );
     }
 
-    /*
-      StockGyan 1D chart:
-      1 Min
-      5 Min
-      15 Min
-      30 Min
-    */
-
     const intradayIntervals = ["1m", "5m", "15m", "30m"];
 
     let upstoxUrl;
 
     if (intradayIntervals.includes(interval)) {
-
       const minutes = interval.replace("m", "");
 
       upstoxUrl =
@@ -51,11 +42,6 @@ export async function onRequestGet(context) {
         `${encodeURIComponent(instrumentKey)}/minutes/${minutes}`;
 
     } else if (interval === "1d") {
-
-      /*
-        Daily candles for:
-        1W / 1M / 3M / 1Y / ALL
-      */
 
       const today = new Date();
 
@@ -76,7 +62,6 @@ export async function onRequestGet(context) {
         `${encodeURIComponent(instrumentKey)}/days/1/${toDate}/${fromDate}`;
 
     } else {
-
       return Response.json(
         {
           status: "error",
@@ -95,7 +80,56 @@ export async function onRequestGet(context) {
       }
     });
 
+    /*
+      IMPORTANT:
+      Do not blindly call response.json().
+      Upstream services can sometimes return HTML
+      instead of JSON, especially during rate limiting.
+    */
+
+    const contentType =
+      response.headers.get("content-type") || "";
+
+    if (!contentType.toLowerCase().includes("application/json")) {
+
+      const text = await response.text();
+
+      console.error(
+        "Upstox returned non-JSON response:",
+        response.status,
+        text.slice(0, 300)
+      );
+
+      return Response.json(
+        {
+          status: "error",
+          message:
+            response.status === 429 ||
+            response.status === 1015
+              ? "Historical data is temporarily rate limited. Please try again shortly."
+              : `Historical data service returned HTTP ${response.status}.`,
+          upstream_status: response.status
+        },
+        {
+          status:
+            response.status === 429 ||
+            response.status === 1015
+              ? 429
+              : 502,
+          headers: {
+            "Cache-Control": "no-store"
+          }
+        }
+      );
+    }
+
     const data = await response.json();
+
+    /*
+      Preserve the Upstox response structure so the
+      existing Market, Performance and DMA code
+      continues to work.
+    */
 
     return Response.json(
       data,
@@ -109,6 +143,11 @@ export async function onRequestGet(context) {
 
   } catch (error) {
 
+    console.error(
+      "OHLC endpoint error:",
+      error
+    );
+
     return Response.json(
       {
         status: "error",
@@ -116,8 +155,12 @@ export async function onRequestGet(context) {
           error.message ||
           "Unable to fetch chart data"
       },
-      { status: 500 }
+      {
+        status: 500,
+        headers: {
+          "Cache-Control": "no-store"
+        }
+      }
     );
-
   }
 }
