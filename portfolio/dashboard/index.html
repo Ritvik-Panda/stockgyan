@@ -1064,6 +1064,58 @@
       display: none;
     }
 
+
+    /* --------------------------------
+       SMART BROKER IMPORT
+    -------------------------------- */
+    .smart-import-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 9999;
+    }
+    .smart-import-overlay.show { display: flex; }
+    .smart-import-modal {
+      width: min(1100px, 100%);
+      max-height: 88vh;
+      overflow: auto;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 25px 70px rgba(15,23,42,.25);
+      padding: 22px;
+    }
+    .smart-import-head {
+      display:flex; justify-content:space-between; gap:16px; align-items:flex-start;
+      margin-bottom: 14px;
+    }
+    .smart-import-title { font-size:20px; font-weight:900; color:#082a63; }
+    .smart-import-subtitle { margin-top:5px; color:#667085; font-size:13px; line-height:1.45; }
+    .smart-import-close {
+      border:1px solid #d0d5dd; background:#fff; border-radius:9px; padding:7px 11px; cursor:pointer;
+    }
+    .smart-import-summary {
+      display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin:14px 0;
+    }
+    .smart-import-stat { border:1px solid #e4e7ec; border-radius:12px; padding:11px 13px; background:#f8fafc; }
+    .smart-import-stat strong { display:block; font-size:18px; color:#172033; }
+    .smart-import-stat span { font-size:12px; color:#667085; }
+    .smart-import-table-wrap { overflow:auto; border:1px solid #e4e7ec; border-radius:12px; }
+    .smart-import-table { width:100%; border-collapse:collapse; min-width:760px; }
+    .smart-import-table th, .smart-import-table td { padding:9px 10px; border-bottom:1px solid #eaecf0; text-align:left; font-size:12px; vertical-align:top; }
+    .smart-import-table th { background:#f8fafc; color:#475467; font-weight:800; position:sticky; top:0; }
+    .smart-import-badge { display:inline-block; padding:3px 7px; border-radius:999px; font-weight:800; font-size:11px; }
+    .smart-import-ok { background:#ecfdf3; color:#027a48; }
+    .smart-import-warn { background:#fffaeb; color:#b54708; }
+    .smart-import-actions { display:flex; justify-content:flex-end; gap:9px; flex-wrap:wrap; margin-top:16px; }
+    .smart-import-note { margin-top:12px; font-size:12px; color:#667085; line-height:1.5; }
+    @media (max-width:700px) {
+      .smart-import-summary { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    }
+
 </style>
 </head>
 
@@ -2576,11 +2628,12 @@
 
 
     /* --------------------------------
-       CSV HOLDINGS IMPORT
+       SMART BROKER IMPORT
     -------------------------------- */
 
-    function openImportHoldings() {
+    let smartImportPreview = null;
 
+    function openImportHoldings() {
       const selectedId = portfolioSelect.value;
       const portfolio = portfolios.find(function(item) {
         return item.id === selectedId;
@@ -2592,7 +2645,6 @@
       }
 
       const input = document.getElementById("holdingsCsvInput");
-
       if (!input) {
         alert("Import control is unavailable.");
         return;
@@ -2602,578 +2654,378 @@
       input.click();
     }
 
-    function parseCsvLine(line) {
-
-      const values = [];
-      let value = "";
-      let quoted = false;
-
-      for (let i = 0; i < line.length; i++) {
-
-        const ch = line[i];
-
-        if (ch === '"') {
-
-          if (quoted && line[i + 1] === '"') {
-            value += '"';
-            i++;
-          } else {
-            quoted = !quoted;
-          }
-
-        } else if (ch === "," && !quoted) {
-
-          values.push(value);
-          value = "";
-
-        } else {
-
-          value += ch;
-
-        }
-      }
-
-      values.push(value);
-
-      return values;
-    }
-
     function parseCsvText(text) {
-
       const rows = [];
       let row = [];
       let value = "";
       let quoted = false;
 
       for (let i = 0; i < text.length; i++) {
-
         const ch = text[i];
-
         if (ch === '"') {
-
           if (quoted && text[i + 1] === '"') {
             value += '"';
             i++;
           } else {
             quoted = !quoted;
           }
-
         } else if (ch === "," && !quoted) {
-
           row.push(value);
           value = "";
-
         } else if ((ch === "\n" || ch === "\r") && !quoted) {
-
-          if (ch === "\r" && text[i + 1] === "\n") {
-            i++;
-          }
-
+          if (ch === "\r" && text[i + 1] === "\n") i++;
           row.push(value);
           value = "";
-
-          if (row.some(function(cell) {
-            return String(cell || "").trim() !== "";
-          })) {
-            rows.push(row);
-          }
-
+          if (row.some(function(cell) { return String(cell || "").trim() !== ""; })) rows.push(row);
           row = [];
-
         } else {
-
           value += ch;
-
         }
       }
 
       if (value !== "" || row.length) {
         row.push(value);
-
-        if (row.some(function(cell) {
-          return String(cell || "").trim() !== "";
-        })) {
-          rows.push(row);
-        }
+        if (row.some(function(cell) { return String(cell || "").trim() !== ""; })) rows.push(row);
       }
-
       return rows;
     }
 
     function normalizeCsvHeader(value) {
-
       return String(value || "")
         .replace(/^\uFEFF/, "")
         .trim()
         .toLowerCase()
+        .replace(/[_\-\/]+/g, " ")
         .replace(/\s+/g, " ");
     }
 
     function normalizeStockName(value) {
-
       return String(value || "")
         .toLowerCase()
         .replace(/&/g, "and")
         .replace(/[^a-z0-9]+/g, " ")
         .replace(/\bltd\b/g, "")
         .replace(/\blimited\b/g, "")
+        .replace(/\bcorporation\b/g, "corp")
+        .replace(/\bcompany\b/g, "")
         .replace(/\s+/g, " ")
         .trim();
     }
 
     function findCsvColumn(headers, names) {
-
+      const normalized = headers.map(normalizeCsvHeader);
       for (const name of names) {
-
         const target = normalizeCsvHeader(name);
-
-        const index = headers.findIndex(function(header) {
-          return normalizeCsvHeader(header) === target;
-        });
-
-        if (index !== -1) {
-          return index;
-        }
+        const index = normalized.indexOf(target);
+        if (index !== -1) return index;
       }
-
       return -1;
     }
 
-    async function searchImportedStock(name, isin) {
+    function findBrokerHeaderRow(rows) {
+      const nameAliases = [
+        "script name", "stock name", "security name", "security", "scrip name",
+        "symbol", "trading symbol", "company name", "name"
+      ];
+      const qtyAliases = ["quantity", "qty", "holding quantity", "net quantity", "sellable qty"];
+      const avgAliases = [
+        "avg unit cost", "average price", "avg price", "average cost", "avg cost",
+        "buy average", "buy avg", "purchase price", "average buy price"
+      ];
 
+      const hasAlias = function(row, aliases) {
+        const set = row.map(normalizeCsvHeader);
+        return aliases.some(function(alias) { return set.indexOf(normalizeCsvHeader(alias)) !== -1; });
+      };
+
+      for (let i = 0; i < Math.min(rows.length, 30); i++) {
+        if (hasAlias(rows[i], nameAliases) && hasAlias(rows[i], qtyAliases) && hasAlias(rows[i], avgAliases)) return i;
+      }
+      return 0;
+    }
+
+    function parseNumber(value) {
+      let text = String(value ?? "").trim();
+      if (!text) return NaN;
+      text = text.replace(/₹/g, "").replace(/,/g, "").replace(/\s/g, "");
+      if (/^\(.*\)$/.test(text)) text = "-" + text.slice(1, -1);
+      return Number(text);
+    }
+
+    async function searchImportedStock(name, isin, symbol) {
       const queries = [];
-
-      if (isin) {
-        queries.push(isin);
-      }
-
-      if (name) {
-        queries.push(name);
-      }
+      if (isin) queries.push(isin);
+      if (symbol && symbol !== name) queries.push(symbol);
+      if (name) queries.push(name);
 
       for (const query of queries) {
-
         try {
-
-          const response = await fetch(
-            "/api/market/search?query=" +
-            encodeURIComponent(query),
-            {
-              method: "GET",
-              cache: "no-store"
-            }
-          );
-
-          if (!response.ok) {
-            continue;
-          }
-
+          const response = await fetch("/api/market/search?query=" + encodeURIComponent(query), {
+            method: "GET", cache: "no-store"
+          });
+          if (!response.ok) continue;
           const data = await response.json();
-
-          if (data.status !== "success") {
-            continue;
-          }
-
-          const list = Array.isArray(data.data)
-            ? data.data
-            : [];
-
-          if (!list.length) {
-            continue;
-          }
-
-          const cleanIsin = String(isin || "")
-            .trim()
-            .toUpperCase();
+          if (data.status !== "success" || !Array.isArray(data.data) || !data.data.length) continue;
+          const list = data.data;
+          const cleanIsin = String(isin || "").trim().toUpperCase();
+          const cleanName = normalizeStockName(name);
+          const cleanSymbol = normalizeStockName(symbol);
 
           if (cleanIsin) {
-
             const isinMatch = list.find(function(stock) {
-              return String(
-                stock.isin ||
-                stock.ISIN ||
-                stock.isin_code ||
-                ""
-              )
-                .trim()
-                .toUpperCase() === cleanIsin;
+              return String(stock.isin || stock.ISIN || stock.isin_code || "").trim().toUpperCase() === cleanIsin && stock.instrument_key;
             });
-
-            if (isinMatch && isinMatch.instrument_key) {
-              return isinMatch;
-            }
+            if (isinMatch) return isinMatch;
           }
 
-          const cleanName = normalizeStockName(name);
+          if (cleanSymbol) {
+            const symbolMatch = list.find(function(stock) {
+              return normalizeStockName(stock.trading_symbol || stock.symbol || "") === cleanSymbol && stock.instrument_key;
+            });
+            if (symbolMatch) return symbolMatch;
+          }
 
           const exactName = list.find(function(stock) {
-
-            return normalizeStockName(
-              stock.name ||
-              stock.trading_symbol ||
-              stock.symbol ||
-              ""
-            ) === cleanName &&
-            stock.instrument_key;
-
+            return normalizeStockName(stock.name || stock.trading_symbol || stock.symbol || "") === cleanName && stock.instrument_key;
           });
-
-          if (exactName) {
-            return exactName;
-          }
+          if (exactName) return exactName;
 
           const nameContains = list.find(function(stock) {
-
-            const resultName = normalizeStockName(
-              stock.name ||
-              stock.trading_symbol ||
-              stock.symbol ||
-              ""
-            );
-
-            return (
-              resultName.includes(cleanName) ||
-              cleanName.includes(resultName)
-            ) &&
-            stock.instrument_key;
-
+            const resultName = normalizeStockName(stock.name || stock.trading_symbol || stock.symbol || "");
+            return cleanName && (resultName.includes(cleanName) || cleanName.includes(resultName)) && stock.instrument_key;
           });
-
-          if (nameContains) {
-            return nameContains;
-          }
-
-          const firstValid = list.find(function(stock) {
-            return !!stock.instrument_key;
-          });
-
-          if (firstValid) {
-            return firstValid;
-          }
-
+          if (nameContains) return nameContains;
         } catch (error) {
-          console.warn(
-            "Import stock search failed:",
-            query,
-            error
-          );
+          console.warn("Import stock search failed:", query, error);
         }
       }
-
       return null;
     }
 
-    async function handleHoldingsCsv(event) {
+    function ensureSmartImportModal() {
+      if (document.getElementById("smartImportOverlay")) return;
+      const overlay = document.createElement("div");
+      overlay.id = "smartImportOverlay";
+      overlay.className = "smart-import-overlay";
+      overlay.innerHTML = `
+        <div class="smart-import-modal" role="dialog" aria-modal="true" aria-labelledby="smartImportTitle">
+          <div class="smart-import-head">
+            <div>
+              <div id="smartImportTitle" class="smart-import-title">Smart Broker Import — Preview</div>
+              <div id="smartImportSubtitle" class="smart-import-subtitle"></div>
+            </div>
+            <button class="smart-import-close" type="button" onclick="closeSmartImportPreview()">✕</button>
+          </div>
+          <div id="smartImportSummary" class="smart-import-summary"></div>
+          <div id="smartImportTable" class="smart-import-table-wrap"></div>
+          <div class="smart-import-note">
+            StockGyan imports quantity and average cost. Current price, current value and P&amp;L are refreshed from the market data already used by the dashboard. Unmatched rows are not saved.
+          </div>
+          <div class="smart-import-actions">
+            <button class="btn btn-light" type="button" onclick="closeSmartImportPreview()">Cancel</button>
+            <button class="btn btn-green" id="smartImportConfirmBtn" type="button" onclick="confirmSmartImport()">Import Matched Holdings</button>
+          </div>
+        </div>`;
+      overlay.addEventListener("click", function(event) {
+        if (event.target === overlay) closeSmartImportPreview();
+      });
+      document.body.appendChild(overlay);
+    }
 
+    function closeSmartImportPreview() {
+      const overlay = document.getElementById("smartImportOverlay");
+      if (overlay) overlay.classList.remove("show");
+      smartImportPreview = null;
+    }
+
+    function renderSmartImportPreview(preview) {
+      ensureSmartImportModal();
+      const overlay = document.getElementById("smartImportOverlay");
+      const summary = document.getElementById("smartImportSummary");
+      const table = document.getElementById("smartImportTable");
+      const subtitle = document.getElementById("smartImportSubtitle");
+      const confirm = document.getElementById("smartImportConfirmBtn");
+
+      subtitle.textContent = preview.fileName + " → " + preview.portfolioName + " • Review before anything is saved.";
+      summary.innerHTML = [
+        [preview.rows.length, "Rows detected"],
+        [preview.matched.length, "Matched"],
+        [preview.unmatched.length, "Unmatched"],
+        [preview.duplicateCount, "Duplicates combined"]
+      ].map(function(item) {
+        return '<div class="smart-import-stat"><strong>' + item[0] + '</strong><span>' + item[1] + '</span></div>';
+      }).join("");
+
+      let html = '<table class="smart-import-table"><thead><tr><th>Status</th><th>Broker Stock</th><th>Matched Stock</th><th>ISIN</th><th>Qty</th><th>Avg Cost</th><th>Action</th></tr></thead><tbody>';
+      preview.rows.forEach(function(row) {
+        const matched = !!row.stock;
+        html += '<tr>' +
+          '<td><span class="smart-import-badge ' + (matched ? 'smart-import-ok' : 'smart-import-warn') + '">' + (matched ? 'Matched' : 'Review') + '</span></td>' +
+          '<td>' + escapeHtml(row.name) + (row.symbol ? '<div style="color:#667085;margin-top:2px;">' + escapeHtml(row.symbol) + '</div>' : '') + '</td>' +
+          '<td>' + (matched ? escapeHtml(row.stock.name || row.stock.trading_symbol || row.stock.symbol || row.name) : '<span style="color:#b54708;">Not identified</span>') + '</td>' +
+          '<td>' + escapeHtml(row.isin || '—') + '</td>' +
+          '<td>' + formatNumber(row.quantity) + '</td>' +
+          '<td>₹' + formatMoney(row.avgPrice) + '</td>' +
+          '<td>' + (matched ? 'Will add / combine' : 'Skipped') + '</td>' +
+        '</tr>';
+      });
+      html += '</tbody></table>';
+      table.innerHTML = html;
+      confirm.disabled = preview.matched.length === 0;
+      confirm.textContent = preview.matched.length ? 'Import ' + preview.matched.length + ' Matched Holdings' : 'No Matched Holdings';
+      overlay.classList.add("show");
+    }
+
+    function formatNumber(value) {
+      return Number(value || 0).toLocaleString("en-IN", { maximumFractionDigits: 4 });
+    }
+
+    async function handleHoldingsCsv(event) {
       const input = event.target;
       const file = input.files && input.files[0];
-
-      if (!file) {
-        return;
-      }
+      if (!file) return;
 
       const selectedId = portfolioSelect.value;
-      const portfolio = portfolios.find(function(item) {
-        return item.id === selectedId;
-      });
-
+      const portfolio = portfolios.find(function(item) { return item.id === selectedId; });
       if (!portfolio) {
         alert("Please select a portfolio first.");
-        return;
-      }
-
-      const confirmed = confirm(
-        'Import "' +
-        file.name +
-        '" into "' +
-        portfolio.name +
-        '"?\n\n' +
-        "Existing matching holdings will be combined using a weighted average cost."
-      );
-
-      if (!confirmed) {
         input.value = "";
         return;
       }
 
       try {
-
         const csvText = await file.text();
         const rows = parseCsvText(csvText);
+        if (rows.length < 2) throw new Error("The CSV file does not contain any holding rows.");
 
-        if (rows.length < 2) {
-          throw new Error(
-            "The CSV file does not contain any holding rows."
-          );
-        }
+        const headerRowIndex = findBrokerHeaderRow(rows);
+        const headers = rows[headerRowIndex];
 
-        const headers = rows[0];
+        const nameIndex = findCsvColumn(headers, ["Script Name", "Stock Name", "Security Name", "Security", "Scrip Name", "Company Name", "Name"]);
+        const symbolIndex = findCsvColumn(headers, ["Trading Symbol", "Symbol", "Ticker", "Stock Symbol"]);
+        const isinIndex = findCsvColumn(headers, ["ISIN", "ISIN Code", "Security ISIN"]);
+        const quantityIndex = findCsvColumn(headers, ["Quantity", "Qty", "Holding Quantity", "Net Quantity", "Sellable Qty", "Free Qty"]);
+        const avgPriceIndex = findCsvColumn(headers, ["Avg Unit Cost", "Average Price", "Avg Price", "Average Cost", "Avg Cost", "Buy Average", "Buy Avg", "Purchase Price", "Average Buy Price"]);
 
-        const nameIndex = findCsvColumn(
-          headers,
-          ["Script Name", "Stock Name", "Security Name", "Name"]
-        );
-
-        const isinIndex = findCsvColumn(
-          headers,
-          ["ISIN"]
-        );
-
-        const quantityIndex = findCsvColumn(
-          headers,
-          ["Quantity", "Qty"]
-        );
-
-        const avgPriceIndex = findCsvColumn(
-          headers,
-          [
-            "Avg Unit Cost",
-            "Avg Unit Cost  ",
-            "Average Price",
-            "Avg Price",
-            "Average Cost"
-          ]
-        );
-
-        if (
-          nameIndex === -1 ||
-          quantityIndex === -1 ||
-          avgPriceIndex === -1
-        ) {
-          throw new Error(
-            "CSV columns not recognized. Required columns: Script Name, Quantity and Avg Unit Cost."
-          );
-        }
+        if (nameIndex === -1 && symbolIndex === -1) throw new Error("Stock name or symbol column was not recognized.");
+        if (quantityIndex === -1) throw new Error("Quantity column was not recognized.");
+        if (avgPriceIndex === -1) throw new Error("Average cost / average price column was not recognized.");
 
         const candidates = [];
+        rows.slice(headerRowIndex + 1).forEach(function(row) {
+          const name = nameIndex >= 0 ? String(row[nameIndex] || "").trim() : "";
+          const symbol = symbolIndex >= 0 ? String(row[symbolIndex] || "").trim() : "";
+          const isin = isinIndex >= 0 ? String(row[isinIndex] || "").trim() : "";
+          const quantity = parseNumber(row[quantityIndex]);
+          const avgPrice = parseNumber(row[avgPriceIndex]);
+          const displayName = name || symbol;
 
-        rows.slice(1).forEach(function(row) {
-
-          const name = String(
-            row[nameIndex] || ""
-          ).trim();
-
-          const isin = isinIndex >= 0
-            ? String(row[isinIndex] || "").trim()
-            : "";
-
-          const quantity = Number(
-            String(row[quantityIndex] || "")
-              .replace(/,/g, "")
-              .trim()
-          );
-
-          const avgPrice = Number(
-            String(row[avgPriceIndex] || "")
-              .replace(/,/g, "")
-              .trim()
-          );
-
-          // Ignore category/header rows and non-equity rows without
-          // the minimum data needed to create a holding.
-          if (
-            !name ||
-            !Number.isFinite(quantity) ||
-            quantity <= 0 ||
-            !Number.isFinite(avgPrice) ||
-            avgPrice <= 0
-          ) {
-            return;
-          }
-
-          candidates.push({
-            name: name,
-            isin: isin,
-            quantity: quantity,
-            avgPrice: avgPrice
-          });
-
+          if (!displayName || !Number.isFinite(quantity) || quantity <= 0 || !Number.isFinite(avgPrice) || avgPrice <= 0) return;
+          candidates.push({ name: displayName, symbol, isin, quantity, avgPrice });
         });
 
-        if (!candidates.length) {
-          throw new Error(
-            "No valid holdings were found in the CSV."
-          );
-        }
+        if (!candidates.length) throw new Error("No valid holdings were found in the CSV.");
 
-        if (!holdings[selectedId]) {
-          holdings[selectedId] = [];
-        }
-
-        let imported = 0;
-        let combined = 0;
-        let failed = [];
-
-        const statusPrefix =
-          "Importing " +
-          candidates.length +
-          " holding" +
-          (candidates.length === 1 ? "" : "s") +
-          "...";
-
-        for (let i = 0; i < candidates.length; i++) {
-
-          const item = candidates[i];
-
-          try {
-
-            const stock = await searchImportedStock(
-              item.name,
-              item.isin
-            );
-
-            if (!stock || !stock.instrument_key) {
-
-              failed.push(
-                item.name
-              );
-
-              continue;
-            }
-
-            const existing = holdings[selectedId].find(
-              function(row) {
-                return row.instrument_key === stock.instrument_key;
-              }
-            );
-
-            if (existing) {
-
-              const oldQty = Number(existing.quantity) || 0;
-              const oldAvg = Number(existing.avg_price) || 0;
-
-              const totalQty =
-                oldQty + item.quantity;
-
-              const totalCost =
-                (oldQty * oldAvg) +
-                (item.quantity * item.avgPrice);
-
-              existing.quantity = totalQty;
-              existing.avg_price =
-                totalCost / totalQty;
-
-              combined++;
-
-            } else {
-
-              holdings[selectedId].push({
-
-                instrument_key:
-                  stock.instrument_key,
-
-                symbol:
-                  stock.trading_symbol ||
-                  stock.symbol ||
-                  "",
-
-                name:
-                  stock.name ||
-                  item.name,
-
-                exchange:
-                  stock.exchange ||
-                  (stock.instrument_key || "")
-                    .split("_")[0],
-
-                quantity:
-                  item.quantity,
-
-                avg_price:
-                  item.avgPrice
-
-              });
-
-              imported++;
-
-            }
-
-          } catch (error) {
-
-            console.warn(
-              "Unable to import holding:",
-              item.name,
-              error
-            );
-
-            failed.push(
-              item.name
-            );
-
+        const unique = [];
+        const keys = new Map();
+        candidates.forEach(function(item) {
+          const key = item.isin ? "isin:" + item.isin.toUpperCase() : "name:" + normalizeStockName(item.symbol || item.name);
+          if (!keys.has(key)) {
+            const copy = Object.assign({}, item);
+            keys.set(key, copy);
+            unique.push(copy);
+          } else {
+            const existing = keys.get(key);
+            const totalQty = existing.quantity + item.quantity;
+            existing.avgPrice = ((existing.quantity * existing.avgPrice) + (item.quantity * item.avgPrice)) / totalQty;
+            existing.quantity = totalQty;
           }
+        });
 
-          const statusText =
-            statusPrefix +
-            " " +
-            (i + 1) +
-            "/" +
-            candidates.length;
+        const preview = {
+          fileName: file.name,
+          portfolioName: portfolio.name,
+          selectedId: selectedId,
+          rows: [],
+          matched: [],
+          unmatched: [],
+          duplicateCount: candidates.length - unique.length
+        };
 
-          const subtitle =
-            document.querySelector(
-              ".holdings-card .card-subtitle"
-            );
+        const subtitle = document.querySelector(".holdings-card .card-subtitle");
+        if (subtitle) subtitle.textContent = "Smart Import: matching holdings...";
 
-          if (subtitle) {
-            subtitle.dataset.importStatus =
-              statusText;
-          }
-
+        for (let i = 0; i < unique.length; i++) {
+          const item = unique[i];
+          const stock = await searchImportedStock(item.name, item.isin, item.symbol);
+          const row = Object.assign({}, item, { stock: stock });
+          preview.rows.push(row);
+          if (stock) preview.matched.push(row); else preview.unmatched.push(row);
+          if (subtitle) subtitle.textContent = "Smart Import: matching " + (i + 1) + "/" + unique.length + "...";
         }
 
-        saveHoldings();
-
-        renderHoldings();
-        updateSummary();
-        fetchPortfolioQuotes();
-
-        movingAverageCache = {};
-        performanceCache = {};
-
-        renderMovingAverageMonitor();
-        refreshMovingAverages();
-        refreshPortfolioPerformance();
-
-        let message =
-          "Import complete.\n\n" +
-          "New holdings: " +
-          imported +
-          "\n" +
-          "Combined with existing: " +
-          combined;
-
-        if (failed.length) {
-
-          message +=
-            "\n\nCould not identify " +
-            failed.length +
-            " holding" +
-            (failed.length === 1 ? "" : "s") +
-            ":\n• " +
-            failed.join("\n• ") +
-            "\n\nPlease add these manually.";
-
-        }
-
-        alert(message);
-
+        smartImportPreview = preview;
+        renderSmartImportPreview(preview);
+        if (subtitle) subtitle.textContent = "Stocks held in the selected portfolio";
       } catch (error) {
-
-        console.error(
-          "Holdings CSV import error:",
-          error
-        );
-
-        alert(
-          error.message ||
-          "Unable to import holdings CSV."
-        );
-
+        console.error("Smart broker import error:", error);
+        alert(error.message || "Unable to import holdings CSV.");
       } finally {
-
         input.value = "";
-
       }
+    }
+
+    async function confirmSmartImport() {
+      if (!smartImportPreview || !smartImportPreview.matched.length) return;
+      const preview = smartImportPreview;
+      const selectedId = preview.selectedId;
+
+      if (!holdings[selectedId]) holdings[selectedId] = [];
+      let added = 0;
+      let combined = 0;
+
+      preview.matched.forEach(function(item) {
+        const stock = item.stock;
+        const existing = holdings[selectedId].find(function(row) {
+          return row.instrument_key === stock.instrument_key;
+        });
+
+        if (existing) {
+          const oldQty = Number(existing.quantity) || 0;
+          const oldAvg = Number(existing.avg_price) || 0;
+          const totalQty = oldQty + item.quantity;
+          const totalCost = (oldQty * oldAvg) + (item.quantity * item.avgPrice);
+          existing.quantity = totalQty;
+          existing.avg_price = totalCost / totalQty;
+          combined++;
+        } else {
+          holdings[selectedId].push({
+            instrument_key: stock.instrument_key,
+            symbol: stock.trading_symbol || stock.symbol || item.symbol || "",
+            name: stock.name || item.name,
+            exchange: stock.exchange || (stock.instrument_key || "").split("_")[0],
+            quantity: item.quantity,
+            avg_price: item.avgPrice
+          });
+          added++;
+        }
+      });
+
+      saveHoldings();
+      renderHoldings();
+      updateSummary();
+      fetchPortfolioQuotes();
+      movingAverageCache = {};
+      performanceCache = {};
+      renderMovingAverageMonitor();
+      refreshMovingAverages();
+      refreshPortfolioPerformance();
+
+      const skipped = preview.unmatched.length;
+      closeSmartImportPreview();
+      let message = "Smart import completed.\n\nNew holdings: " + added + "\nCombined with existing: " + combined;
+      if (skipped) message += "\nSkipped / not identified: " + skipped + "\n\nThese rows were not saved and can be added manually.";
+      alert(message);
     }
 
     function addHolding() {
