@@ -294,6 +294,54 @@
        QUICK SECTION ACCESS
     ========================= */
 
+    .combined-portfolio-card {
+      margin-bottom: 24px;
+    }
+
+    .combined-portfolio-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: #ecfdf3;
+      color: #067647;
+      border: 1px solid #b7dfc8;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .combined-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      padding: 0 20px 20px;
+    }
+
+    .combined-summary-item {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      padding: 13px 14px;
+    }
+
+    .combined-summary-label {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .25px;
+    }
+
+    .combined-summary-value {
+      margin-top: 6px;
+      color: var(--navy);
+      font-size: 19px;
+      font-weight: 800;
+    }
+
+    .combined-summary-value.positive { color: var(--green); }
+    .combined-summary-value.negative { color: #dc3545; }
+
     .section-quick-access {
       background: #ffffff;
       border: 1px solid var(--border);
@@ -319,9 +367,9 @@
     }
 
     .section-quick-btn {
-      border: 1px solid var(--border);
-      background: #f8fafc;
-      color: var(--navy);
+      border: 1px solid #b7dfc8;
+      background: #ecfdf3;
+      color: #067647;
       border-radius: 10px;
       padding: 10px 9px;
       cursor: pointer;
@@ -335,8 +383,8 @@
     }
 
     .section-quick-btn:hover {
-      border-color: #b9c5d6;
-      background: #edf3ff;
+      border-color: #86d4a5;
+      background: #dff7e9;
       transform: translateY(-1px);
     }
 
@@ -344,7 +392,8 @@
       width: 20px;
       height: 20px;
       border-radius: 6px;
-      background: #e7eefb;
+      background: #159447;
+      color: #ffffff;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -357,10 +406,10 @@
       width: 34px;
       height: 34px;
       flex: 0 0 34px;
-      border: 1px solid var(--border);
+      border: 1px solid #b7dfc8;
       border-radius: 9px;
-      background: #f8fafc;
-      color: var(--navy);
+      background: #ecfdf3;
+      color: #067647;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
@@ -372,8 +421,8 @@
     }
 
     .section-toggle:hover {
-      background: #edf3ff;
-      border-color: #b9c5d6;
+      background: #dff7e9;
+      border-color: #86d4a5;
     }
 
     .card-header-actions {
@@ -1052,6 +1101,10 @@
         grid-template-columns: 1fr;
       }
 
+      .combined-summary-grid {
+        grid-template-columns: 1fr;
+      }
+
       .quick-actions {
         grid-template-columns: 1fr;
       }
@@ -1447,6 +1500,42 @@
           <span class="section-quick-plus">+</span> Download
         </button>
 
+      </div>
+    </section>
+
+
+    <!-- =========================
+         COMBINED PORTFOLIO DETAILS
+    ========================= -->
+
+    <section class="card combined-portfolio-card" id="combinedPortfolioCard">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Combined Portfolio Details</div>
+          <div class="card-subtitle">All portfolios combined</div>
+        </div>
+        <div class="card-header-actions">
+          <span id="combinedPortfolioCount" class="combined-portfolio-badge">0 Portfolios</span>
+        </div>
+      </div>
+
+      <div class="combined-summary-grid">
+        <div class="combined-summary-item">
+          <div class="combined-summary-label">All Portfolio Invested Value</div>
+          <div id="combinedInvestedValue" class="combined-summary-value">₹0.00</div>
+        </div>
+        <div class="combined-summary-item">
+          <div class="combined-summary-label">Combined Current Value</div>
+          <div id="combinedCurrentValue" class="combined-summary-value">—</div>
+        </div>
+        <div class="combined-summary-item">
+          <div class="combined-summary-label">Combined Total Gain</div>
+          <div id="combinedTotalGain" class="combined-summary-value">—</div>
+        </div>
+        <div class="combined-summary-item">
+          <div class="combined-summary-label">Combined Today's Gain</div>
+          <div id="combinedTodayGain" class="combined-summary-value">—</div>
+        </div>
       </div>
     </section>
 
@@ -2333,6 +2422,7 @@
     // Live quote cache for the selected portfolio.
     // Prices come from StockGyan's secure server-side Upstox proxy.
     let quoteCache = {};
+    let combinedQuoteCache = {};
     let quoteSource = "";
     let quoteRefreshTimer = null;
     let quoteRequestInProgress = false;
@@ -3189,6 +3279,7 @@
       if (!list.length) {
         quoteCache = {};
         quoteSource = "";
+        updateCombinedPortfolioDetails();
         renderHoldings();
         updateMarketDataStatus();
         return;
@@ -3292,6 +3383,7 @@
         quoteCache = nextCache;
         quoteSource = data.source || "";
 
+        updateCombinedPortfolioDetails();
         renderHoldings();
         updateMarketDataStatus();
 
@@ -3311,6 +3403,143 @@
 
       } finally {
         quoteRequestInProgress = false;
+      }
+    }
+
+    function getAllPortfolioHoldings() {
+      const result = [];
+      const seen = {};
+
+      portfolios.forEach(function(portfolio) {
+        const list = holdings[portfolio.id] || [];
+
+        list.forEach(function(item) {
+          if (!item || !item.instrument_key) return;
+
+          const key = item.instrument_key;
+          const uniqueId = portfolio.id + "|" + key;
+
+          if (!seen[uniqueId]) {
+            result.push(item);
+            seen[uniqueId] = true;
+          }
+        });
+      });
+
+      return result;
+    }
+
+    function updateCombinedPortfolioDetails() {
+      const all = getAllPortfolioHoldings();
+
+      let invested = 0;
+      let currentValue = 0;
+      let totalGain = 0;
+      let todayGain = 0;
+      let previousValue = 0;
+      let hasCurrent = false;
+      let hasToday = false;
+
+      all.forEach(function(item) {
+        const quantity = Number(item.quantity) || 0;
+        const avgPrice = Number(item.avg_price) || 0;
+        const investedValue = quantity * avgPrice;
+        invested += investedValue;
+
+        const quote = combinedQuoteCache[item.instrument_key] || null;
+        const ltp = quote && Number.isFinite(quote.lastPrice) ? quote.lastPrice : null;
+        const dailyChange = quote && Number.isFinite(quote.dailyChange) ? quote.dailyChange : null;
+        const previousClose = quote && Number.isFinite(quote.previousClose) ? quote.previousClose : null;
+
+        if (ltp !== null) {
+          const value = quantity * ltp;
+          currentValue += value;
+          totalGain += value - investedValue;
+          hasCurrent = true;
+        }
+
+        if (dailyChange !== null) {
+          todayGain += quantity * dailyChange;
+          hasToday = true;
+        }
+
+        if (previousClose !== null) {
+          previousValue += quantity * previousClose;
+        }
+      });
+
+      const combinedGainPercent = hasCurrent && invested > 0
+        ? (totalGain / invested) * 100
+        : null;
+
+      const combinedTodayPercent = hasToday && previousValue > 0
+        ? (todayGain / previousValue) * 100
+        : null;
+
+      document.getElementById("combinedPortfolioCount").textContent =
+        portfolios.length + (portfolios.length === 1 ? " Portfolio" : " Portfolios");
+
+      document.getElementById("combinedInvestedValue").textContent =
+        "₹" + formatMoney(invested);
+
+      const currentEl = document.getElementById("combinedCurrentValue");
+      currentEl.textContent = hasCurrent ? "₹" + formatMoney(currentValue) : "—";
+
+      const gainEl = document.getElementById("combinedTotalGain");
+      gainEl.textContent = hasCurrent ? formatSignedMoney(totalGain) : "—";
+      gainEl.className = "combined-summary-value " + valueClass(totalGain);
+
+      const todayEl = document.getElementById("combinedTodayGain");
+      todayEl.textContent = hasToday
+        ? formatSignedMoney(todayGain) + (combinedTodayPercent !== null ? " (" + formatSignedPercent(combinedTodayPercent) + ")" : "")
+        : "—";
+      todayEl.className = "combined-summary-value " + valueClass(todayGain);
+    }
+
+    async function fetchCombinedPortfolioQuotes() {
+      const all = getAllPortfolioHoldings();
+
+      if (!all.length) {
+        combinedQuoteCache = {};
+        updateCombinedPortfolioDetails();
+        return;
+      }
+
+      const keys = Array.from(new Set(all.map(function(item) {
+        return item.instrument_key;
+      }).filter(Boolean)));
+
+      try {
+        const response = await fetch(
+          "/api/market/batch?instrument_keys=" +
+          keys.map(encodeURIComponent).join(","),
+          {
+            method: "GET",
+            cache: "no-store",
+            headers: { "Accept": "application/json" }
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || data.status === "error") {
+          throw new Error(data.message || "Unable to fetch combined portfolio prices.");
+        }
+
+        const nextCache = {};
+
+        keys.forEach(function(key) {
+          const quote = getQuoteFromResponse(data, key);
+          if (quote && quote.lastPrice !== null) {
+            nextCache[key] = quote;
+          }
+        });
+
+        combinedQuoteCache = nextCache;
+        updateCombinedPortfolioDetails();
+      } catch (error) {
+        console.warn("StockGyan: combined portfolio quote update failed", error);
+        updateCombinedPortfolioDetails();
       }
     }
 
@@ -4786,6 +5015,7 @@
       // Refresh live prices every 30 seconds.
       quoteRefreshTimer = setInterval(function() {
         fetchPortfolioQuotes();
+        fetchCombinedPortfolioQuotes();
       }, 30000);
     }
 
@@ -4942,6 +5172,7 @@
       updateSummary();
       renderMovingAverageMonitor();
       fetchPortfolioQuotes();
+      fetchCombinedPortfolioQuotes();
       refreshMovingAverages();
 
     }
@@ -5041,6 +5272,7 @@
     startQuoteRefresh();
     startMovingAverageRefresh();
     fetchPortfolioQuotes();
+    fetchCombinedPortfolioQuotes();
     refreshMovingAverages();
     refreshPortfolioPerformance();
 
