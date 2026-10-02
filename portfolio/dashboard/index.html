@@ -1116,6 +1116,33 @@
       .smart-import-summary { grid-template-columns:repeat(2,minmax(0,1fr)); }
     }
 
+
+<style>
+/* StockGyan collapsible sections */
+.sg-collapse-wrap { margin-top: 16px; }
+.sg-collapse-toggle {
+  width: 100%;
+  border: 0;
+  border-radius: 10px;
+  padding: 11px 14px;
+  background: #159447;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  box-shadow: 0 3px 10px rgba(21,148,71,.15);
+}
+.sg-collapse-toggle:hover { opacity: .95; }
+.sg-collapse-arrow { font-size: 15px; transition: transform .18s ease; }
+.sg-collapse-toggle[aria-expanded="true"] .sg-collapse-arrow { transform: rotate(180deg); }
+.sg-collapse-content { display: block; }
+</style>
+
 </style>
 </head>
 
@@ -5571,20 +5598,15 @@
       const list = getCurrentPortfolioHoldings();
 
       if (!list.length) {
-        box.innerHTML =
-          '<div style="color:var(--muted);padding:8px 0;">Add holdings to view relevant portfolio news.</div>';
+        box.innerHTML = "Add holdings to search relevant portfolio news.";
         return;
       }
 
-      // Google News is opened directly from the user's browser. This avoids
-      // third-party RSS/CORS/server-feed failures while keeping the dashboard
-      // independent of the holdings, D1 sync and market-data systems.
       const holdings = list.slice(0, 12).map(function(item) {
         const symbol = String(item.symbol || "").trim();
         const name = String(item.name || symbol || "Stock").trim();
-        const searchText = (name + " " + symbol + " NSE stock India").trim();
-        const url = "https://news.google.com/search?q=" +
-          encodeURIComponent(searchText) +
+        const query = (name + " " + symbol + " NSE stock India").trim();
+        const url = "https://news.google.com/search?q=" + encodeURIComponent(query) +
           "&hl=en-IN&gl=IN&ceid=IN:en";
 
         return {
@@ -5604,10 +5626,10 @@
 
       box.innerHTML =
         '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;">' +
-          '<div style="font-size:12px;color:var(--muted);">News is searched live from Google News for your portfolio holdings.</div>' +
+          '<div style="font-size:12px;color:var(--muted);">Latest company news is opened directly from Google News.</div>' +
           '<a href="' + escapeHtml(allUrl) + '" target="_blank" rel="noopener noreferrer" ' +
             'style="display:inline-block;padding:7px 10px;border-radius:8px;background:var(--navy);color:#fff;text-decoration:none;font-size:12px;font-weight:800;">' +
-            'Open All Portfolio News ↗' +
+            'Open All Portfolio News' +
           '</a>' +
         '</div>' +
         holdings.map(function(item) {
@@ -5901,7 +5923,63 @@
       }, 500);
     }
 
-  </script>
+  
+  function toggleSGSection(id, btn) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const open = el.style.display !== "none";
+    el.style.display = open ? "none" : "block";
+    btn.setAttribute("aria-expanded", String(!open));
+  }
+
+  function makeSGSectionCollapsible(section, title) {
+    if (!section || section.dataset.sgCollapsible === "1") return;
+    section.dataset.sgCollapsible = "1";
+
+    const content = document.createElement("div");
+    content.className = "sg-collapse-content";
+    content.id = "sg-collapse-" + Math.random().toString(36).slice(2);
+
+    while (section.firstChild) content.appendChild(section.firstChild);
+
+    const wrap = document.createElement("div");
+    wrap.className = "sg-collapse-wrap";
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "sg-collapse-toggle";
+    btn.setAttribute("aria-expanded", "true");
+    btn.innerHTML = "<span>" + title + "</span><span class=\"sg-collapse-arrow\">⌃</span>";
+    btn.onclick = function() { toggleSGSection(content.id, btn); };
+
+    wrap.appendChild(btn);
+    wrap.appendChild(content);
+    section.appendChild(wrap);
+  }
+
+  function initSGCollapsibles() {
+    const sections = Array.from(document.querySelectorAll("main > section"));
+    sections.forEach(function(section) {
+      const id = section.id || "";
+      let title = "";
+
+      if (section.classList.contains("portfolio-controls")) title = "📁 Portfolio Controls";
+      else if (section.classList.contains("summary-grid")) title = "📊 Portfolio Summary";
+      else if (id === "downloadPortfolioSection") title = "📥 Download Portfolio";
+      else if (section.classList.contains("main-grid")) title = "📈 Portfolio Performance & Leaders";
+      else if (section.querySelector(".holdings-card")) title = "📋 Holdings";
+      else if (section.querySelector("#analytics")) title = "📊 Portfolio Analytics";
+      else return;
+
+      makeSGSectionCollapsible(section, title);
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", function() {
+    setTimeout(initSGCollapsibles, 0);
+  });
+
+</script>
 
 </body>
 </html>
