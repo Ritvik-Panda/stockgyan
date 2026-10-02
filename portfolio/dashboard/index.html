@@ -5566,89 +5566,64 @@
       loadPortfolioNews();
     }
 
-    async function loadPortfolioNews() {
+    function loadPortfolioNews() {
       const box = document.getElementById("portfolioNewsList");
       const list = getCurrentPortfolioHoldings();
 
       if (!list.length) {
-        box.innerHTML = "Add holdings to load relevant portfolio news.";
+        box.innerHTML = "Add holdings to search relevant portfolio news.";
         return;
       }
 
-      const symbols = list
-        .map(function(item) {
-          return String(item.symbol || item.name || "").trim();
-        })
-        .filter(Boolean)
-        .slice(0, 8);
+      const holdings = list.slice(0, 12).map(function(item) {
+        const symbol = String(item.symbol || "").trim();
+        const name = String(item.name || symbol || "Stock").trim();
+        const query = (name + " " + symbol + " NSE stock India").trim();
+        const url = "https://news.google.com/search?q=" + encodeURIComponent(query) +
+          "&hl=en-IN&gl=IN&ceid=IN:en";
 
-      if (!symbols.length) {
-        box.innerHTML = "No stock names are available for news search.";
-        return;
-      }
+        return {
+          symbol: symbol || name,
+          name: name,
+          url: url
+        };
+      });
+
+      const allQuery = holdings.map(function(item) {
+        return '"' + item.name + '"';
+      }).join(" OR ");
+
+      const allUrl = "https://news.google.com/search?q=" +
+        encodeURIComponent(allQuery + " NSE stock India") +
+        "&hl=en-IN&gl=IN&ceid=IN:en";
 
       box.innerHTML =
-        '<div style="color:var(--muted);">Loading portfolio news…</div>';
-
-      try {
-        const response = await fetch(
-          "/api/portfolio/news?symbols=" +
-          symbols.map(encodeURIComponent).join(","),
-          {
-            method: "GET",
-            cache: "no-store",
-            headers: { "Accept": "application/json" }
-          }
-        );
-
-        const data = await response.json();
-
-        if (!response.ok || data.status === "error") {
-          throw new Error(data.message || "News unavailable.");
-        }
-
-        const articles = Array.isArray(data.articles)
-          ? data.articles
-          : [];
-
-        if (!articles.length) {
-          box.innerHTML =
-            '<div style="color:var(--muted);">No recent portfolio news was found.</div>';
-          return;
-        }
-
-        box.innerHTML = articles.slice(0, 12).map(function(article) {
-          const title = article.title || "Untitled";
-          const source = article.source || "News";
-          const date = article.published
-            ? new Date(article.published).toLocaleString("en-IN", {
-                day:"2-digit",
-                month:"short",
-                hour:"2-digit",
-                minute:"2-digit"
-              })
-            : "";
-
+        '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;">' +
+          '<div style="font-size:12px;color:var(--muted);">Latest company news is opened directly from Google News.</div>' +
+          '<a href="' + escapeHtml(allUrl) + '" target="_blank" rel="noopener noreferrer" ' +
+            'style="display:inline-block;padding:7px 10px;border-radius:8px;background:var(--navy);color:#fff;text-decoration:none;font-size:12px;font-weight:800;">' +
+            'Open All Portfolio News' +
+          '</a>' +
+        '</div>' +
+        holdings.map(function(item) {
           return (
-            '<a href="' + escapeHtml(article.link || "#") + '" target="_blank" rel="noopener noreferrer" ' +
-              'style="display:block;text-decoration:none;color:inherit;padding:11px 0;border-bottom:1px solid #eef2f6;">' +
-              '<div style="font-weight:800;color:var(--navy);line-height:1.4;">' +
-                escapeHtml(title) +
+            '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid #eef2f6;">' +
+              '<div style="min-width:0;">' +
+                '<div style="font-weight:800;color:var(--navy);">' +
+                  escapeHtml(item.symbol) +
+                '</div>' +
+                '<div style="font-size:11px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' +
+                  escapeHtml(item.name) +
+                '</div>' +
               '</div>' +
-              '<div style="font-size:11px;color:var(--muted);margin-top:4px;">' +
-                escapeHtml(source) + (date ? " • " + escapeHtml(date) : "") +
-              '</div>' +
-            '</a>'
+              '<a href="' + escapeHtml(item.url) + '" target="_blank" rel="noopener noreferrer" ' +
+                'style="flex:0 0 auto;display:inline-block;padding:7px 10px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--navy);text-decoration:none;font-size:12px;font-weight:800;">' +
+                'Latest News ↗' +
+              '</a>' +
+            '</div>'
           );
         }).join("");
-
-      } catch (error) {
-        console.warn("StockGyan portfolio news failed", error);
-        box.innerHTML =
-          '<div style="color:#b42318;">Unable to load news right now. Portfolio analytics will continue to work.</div>';
-      }
     }
-
 
     /* --------------------------------
        CLOSE MODAL WHEN CLICKING OUTSIDE
