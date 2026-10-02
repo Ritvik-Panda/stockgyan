@@ -46,10 +46,33 @@ function getSessionEmail(request, env) {
       SESSION_COOKIE_NAME.length + 1
     );
 
-  return verifySessionToken(
+  const verified = await verifySessionToken(
     token,
     env.SESSION_SECRET
   );
+
+  // Support the session format used by the OTP login.
+  // Some session implementations return the email directly,
+  // while others return an object containing email.
+  const email =
+    typeof verified === "string"
+      ? verified
+      : (
+          verified &&
+          (
+            verified.email ||
+            (verified.payload && verified.payload.email) ||
+            (verified.user && verified.user.email)
+          )
+        );
+
+  if (!email) {
+    return null;
+  }
+
+  return {
+    email: String(email).trim().toLowerCase()
+  };
 }
 
 
@@ -89,13 +112,17 @@ async function authenticate(context) {
       env
     );
 
-  if (!session) {
+  if (
+    !session ||
+    !session.email ||
+    typeof session.email !== "string"
+  ) {
     return {
       error: Response.json(
         {
           status: "error",
           message:
-            "Not authenticated"
+            "Unable to identify the logged-in email. Please login again."
         },
         { status: 401 }
       )
