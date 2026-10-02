@@ -1,5 +1,5 @@
 /**
- * StockGyan Portfolio News v2
+ * StockGyan Portfolio News v3
  * Cloudflare Pages Function
  *
  * GET /api/portfolio/news?symbols=RELIANCE,TCS,INFY
@@ -86,9 +86,14 @@ function cleanSymbol(symbol) {
 }
 
 function buildQueries(symbol) {
+  // Keep the search broad enough for Google News to return Indian
+  // market coverage. Very restrictive combinations such as
+  // "SYMBOL" NSE stock India can return an empty RSS feed for
+  // otherwise valid listed companies.
   return [
-    '"' + symbol + '" NSE stock India',
-    '"' + symbol + '" share price India'
+    '"' + symbol + '" when:14d',
+    symbol + ' India stock when:14d',
+    symbol + ' NSE when:14d'
   ];
 }
 
