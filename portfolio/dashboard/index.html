@@ -1912,22 +1912,28 @@
 
         </div>
 
-        <div style="margin-top:16px;border:1px solid var(--border);border-radius:12px;padding:16px;background:#fff;">
-          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;">
-            <div>
-              <div style="font-weight:800;color:var(--navy);">📰 Portfolio News</div>
-              <div style="font-size:11px;color:var(--muted);margin-top:3px;">
-                Recent news related to stocks in this portfolio.
+        <div style="margin-top:16px;border:1px solid var(--border);border-radius:12px;background:#fff;overflow:hidden;">
+          <details id="portfolioNewsCollapse">
+            <summary style="list-style:none;cursor:pointer;background:#159447;color:#fff;padding:13px 16px;font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+              <span>📰 Portfolio News</span>
+              <span style="font-size:12px;font-weight:700;opacity:.95;">▼ Open / Close</span>
+            </summary>
+
+            <div style="padding:16px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
+                <div style="font-size:11px;color:var(--muted);">
+                  Latest company news is opened directly from Google News.
+                </div>
+                <button type="button" class="btn btn-light" style="padding:7px 10px;font-size:12px;" onclick="loadPortfolioNews()">
+                  Refresh News
+                </button>
+              </div>
+
+              <div id="portfolioNewsList" style="font-size:13px;">
+                News will appear here when holdings are available.
               </div>
             </div>
-            <button type="button" class="btn btn-light" style="padding:7px 10px;font-size:12px;" onclick="loadPortfolioNews()">
-              Refresh News
-            </button>
-          </div>
-
-          <div id="portfolioNewsList" style="font-size:13px;">
-            News will appear here when holdings are available.
-          </div>
+          </details>
         </div>
 
         <div style="margin-top:12px;font-size:11px;color:var(--muted);">
@@ -5571,15 +5577,20 @@
       const list = getCurrentPortfolioHoldings();
 
       if (!list.length) {
-        box.innerHTML = "Add holdings to search relevant portfolio news.";
+        box.innerHTML =
+          '<div style="color:var(--muted);padding:8px 0;">Add holdings to view relevant portfolio news.</div>';
         return;
       }
 
+      // Google News is opened directly from the user's browser. This avoids
+      // third-party RSS/CORS/server-feed failures while keeping the dashboard
+      // independent of the holdings, D1 sync and market-data systems.
       const holdings = list.slice(0, 12).map(function(item) {
         const symbol = String(item.symbol || "").trim();
         const name = String(item.name || symbol || "Stock").trim();
-        const query = (name + " " + symbol + " NSE stock India").trim();
-        const url = "https://news.google.com/search?q=" + encodeURIComponent(query) +
+        const searchText = (name + " " + symbol + " NSE stock India").trim();
+        const url = "https://news.google.com/search?q=" +
+          encodeURIComponent(searchText) +
           "&hl=en-IN&gl=IN&ceid=IN:en";
 
         return {
@@ -5599,10 +5610,10 @@
 
       box.innerHTML =
         '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;">' +
-          '<div style="font-size:12px;color:var(--muted);">Latest company news is opened directly from Google News.</div>' +
+          '<div style="font-size:12px;color:var(--muted);">News is searched live from Google News for your portfolio holdings.</div>' +
           '<a href="' + escapeHtml(allUrl) + '" target="_blank" rel="noopener noreferrer" ' +
             'style="display:inline-block;padding:7px 10px;border-radius:8px;background:var(--navy);color:#fff;text-decoration:none;font-size:12px;font-weight:800;">' +
-            'Open All Portfolio News' +
+            'Open All Portfolio News ↗' +
           '</a>' +
         '</div>' +
         holdings.map(function(item) {
