@@ -2265,7 +2265,10 @@
 
     function saveHoldings() {
 
-      saveHoldings();
+      localStorage.setItem(
+        "stockgyan_holdings",
+        JSON.stringify(holdings)
+      );
 
       syncPortfolioToServer();
 
@@ -2343,7 +2346,44 @@
           data.exists === false
         ) {
 
+          // This is a new account on this device.
+          // Never copy another user's browser-local portfolio
+          // into the new account.
+
+          portfolios = [
+            {
+              id: "default",
+              name: "My Portfolio"
+            }
+          ];
+
+          holdings = {};
+
+          localStorage.setItem(
+            "stockgyan_portfolios",
+            JSON.stringify(portfolios)
+          );
+
+          localStorage.setItem(
+            "stockgyan_holdings",
+            JSON.stringify(holdings)
+          );
+
+          renderPortfolios();
+
+          portfolioSelect.value = "default";
+
+          renderHoldings();
+          updateSummary();
+          renderMovingAverageMonitor();
+          fetchPortfolioQuotes();
+          refreshMovingAverages();
+          refreshPortfolioPerformance();
+
+          // Save only the fresh default state for this logged-in email.
           await syncPortfolioToServer();
+
+          return true;
 
         }
 
