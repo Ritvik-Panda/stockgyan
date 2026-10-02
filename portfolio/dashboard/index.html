@@ -2216,6 +2216,150 @@
         JSON.stringify(portfolios)
       );
 
+      syncPortfolioToServer();
+
+    }
+
+
+    async function syncPortfolioToServer() {
+
+      try {
+
+        const response = await fetch("/api/portfolio/sync", {
+          method: "PUT",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            portfolios: portfolios,
+            holdings: holdings
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          console.warn(
+            "Portfolio sync failed:",
+            data.message || "Unknown error"
+          );
+          return false;
+        }
+
+        return true;
+
+      } catch (error) {
+
+        console.warn(
+          "Portfolio sync error:",
+          error
+        );
+
+        return false;
+
+      }
+
+    }
+
+
+    function saveHoldings() {
+
+      saveHoldings();
+
+      syncPortfolioToServer();
+
+    }
+
+
+    async function loadPortfolioFromServer() {
+
+      try {
+
+        const response = await fetch(
+          "/api/portfolio/sync",
+          {
+            method: "GET",
+            credentials: "include",
+            cache: "no-store"
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          console.warn(
+            "Portfolio load failed:",
+            data.message || "Unknown error"
+          );
+          return false;
+        }
+
+        if (
+          data.status === "ok" &&
+          data.exists &&
+          data.state &&
+          Array.isArray(data.state.portfolios) &&
+          data.state.holdings &&
+          typeof data.state.holdings === "object"
+        ) {
+
+          portfolios = data.state.portfolios;
+          holdings = data.state.holdings;
+
+          localStorage.setItem(
+            "stockgyan_portfolios",
+            JSON.stringify(portfolios)
+          );
+
+          localStorage.setItem(
+            "stockgyan_holdings",
+            JSON.stringify(holdings)
+          );
+
+          renderPortfolios();
+
+          if (
+            !portfolios.some(function(item) {
+              return item.id === portfolioSelect.value;
+            })
+          ) {
+            portfolioSelect.value =
+              portfolios[0]?.id || "default";
+          }
+
+          renderHoldings();
+          updateSummary();
+          renderMovingAverageMonitor();
+          fetchPortfolioQuotes();
+          refreshMovingAverages();
+          refreshPortfolioPerformance();
+
+          return true;
+        }
+
+        if (
+          data.status === "ok" &&
+          data.exists === false
+        ) {
+
+          await syncPortfolioToServer();
+
+        }
+
+        return false;
+
+      } catch (error) {
+
+        console.warn(
+          "Portfolio server load error:",
+          error
+        );
+
+        return false;
+
+      }
+
     }
 
 
@@ -2614,10 +2758,7 @@
 
       }
 
-      localStorage.setItem(
-        "stockgyan_holdings",
-        JSON.stringify(holdings)
-      );
+      saveHoldings();
 
       closeHoldingModal();
       renderHoldings();
@@ -2732,10 +2873,7 @@
       item.quantity = quantity;
       item.avg_price = avgPrice;
 
-      localStorage.setItem(
-        "stockgyan_holdings",
-        JSON.stringify(holdings)
-      );
+      saveHoldings();
 
       closeEditHoldingModal();
       renderHoldings();
@@ -2811,10 +2949,7 @@
         return item.instrument_key !== removingHoldingKey;
       });
 
-      localStorage.setItem(
-        "stockgyan_holdings",
-        JSON.stringify(holdings)
-      );
+      saveHoldings();
 
       closeRemoveHoldingModal();
       renderHoldings();
@@ -4630,10 +4765,7 @@
 
       savePortfolios();
 
-      localStorage.setItem(
-        "stockgyan_holdings",
-        JSON.stringify(holdings)
-      );
+      saveHoldings();
 
       renderPortfolios();
 
@@ -4749,6 +4881,7 @@
     fetchPortfolioQuotes();
     refreshMovingAverages();
     refreshPortfolioPerformance();
+    loadPortfolioFromServer();
 
 
     /* --------------------------------
