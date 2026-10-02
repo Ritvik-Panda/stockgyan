@@ -1846,7 +1846,7 @@
 
       <div
         class="quick-action"
-        onclick="showComingSoon()"
+        onclick="openPortfolioAnalytics()"
       >
 
         <div class="quick-icon">
@@ -1866,6 +1866,77 @@
 
     </section>
 
+
+
+
+    <!-- =========================
+         PORTFOLIO ANALYTICS & INSIGHTS
+    ========================= -->
+
+    <section class="card" id="portfolioAnalyticsSection" style="margin-top:18px;">
+
+      <div class="card-header">
+        <div>
+          <div class="card-title">Portfolio Analytics</div>
+          <div class="card-subtitle">
+            Understand performance, concentration, movers and news related to your holdings.
+          </div>
+        </div>
+
+        <button type="button" class="btn btn-light" onclick="refreshPortfolioAnalytics()">
+          ↻ Refresh
+        </button>
+      </div>
+
+      <div class="card-body">
+
+        <div id="portfolioInsightSummary"
+             style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:18px;">
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;">
+
+          <div style="border:1px solid var(--border);border-radius:12px;padding:16px;background:#fff;">
+            <div style="font-weight:800;color:var(--navy);margin-bottom:12px;">Portfolio Insights</div>
+            <div id="portfolioInsightsList" style="font-size:13px;line-height:1.55;">
+              Add holdings to generate insights.
+            </div>
+          </div>
+
+          <div style="border:1px solid var(--border);border-radius:12px;padding:16px;background:#fff;">
+            <div style="font-weight:800;color:var(--navy);margin-bottom:12px;">Top Holdings</div>
+            <div id="portfolioConcentrationList" style="font-size:13px;">
+              —
+            </div>
+          </div>
+
+        </div>
+
+        <div style="margin-top:16px;border:1px solid var(--border);border-radius:12px;padding:16px;background:#fff;">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;">
+            <div>
+              <div style="font-weight:800;color:var(--navy);">📰 Portfolio News</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:3px;">
+                Recent news related to stocks in this portfolio.
+              </div>
+            </div>
+            <button type="button" class="btn btn-light" style="padding:7px 10px;font-size:12px;" onclick="loadPortfolioNews()">
+              Refresh News
+            </button>
+          </div>
+
+          <div id="portfolioNewsList" style="font-size:13px;">
+            News will appear here when holdings are available.
+          </div>
+        </div>
+
+        <div style="margin-top:12px;font-size:11px;color:var(--muted);">
+          Insights are calculated from your portfolio holdings and available live market data.
+          News is informational and may contain third-party reporting.
+        </div>
+
+      </div>
+    </section>
 
 
     <!-- =========================
@@ -2407,6 +2478,7 @@
           fetchPortfolioQuotes();
           refreshMovingAverages();
           refreshPortfolioPerformance();
+          refreshPortfolioAnalytics();
 
           return true;
         }
@@ -3278,6 +3350,7 @@
       fetchPortfolioQuotes();
       performanceCache = {};
       refreshPortfolioPerformance();
+      refreshPortfolioAnalytics();
 
     }
 
@@ -5310,15 +5383,270 @@
 
 
     /* --------------------------------
-       COMING SOON
+       PORTFOLIO ANALYTICS & NEWS
     -------------------------------- */
 
-    function showComingSoon() {
+    function openPortfolioAnalytics() {
+      const section = document.getElementById("portfolioAnalyticsSection");
 
-      alert(
-        "Portfolio Analytics will be connected after the holdings system is completed."
+      if (section) {
+        section.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+      }
+
+      refreshPortfolioAnalytics();
+    }
+
+    function analyticsCard(title, value, subtitle, className) {
+      return (
+        '<div style="border:1px solid var(--border);border-radius:12px;padding:14px;background:#fff;">' +
+          '<div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.3px;">' +
+            escapeHtml(title) +
+          '</div>' +
+          '<div class="' + (className || '') + '" style="font-size:20px;font-weight:850;margin-top:6px;">' +
+            escapeHtml(value) +
+          '</div>' +
+          '<div style="font-size:11px;color:var(--muted);margin-top:4px;">' +
+            escapeHtml(subtitle || "") +
+          '</div>' +
+        '</div>'
       );
+    }
 
+    function refreshPortfolioAnalytics() {
+      const list = getCurrentPortfolioHoldings();
+      const summary = document.getElementById("portfolioInsightSummary");
+      const insights = document.getElementById("portfolioInsightsList");
+      const concentration = document.getElementById("portfolioConcentrationList");
+
+      if (!list.length) {
+        summary.innerHTML = analyticsCard("Holdings", "0", "No stocks in this portfolio");
+        insights.innerHTML = "Add or import holdings to generate portfolio insights.";
+        concentration.innerHTML = "—";
+        document.getElementById("portfolioNewsList").innerHTML =
+          "Add holdings to load relevant portfolio news.";
+        return;
+      }
+
+      let invested = 0;
+      let current = 0;
+      let hasCurrent = false;
+      let todayGain = 0;
+      let hasToday = false;
+
+      const rows = list.map(function(item) {
+        const m = holdingMetrics(item);
+        invested += m.invested;
+
+        if (m.currentValue !== null) {
+          current += m.currentValue;
+          hasCurrent = true;
+        }
+
+        if (m.todayGain !== null) {
+          todayGain += m.todayGain;
+          hasToday = true;
+        }
+
+        return { item: item, metrics: m };
+      });
+
+      const gain = hasCurrent ? current - invested : null;
+      const gainPct = gain !== null && invested > 0 ? (gain / invested) * 100 : null;
+
+      const ranked = rows
+        .filter(function(row) {
+          return Number.isFinite(Number(row.metrics.currentValue));
+        })
+        .sort(function(a, b) {
+          return Number(b.metrics.currentValue) - Number(a.metrics.currentValue);
+        });
+
+      const topWeight = ranked.length && current > 0
+        ? (ranked[0].metrics.currentValue / current) * 100
+        : null;
+
+      const topFiveWeight = ranked.length && current > 0
+        ? ranked.slice(0, 5).reduce(function(sum, row) {
+            return sum + row.metrics.currentValue;
+          }, 0) / current * 100
+        : null;
+
+      summary.innerHTML =
+        analyticsCard("Holdings", String(list.length), "Stocks in selected portfolio") +
+        analyticsCard("Current Value", hasCurrent ? "₹" + formatMoney(current) : "—", "Live valuation") +
+        analyticsCard("Total P&L", gain !== null ? formatSignedMoney(gain) : "—", gainPct !== null ? formatSignedPercent(gainPct) : "Waiting for prices", valueClass(gain)) +
+        analyticsCard("Today's P&L", hasToday ? formatSignedMoney(todayGain) : "—", "Based on available live quotes", valueClass(todayGain));
+
+      const insightItems = [];
+
+      if (gainPct !== null) {
+        insightItems.push(
+          '<div style="margin-bottom:9px;">• Overall portfolio return is <strong class="' +
+          valueClass(gainPct) + '">' + formatSignedPercent(gainPct) +
+          '</strong> based on current available prices.</div>'
+        );
+      }
+
+      if (topWeight !== null) {
+        insightItems.push(
+          '<div style="margin-bottom:9px;">• Largest holding represents approximately <strong>' +
+          topWeight.toFixed(1) + '%</strong> of current portfolio value.</div>'
+        );
+      }
+
+      if (topFiveWeight !== null) {
+        insightItems.push(
+          '<div style="margin-bottom:9px;">• Top 5 holdings represent approximately <strong>' +
+          topFiveWeight.toFixed(1) + '%</strong> of current portfolio value.</div>'
+        );
+      }
+
+      const gainers = rows
+        .filter(function(row) { return row.metrics.gain !== null; })
+        .sort(function(a,b) { return b.metrics.gain - a.metrics.gain; });
+
+      if (gainers.length) {
+        const best = gainers[0];
+        const worst = gainers[gainers.length - 1];
+
+        insightItems.push(
+          '<div style="margin-bottom:9px;">• Largest unrealized gain: <strong class="positive">' +
+          escapeHtml(best.item.symbol || best.item.name) + '</strong> at ' +
+          formatSignedPercent(best.metrics.gainPercent) + '.</div>'
+        );
+
+        if (worst.item.instrument_key !== best.item.instrument_key) {
+          insightItems.push(
+            '<div style="margin-bottom:9px;">• Largest unrealized loss: <strong class="negative">' +
+            escapeHtml(worst.item.symbol || worst.item.name) + '</strong> at ' +
+            formatSignedPercent(worst.metrics.gainPercent) + '.</div>'
+          );
+        }
+      }
+
+      if (list.length < 5) {
+        insightItems.push(
+          '<div style="margin-bottom:9px;">• Portfolio contains ' + list.length +
+          ' holding' + (list.length === 1 ? '' : 's') +
+          '. Diversification analysis will become more meaningful as holdings are added.</div>'
+        );
+      }
+
+      insights.innerHTML = insightItems.length
+        ? insightItems.join("")
+        : "Live prices are required to generate more portfolio insights.";
+
+      if (!ranked.length) {
+        concentration.innerHTML = "Live prices are not available yet.";
+      } else {
+        concentration.innerHTML = ranked.slice(0, 5).map(function(row) {
+          const weight = current > 0 ? row.metrics.currentValue / current * 100 : 0;
+
+          return (
+            '<div style="display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid #eef2f6;">' +
+              '<div><strong>' + escapeHtml(row.item.symbol || "Stock") + '</strong>' +
+                '<div style="font-size:11px;color:var(--muted);">' +
+                  escapeHtml(row.item.name || "") +
+                '</div>' +
+              '</div>' +
+              '<div style="text-align:right;font-weight:800;color:var(--navy);">' +
+                weight.toFixed(1) + '%' +
+                '<div style="font-size:11px;color:var(--muted);font-weight:600;">₹' +
+                  formatMoney(row.metrics.currentValue) +
+                '</div>' +
+              '</div>' +
+            '</div>'
+          );
+        }).join("");
+      }
+
+      loadPortfolioNews();
+    }
+
+    async function loadPortfolioNews() {
+      const box = document.getElementById("portfolioNewsList");
+      const list = getCurrentPortfolioHoldings();
+
+      if (!list.length) {
+        box.innerHTML = "Add holdings to load relevant portfolio news.";
+        return;
+      }
+
+      const symbols = list
+        .map(function(item) {
+          return String(item.symbol || item.name || "").trim();
+        })
+        .filter(Boolean)
+        .slice(0, 8);
+
+      if (!symbols.length) {
+        box.innerHTML = "No stock names are available for news search.";
+        return;
+      }
+
+      box.innerHTML =
+        '<div style="color:var(--muted);">Loading portfolio news…</div>';
+
+      try {
+        const response = await fetch(
+          "/api/portfolio/news?symbols=" +
+          symbols.map(encodeURIComponent).join(","),
+          {
+            method: "GET",
+            cache: "no-store",
+            headers: { "Accept": "application/json" }
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || data.status === "error") {
+          throw new Error(data.message || "News unavailable.");
+        }
+
+        const articles = Array.isArray(data.articles)
+          ? data.articles
+          : [];
+
+        if (!articles.length) {
+          box.innerHTML =
+            '<div style="color:var(--muted);">No recent portfolio news was found.</div>';
+          return;
+        }
+
+        box.innerHTML = articles.slice(0, 12).map(function(article) {
+          const title = article.title || "Untitled";
+          const source = article.source || "News";
+          const date = article.published
+            ? new Date(article.published).toLocaleString("en-IN", {
+                day:"2-digit",
+                month:"short",
+                hour:"2-digit",
+                minute:"2-digit"
+              })
+            : "";
+
+          return (
+            '<a href="' + escapeHtml(article.link || "#") + '" target="_blank" rel="noopener noreferrer" ' +
+              'style="display:block;text-decoration:none;color:inherit;padding:11px 0;border-bottom:1px solid #eef2f6;">' +
+              '<div style="font-weight:800;color:var(--navy);line-height:1.4;">' +
+                escapeHtml(title) +
+              '</div>' +
+              '<div style="font-size:11px;color:var(--muted);margin-top:4px;">' +
+                escapeHtml(source) + (date ? " • " + escapeHtml(date) : "") +
+              '</div>' +
+            '</a>'
+          );
+        }).join("");
+
+      } catch (error) {
+        console.warn("StockGyan portfolio news failed", error);
+        box.innerHTML =
+          '<div style="color:#b42318;">Unable to load news right now. Portfolio analytics will continue to work.</div>';
+      }
     }
 
 
@@ -5393,6 +5721,7 @@
     fetchPortfolioQuotes();
     refreshMovingAverages();
     refreshPortfolioPerformance();
+    refreshPortfolioAnalytics();
     loadPortfolioFromServer();
 
 
