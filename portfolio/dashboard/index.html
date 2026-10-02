@@ -2428,33 +2428,100 @@
     let movingAverageRefreshTimer = null;
 
     async function portfolioApi(url, options) {
-      const response = await fetch(url, Object.assign({
-        credentials: "same-origin",
-        headers: {
-          "Accept": "application/json"
-        }
-      }, options || {}));
-
-      let data = null;
 
       try {
-        data = await response.json();
-      } catch (error) {
-        data = null;
-      }
 
-      if (!response.ok || !data || data.status === "error") {
-        if (response.status === 401) {
-          throw new Error("Your login session has expired. Please login again.");
+        const requestOptions = Object.assign(
+          {
+            credentials: "same-origin",
+            headers: {
+              "Accept": "application/json"
+            }
+          },
+          options || {}
+        );
+
+        /*
+         * When POST/PATCH/DELETE supplies its own headers object,
+         * merge it with the default Accept header instead of replacing
+         * the whole headers object.
+         */
+        requestOptions.headers = Object.assign(
+          {
+            "Accept": "application/json"
+          },
+          (options && options.headers) || {}
+        );
+
+        const response = await window.fetch(
+          url,
+          requestOptions
+        );
+
+        if (!response) {
+          throw new Error(
+            "No response received from StockGyan server."
+          );
         }
 
-        throw new Error(
-          (data && data.message) ||
-          "Unable to update portfolio data."
-        );
-      }
+        let data = null;
 
-      return data;
+        const contentType =
+          response.headers &&
+          response.headers.get
+            ? (response.headers.get("content-type") || "")
+            : "";
+
+        if (contentType.includes("application/json")) {
+
+          data = await response.json();
+
+        } else {
+
+          const responseText =
+            await response.text();
+
+          console.error(
+            "StockGyan API returned non-JSON response:",
+            responseText
+          );
+
+          throw new Error(
+            response.status === 401
+              ? "Your login session has expired. Please login again."
+              : "StockGyan server returned an unexpected response."
+          );
+        }
+
+        if (
+          !response.ok ||
+          !data ||
+          data.status === "error"
+        ) {
+
+          if (response.status === 401) {
+            throw new Error(
+              "Your login session has expired. Please login again."
+            );
+          }
+
+          throw new Error(
+            (data && data.message) ||
+            "Unable to update portfolio data."
+          );
+        }
+
+        return data;
+
+      } catch (error) {
+
+        console.error(
+          "StockGyan portfolio API error:",
+          error
+        );
+
+        throw error;
+      }
     }
 
 
@@ -2599,8 +2666,10 @@
           })
         });
 
-        if (!data.portfolio) {
-          throw new Error("Portfolio was not created.");
+        if (!data || !data.portfolio) {
+          throw new Error(
+            "Portfolio was not created. Please try again."
+          );
         }
 
         portfolios.push(data.portfolio);
