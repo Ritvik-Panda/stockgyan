@@ -290,177 +290,6 @@
       color: var(--muted);
     }
 
-    /* =========================
-       QUICK SECTION ACCESS
-    ========================= */
-
-    .combined-portfolio-card {
-      margin-bottom: 24px;
-    }
-
-    .combined-portfolio-badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 7px 10px;
-      border-radius: 999px;
-      background: #ecfdf3;
-      color: #067647;
-      border: 1px solid #b7dfc8;
-      font-size: 11px;
-      font-weight: 800;
-    }
-
-    .combined-summary-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 12px;
-      padding: 0 20px 20px;
-    }
-
-    .combined-summary-item {
-      background: #f8fafc;
-      border: 1px solid var(--border);
-      border-radius: 11px;
-      padding: 13px 14px;
-    }
-
-    .combined-summary-label {
-      color: var(--muted);
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .25px;
-    }
-
-    .combined-summary-value {
-      margin-top: 6px;
-      color: var(--navy);
-      font-size: 19px;
-      font-weight: 800;
-    }
-
-    .combined-summary-value.positive { color: var(--green); }
-    .combined-summary-value.negative { color: #dc3545; }
-
-    .section-quick-access {
-      background: #ffffff;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 13px 15px;
-      margin-bottom: 24px;
-      box-shadow: var(--shadow);
-    }
-
-    .section-quick-title {
-      color: var(--muted);
-      font-size: 11px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: .45px;
-      margin-bottom: 9px;
-    }
-
-    .section-quick-buttons {
-      display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 9px;
-    }
-
-    .section-quick-btn {
-      border: 1px solid #b7dfc8;
-      background: #ecfdf3;
-      color: #067647;
-      border-radius: 10px;
-      padding: 10px 9px;
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: 800;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      transition: .18s ease;
-    }
-
-    .section-quick-btn:hover {
-      border-color: #86d4a5;
-      background: #dff7e9;
-      transform: translateY(-1px);
-    }
-
-    .section-quick-plus {
-      width: 20px;
-      height: 20px;
-      border-radius: 6px;
-      background: #159447;
-      color: #ffffff;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 15px;
-      line-height: 1;
-      font-weight: 900;
-    }
-
-    .section-toggle {
-      width: 34px;
-      height: 34px;
-      flex: 0 0 34px;
-      border: 1px solid #b7dfc8;
-      border-radius: 9px;
-      background: #ecfdf3;
-      color: #067647;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 21px;
-      font-weight: 800;
-      line-height: 1;
-      transition: .18s ease;
-    }
-
-    .section-toggle:hover {
-      background: #dff7e9;
-      border-color: #86d4a5;
-    }
-
-    .card-header-actions {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .collapsible-card {
-      scroll-margin-top: 90px;
-    }
-
-    .collapsible-card.is-collapsed > :not(.card-header) {
-      display: none !important;
-    }
-
-    .collapsible-card.is-collapsed .card-header {
-      border-bottom: none;
-    }
-
-    @media (max-width: 900px) {
-      .section-quick-buttons {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
-
-    @media (max-width: 600px) {
-      .section-quick-buttons {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .section-quick-btn {
-        justify-content: flex-start;
-      }
-    }
-
     .positive {
       color: var(--green) !important;
     }
@@ -744,7 +573,7 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 1140px;
+      min-width: 1030px;
     }
 
     th {
@@ -1101,10 +930,6 @@
         grid-template-columns: 1fr;
       }
 
-      .combined-summary-grid {
-        grid-template-columns: 1fr;
-      }
-
       .quick-actions {
         grid-template-columns: 1fr;
       }
@@ -1192,7 +1017,6 @@
       }
 
       .portfolio-controls,
-      .section-quick-access,
       .quick-actions,
       .footer,
       .ma-monitor-card,
@@ -1473,74 +1297,6 @@
 
 
     <!-- =========================
-         QUICK SECTION ACCESS
-    ========================= -->
-
-    <section class="section-quick-access">
-      <div class="section-quick-title">Quick Access</div>
-      <div class="section-quick-buttons">
-
-        <button type="button" class="section-quick-btn" onclick="openPortfolioSection('performanceCard')">
-          <span class="section-quick-plus">+</span> Performance
-        </button>
-
-        <button type="button" class="section-quick-btn" onclick="openPortfolioSection('maMonitorCard')">
-          <span class="section-quick-plus">+</span> Technical / DMA
-        </button>
-
-        <button type="button" class="section-quick-btn" onclick="openPortfolioSection('holdingsCard')">
-          <span class="section-quick-plus">+</span> Holdings
-        </button>
-
-        <button type="button" class="section-quick-btn" onclick="openPortfolioSection('moversCard')">
-          <span class="section-quick-plus">+</span> Movers
-        </button>
-
-        <button type="button" class="section-quick-btn" onclick="openPortfolioSection('downloadPortfolioSection')">
-          <span class="section-quick-plus">+</span> Download
-        </button>
-
-      </div>
-    </section>
-
-
-    <!-- =========================
-         COMBINED PORTFOLIO DETAILS
-    ========================= -->
-
-    <section class="card combined-portfolio-card" id="combinedPortfolioCard">
-      <div class="card-header">
-        <div>
-          <div class="card-title">Combined Portfolio Details</div>
-          <div class="card-subtitle">All portfolios combined</div>
-        </div>
-        <div class="card-header-actions">
-          <span id="combinedPortfolioCount" class="combined-portfolio-badge">0 Portfolios</span>
-        </div>
-      </div>
-
-      <div class="combined-summary-grid">
-        <div class="combined-summary-item">
-          <div class="combined-summary-label">All Portfolio Invested Value</div>
-          <div id="combinedInvestedValue" class="combined-summary-value">₹0.00</div>
-        </div>
-        <div class="combined-summary-item">
-          <div class="combined-summary-label">Combined Current Value</div>
-          <div id="combinedCurrentValue" class="combined-summary-value">—</div>
-        </div>
-        <div class="combined-summary-item">
-          <div class="combined-summary-label">Combined Total Gain</div>
-          <div id="combinedTotalGain" class="combined-summary-value">—</div>
-        </div>
-        <div class="combined-summary-item">
-          <div class="combined-summary-label">Combined Today's Gain</div>
-          <div id="combinedTodayGain" class="combined-summary-value">—</div>
-        </div>
-      </div>
-    </section>
-
-
-    <!-- =========================
          PERFORMANCE + LEADERS
     ========================= -->
 
@@ -1549,7 +1305,7 @@
 
       <!-- PERFORMANCE -->
 
-      <div class="card collapsible-card is-collapsed" id="performanceCard">
+      <div class="card">
 
         <div class="card-header">
 
@@ -1563,28 +1319,17 @@
             </div>
           </div>
 
-          <div class="card-header-actions">
-            <select
-              class="portfolio-select"
-              style="min-width:110px;"
-              id="performancePeriod"
-            >
+          <select
+            class="portfolio-select"
+            style="min-width:110px;"
+            id="performancePeriod"
+          >
             <option>1M</option>
             <option>3M</option>
             <option>6M</option>
             <option>1Y</option>
             <option>ALL</option>
-            </select>
-
-            <button
-              type="button"
-              class="section-toggle"
-              onclick="togglePortfolioSection('performanceCard', this)"
-              aria-expanded="false"
-              aria-label="Open portfolio performance"
-              title="Open / close"
-            >+</button>
-          </div>
+          </select>
 
         </div>
 
@@ -1643,7 +1388,7 @@
 
       <!-- TOP GAINERS / LOSERS -->
 
-      <div class="card collapsible-card is-collapsed" id="moversCard">
+      <div class="card">
 
         <div class="card-header">
 
@@ -1656,15 +1401,6 @@
               Biggest gainers and losers
             </div>
           </div>
-
-          <button
-            type="button"
-            class="section-toggle"
-            onclick="togglePortfolioSection('moversCard', this)"
-            aria-expanded="false"
-            aria-label="Open portfolio movers"
-            title="Open / close"
-          >+</button>
 
         </div>
 
@@ -1785,7 +1521,7 @@
          MOVING AVERAGE MONITOR
     ========================= -->
 
-    <section class="card ma-monitor-card collapsible-card is-collapsed" id="maMonitorCard">
+    <section class="card ma-monitor-card">
 
       <div class="card-header">
         <div>
@@ -1800,25 +1536,14 @@
           </div>
         </div>
 
-        <div class="card-header-actions">
-          <button
-            type="button"
-            class="btn btn-light"
-            onclick="refreshMovingAverages()"
-            id="maRefreshButton"
-          >
-            ↻ Refresh
-          </button>
-
-          <button
-            type="button"
-            class="section-toggle"
-            onclick="togglePortfolioSection('maMonitorCard', this)"
-            aria-expanded="false"
-            aria-label="Open technical position"
-            title="Open / close"
-          >+</button>
-        </div>
+        <button
+          type="button"
+          class="btn btn-light"
+          onclick="refreshMovingAverages()"
+          id="maRefreshButton"
+        >
+          ↻ Refresh
+        </button>
       </div>
 
       <div class="card-body">
@@ -1891,7 +1616,7 @@
          HOLDINGS
     ========================= -->
 
-    <section class="card holdings-card collapsible-card is-collapsed" id="holdingsCard">
+    <section class="card holdings-card">
 
       <div class="card-header">
 
@@ -1910,23 +1635,12 @@
 
         </div>
 
-        <div class="card-header-actions">
-          <button
-            class="btn btn-green"
-            onclick="addHolding()"
-          >
-            + Add Holding
-          </button>
-
-          <button
-            type="button"
-            class="section-toggle"
-            onclick="togglePortfolioSection('holdingsCard', this)"
-            aria-expanded="false"
-            aria-label="Open holdings"
-            title="Open / close"
-          >+</button>
-        </div>
+        <button
+          class="btn btn-green"
+          onclick="addHolding()"
+        >
+          + Add Holding
+        </button>
 
       </div>
 
@@ -1961,10 +1675,6 @@
 
               <th>
                 Current Value
-              </th>
-
-              <th>
-                Today Gain
               </th>
 
               <th>
@@ -2092,7 +1802,7 @@
          DOWNLOAD PORTFOLIO
     ========================= -->
 
-    <section class="card download-portfolio-card collapsible-card is-collapsed" id="downloadPortfolioSection">
+    <section class="card download-portfolio-card" id="downloadPortfolioSection">
 
       <div class="card-header">
 
@@ -2105,15 +1815,6 @@
             Create a clean report or download your current holdings.
           </div>
         </div>
-
-        <button
-          type="button"
-          class="section-toggle"
-          onclick="togglePortfolioSection('downloadPortfolioSection', this)"
-          aria-expanded="false"
-          aria-label="Open download portfolio"
-          title="Open / close"
-        >+</button>
 
       </div>
 
@@ -2158,7 +1859,72 @@
 
 
     <div class="footer">
-      StockGyan • Your personal investment dashboard
+      <div style="margin-bottom:10px;">
+        StockGyan • Your personal investment dashboard
+      </div>
+
+      <div style="
+        max-width:520px;
+        margin:0 auto;
+        padding:14px 18px;
+        border:1px solid var(--border);
+        border-radius:12px;
+        background:#ffffff;
+        box-shadow:0 4px 14px rgba(8,42,99,.05);
+        text-align:center;
+      ">
+        <div style="
+          font-size:11px;
+          font-weight:800;
+          color:var(--muted);
+          text-transform:uppercase;
+          letter-spacing:.5px;
+          margin-bottom:10px;
+        ">
+          StockGyan Credits
+        </div>
+
+        <div style="
+          display:flex;
+          justify-content:center;
+          gap:28px;
+          flex-wrap:wrap;
+        ">
+          <div>
+            <div style="
+              font-size:13px;
+              font-weight:800;
+              color:var(--navy);
+            ">
+              Ritvik Vishe
+            </div>
+            <div style="
+              font-size:11px;
+              color:var(--muted);
+              margin-top:3px;
+            ">
+              Developer &amp; Technology
+            </div>
+          </div>
+
+          <div>
+            <div style="
+              font-size:13px;
+              font-weight:800;
+              color:var(--navy);
+            ">
+              Tanay Vartak
+            </div>
+            <div style="
+              font-size:11px;
+              color:var(--muted);
+              margin-top:3px;
+            ">
+              Wealth Manager &amp; Portfolio Strategist
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
   </main>
@@ -2422,7 +2188,6 @@
     // Live quote cache for the selected portfolio.
     // Prices come from StockGyan's secure server-side Upstox proxy.
     let quoteCache = {};
-    let combinedQuoteCache = {};
     let quoteSource = "";
     let quoteRefreshTimer = null;
     let quoteRequestInProgress = false;
@@ -3279,7 +3044,6 @@
       if (!list.length) {
         quoteCache = {};
         quoteSource = "";
-        updateCombinedPortfolioDetails();
         renderHoldings();
         updateMarketDataStatus();
         return;
@@ -3383,7 +3147,6 @@
         quoteCache = nextCache;
         quoteSource = data.source || "";
 
-        updateCombinedPortfolioDetails();
         renderHoldings();
         updateMarketDataStatus();
 
@@ -3403,143 +3166,6 @@
 
       } finally {
         quoteRequestInProgress = false;
-      }
-    }
-
-    function getAllPortfolioHoldings() {
-      const result = [];
-      const seen = {};
-
-      portfolios.forEach(function(portfolio) {
-        const list = holdings[portfolio.id] || [];
-
-        list.forEach(function(item) {
-          if (!item || !item.instrument_key) return;
-
-          const key = item.instrument_key;
-          const uniqueId = portfolio.id + "|" + key;
-
-          if (!seen[uniqueId]) {
-            result.push(item);
-            seen[uniqueId] = true;
-          }
-        });
-      });
-
-      return result;
-    }
-
-    function updateCombinedPortfolioDetails() {
-      const all = getAllPortfolioHoldings();
-
-      let invested = 0;
-      let currentValue = 0;
-      let totalGain = 0;
-      let todayGain = 0;
-      let previousValue = 0;
-      let hasCurrent = false;
-      let hasToday = false;
-
-      all.forEach(function(item) {
-        const quantity = Number(item.quantity) || 0;
-        const avgPrice = Number(item.avg_price) || 0;
-        const investedValue = quantity * avgPrice;
-        invested += investedValue;
-
-        const quote = combinedQuoteCache[item.instrument_key] || null;
-        const ltp = quote && Number.isFinite(quote.lastPrice) ? quote.lastPrice : null;
-        const dailyChange = quote && Number.isFinite(quote.dailyChange) ? quote.dailyChange : null;
-        const previousClose = quote && Number.isFinite(quote.previousClose) ? quote.previousClose : null;
-
-        if (ltp !== null) {
-          const value = quantity * ltp;
-          currentValue += value;
-          totalGain += value - investedValue;
-          hasCurrent = true;
-        }
-
-        if (dailyChange !== null) {
-          todayGain += quantity * dailyChange;
-          hasToday = true;
-        }
-
-        if (previousClose !== null) {
-          previousValue += quantity * previousClose;
-        }
-      });
-
-      const combinedGainPercent = hasCurrent && invested > 0
-        ? (totalGain / invested) * 100
-        : null;
-
-      const combinedTodayPercent = hasToday && previousValue > 0
-        ? (todayGain / previousValue) * 100
-        : null;
-
-      document.getElementById("combinedPortfolioCount").textContent =
-        portfolios.length + (portfolios.length === 1 ? " Portfolio" : " Portfolios");
-
-      document.getElementById("combinedInvestedValue").textContent =
-        "₹" + formatMoney(invested);
-
-      const currentEl = document.getElementById("combinedCurrentValue");
-      currentEl.textContent = hasCurrent ? "₹" + formatMoney(currentValue) : "—";
-
-      const gainEl = document.getElementById("combinedTotalGain");
-      gainEl.textContent = hasCurrent ? formatSignedMoney(totalGain) : "—";
-      gainEl.className = "combined-summary-value " + valueClass(totalGain);
-
-      const todayEl = document.getElementById("combinedTodayGain");
-      todayEl.textContent = hasToday
-        ? formatSignedMoney(todayGain) + (combinedTodayPercent !== null ? " (" + formatSignedPercent(combinedTodayPercent) + ")" : "")
-        : "—";
-      todayEl.className = "combined-summary-value " + valueClass(todayGain);
-    }
-
-    async function fetchCombinedPortfolioQuotes() {
-      const all = getAllPortfolioHoldings();
-
-      if (!all.length) {
-        combinedQuoteCache = {};
-        updateCombinedPortfolioDetails();
-        return;
-      }
-
-      const keys = Array.from(new Set(all.map(function(item) {
-        return item.instrument_key;
-      }).filter(Boolean)));
-
-      try {
-        const response = await fetch(
-          "/api/market/batch?instrument_keys=" +
-          keys.map(encodeURIComponent).join(","),
-          {
-            method: "GET",
-            cache: "no-store",
-            headers: { "Accept": "application/json" }
-          }
-        );
-
-        const data = await response.json();
-
-        if (!response.ok || data.status === "error") {
-          throw new Error(data.message || "Unable to fetch combined portfolio prices.");
-        }
-
-        const nextCache = {};
-
-        keys.forEach(function(key) {
-          const quote = getQuoteFromResponse(data, key);
-          if (quote && quote.lastPrice !== null) {
-            nextCache[key] = quote;
-          }
-        });
-
-        combinedQuoteCache = nextCache;
-        updateCombinedPortfolioDetails();
-      } catch (error) {
-        console.warn("StockGyan: combined portfolio quote update failed", error);
-        updateCombinedPortfolioDetails();
       }
     }
 
@@ -3639,7 +3265,7 @@
       if (!list.length) {
         body.innerHTML =
           '<tr>' +
-            '<td colspan="10" class="empty-table">' +
+            '<td colspan="9" class="empty-table">' +
               '<strong>No holdings added yet</strong><br>' +
               '<span style="font-size:12px;">Add stocks to start tracking your portfolio.</span>' +
             '</td>' +
@@ -3671,13 +3297,6 @@
             ? formatSignedMoney(metrics.gain)
             : "—";
 
-        const todayGainHtml =
-          metrics.todayGain !== null
-            ? formatSignedMoney(metrics.todayGain)
-            : "—";
-
-        const todayGainClass = valueClass(metrics.todayGain);
-
         const percentHtml =
           metrics.gainPercent !== null
             ? formatSignedPercent(metrics.gainPercent)
@@ -3705,9 +3324,6 @@
           '<td>' + ltpHtml + '</td>' +
           '<td>₹' + formatMoney(metrics.invested) + '</td>' +
           '<td>' + currentValueHtml + '</td>' +
-          '<td class="' + todayGainClass + '" style="font-weight:800;">' +
-            todayGainHtml +
-          '</td>' +
           '<td class="' + gainClass + '" style="font-weight:800;">' +
             gainHtml +
           '</td>' +
@@ -3946,132 +3562,6 @@
     /* --------------------------------
        PORTFOLIO PERFORMANCE
     -------------------------------- */
-
-    /* --------------------------------
-       COLLAPSIBLE PORTFOLIO SECTIONS
-    -------------------------------- */
-
-    function updatePortfolioSectionButton(card, expanded) {
-      if (!card) return;
-
-      const button = card.querySelector('.section-toggle');
-
-      if (!button) return;
-
-      button.textContent = expanded ? '−' : '+';
-      button.setAttribute('aria-expanded', expanded ? 'true' : 'false');
-    }
-
-    function togglePortfolioSection(id, button) {
-      const card = document.getElementById(id);
-
-      if (!card) return;
-
-      const willOpen = card.classList.contains('is-collapsed');
-
-      card.classList.toggle('is-collapsed', !willOpen);
-      updatePortfolioSectionButton(card, willOpen);
-
-      try {
-        localStorage.setItem(
-          'stockgyan_section_' + id,
-          willOpen ? 'open' : 'closed'
-        );
-      } catch (error) {
-        // Ignore localStorage errors.
-      }
-    }
-
-    function openPortfolioSection(id) {
-      const card = document.getElementById(id);
-
-      if (!card) return;
-
-      card.classList.remove('is-collapsed');
-      updatePortfolioSectionButton(card, true);
-
-      try {
-        localStorage.setItem(
-          'stockgyan_section_' + id,
-          'open'
-        );
-      } catch (error) {
-        // Ignore localStorage errors.
-      }
-
-      setTimeout(function() {
-        card.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start'
-        });
-      }, 20);
-    }
-
-    function restorePortfolioSectionStates() {
-      const ids = [
-        'performanceCard',
-        'moversCard',
-        'maMonitorCard',
-        'holdingsCard',
-        'downloadPortfolioSection'
-      ];
-
-      ids.forEach(function(id) {
-        const card = document.getElementById(id);
-
-        if (!card) return;
-
-        let saved = null;
-
-        try {
-          saved = localStorage.getItem('stockgyan_section_' + id);
-        } catch (error) {
-          saved = null;
-        }
-
-        const expanded = saved === 'open';
-
-        card.classList.toggle('is-collapsed', !expanded);
-        updatePortfolioSectionButton(card, expanded);
-      });
-    }
-
-    /* --------------------------------
-       CONTROLLED HISTORICAL REQUESTS
-    -------------------------------- */
-
-    async function runWithConcurrency(items, worker, concurrency) {
-      const results = new Array(items.length);
-      let nextIndex = 0;
-
-      async function runner() {
-        while (true) {
-          const index = nextIndex++;
-
-          if (index >= items.length) {
-            return;
-          }
-
-          try {
-            results[index] = await worker(items[index], index);
-          } catch (error) {
-            results[index] = {
-              error: error
-            };
-          }
-        }
-      }
-
-      const workers = [];
-      const workerCount = Math.min(concurrency, items.length);
-
-      for (let i = 0; i < workerCount; i++) {
-        workers.push(runner());
-      }
-
-      await Promise.all(workers);
-      return results;
-    }
 
     let performanceRequestInProgress = false;
     let performanceCache = {};
@@ -4469,22 +3959,11 @@
           return;
         }
 
-        const performanceResults =
-          await runWithConcurrency(
-            list,
-            function(item) {
-              return fetchPerformanceCandles(item);
-            },
-            3
-          );
-
-        const candles = performanceResults.map(function(result) {
-          if (result && result.error) {
-            throw result.error;
-          }
-
-          return result;
-        });
+        const candles = await Promise.all(
+          list.map(function(item) {
+            return fetchPerformanceCandles(item);
+          })
+        );
 
         const livePortfolioValue =
           getLivePortfolioValue(list);
@@ -4921,9 +4400,8 @@
       try {
 
         const results =
-          await runWithConcurrency(
-            list,
-            function(item) {
+          await Promise.all(
+            list.map(function(item) {
 
               return fetchMovingAverageForHolding(item)
                 .then(function(result) {
@@ -4935,8 +4413,7 @@
 
                 });
 
-            },
-            3
+            })
           );
 
         results.forEach(function(entry) {
@@ -5015,7 +4492,6 @@
       // Refresh live prices every 30 seconds.
       quoteRefreshTimer = setInterval(function() {
         fetchPortfolioQuotes();
-        fetchCombinedPortfolioQuotes();
       }, 30000);
     }
 
@@ -5172,7 +4648,6 @@
       updateSummary();
       renderMovingAverageMonitor();
       fetchPortfolioQuotes();
-      fetchCombinedPortfolioQuotes();
       refreshMovingAverages();
 
     }
@@ -5272,7 +4747,6 @@
     startQuoteRefresh();
     startMovingAverageRefresh();
     fetchPortfolioQuotes();
-    fetchCombinedPortfolioQuotes();
     refreshMovingAverages();
     refreshPortfolioPerformance();
 
@@ -5344,8 +4818,6 @@
         "LTP",
         "Invested",
         "Current Value",
-        "Today Gain",
-        "Today Gain %",
         "Gain/Loss",
         "Gain/Loss %"
       ]);
@@ -5361,8 +4833,6 @@
           metrics.ltp !== null ? metrics.ltp : "",
           metrics.invested,
           metrics.currentValue !== null ? metrics.currentValue : "",
-          metrics.todayGain !== null ? metrics.todayGain : "",
-          metrics.dailyPercent !== null ? metrics.dailyPercent : "",
           metrics.gain !== null ? metrics.gain : "",
           metrics.gainPercent !== null ? metrics.gainPercent : ""
         ]);
@@ -5476,8 +4946,6 @@
         }
       }, 500);
     }
-
-    restorePortfolioSectionStates();
 
   </script>
 
