@@ -290,6 +290,128 @@
       color: var(--muted);
     }
 
+    /* =========================
+       QUICK SECTION ACCESS
+    ========================= */
+
+    .section-quick-access {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 13px 15px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .section-quick-title {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .45px;
+      margin-bottom: 9px;
+    }
+
+    .section-quick-buttons {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 9px;
+    }
+
+    .section-quick-btn {
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      color: var(--navy);
+      border-radius: 10px;
+      padding: 10px 9px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: .18s ease;
+    }
+
+    .section-quick-btn:hover {
+      border-color: #b9c5d6;
+      background: #edf3ff;
+      transform: translateY(-1px);
+    }
+
+    .section-quick-plus {
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      background: #e7eefb;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      line-height: 1;
+      font-weight: 900;
+    }
+
+    .section-toggle {
+      width: 34px;
+      height: 34px;
+      flex: 0 0 34px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: #f8fafc;
+      color: var(--navy);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 21px;
+      font-weight: 800;
+      line-height: 1;
+      transition: .18s ease;
+    }
+
+    .section-toggle:hover {
+      background: #edf3ff;
+      border-color: #b9c5d6;
+    }
+
+    .card-header-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .collapsible-card {
+      scroll-margin-top: 90px;
+    }
+
+    .collapsible-card.is-collapsed > :not(.card-header) {
+      display: none !important;
+    }
+
+    .collapsible-card.is-collapsed .card-header {
+      border-bottom: none;
+    }
+
+    @media (max-width: 900px) {
+      .section-quick-buttons {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .section-quick-buttons {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .section-quick-btn {
+        justify-content: flex-start;
+      }
+    }
+
     .positive {
       color: var(--green) !important;
     }
@@ -1017,6 +1139,7 @@
       }
 
       .portfolio-controls,
+      .section-quick-access,
       .quick-actions,
       .footer,
       .ma-monitor-card,
@@ -1297,6 +1420,38 @@
 
 
     <!-- =========================
+         QUICK SECTION ACCESS
+    ========================= -->
+
+    <section class="section-quick-access">
+      <div class="section-quick-title">Quick Access</div>
+      <div class="section-quick-buttons">
+
+        <button type="button" class="section-quick-btn" onclick="openPortfolioSection('performanceCard')">
+          <span class="section-quick-plus">+</span> Performance
+        </button>
+
+        <button type="button" class="section-quick-btn" onclick="openPortfolioSection('maMonitorCard')">
+          <span class="section-quick-plus">+</span> Technical / DMA
+        </button>
+
+        <button type="button" class="section-quick-btn" onclick="openPortfolioSection('holdingsCard')">
+          <span class="section-quick-plus">+</span> Holdings
+        </button>
+
+        <button type="button" class="section-quick-btn" onclick="openPortfolioSection('moversCard')">
+          <span class="section-quick-plus">+</span> Movers
+        </button>
+
+        <button type="button" class="section-quick-btn" onclick="openPortfolioSection('downloadPortfolioSection')">
+          <span class="section-quick-plus">+</span> Download
+        </button>
+
+      </div>
+    </section>
+
+
+    <!-- =========================
          PERFORMANCE + LEADERS
     ========================= -->
 
@@ -1305,7 +1460,7 @@
 
       <!-- PERFORMANCE -->
 
-      <div class="card">
+      <div class="card collapsible-card is-collapsed" id="performanceCard">
 
         <div class="card-header">
 
@@ -1319,17 +1474,28 @@
             </div>
           </div>
 
-          <select
-            class="portfolio-select"
-            style="min-width:110px;"
-            id="performancePeriod"
-          >
+          <div class="card-header-actions">
+            <select
+              class="portfolio-select"
+              style="min-width:110px;"
+              id="performancePeriod"
+            >
             <option>1M</option>
             <option>3M</option>
             <option>6M</option>
             <option>1Y</option>
             <option>ALL</option>
-          </select>
+            </select>
+
+            <button
+              type="button"
+              class="section-toggle"
+              onclick="togglePortfolioSection('performanceCard', this)"
+              aria-expanded="false"
+              aria-label="Open portfolio performance"
+              title="Open / close"
+            >+</button>
+          </div>
 
         </div>
 
@@ -1388,7 +1554,7 @@
 
       <!-- TOP GAINERS / LOSERS -->
 
-      <div class="card">
+      <div class="card collapsible-card is-collapsed" id="moversCard">
 
         <div class="card-header">
 
@@ -1401,6 +1567,15 @@
               Biggest gainers and losers
             </div>
           </div>
+
+          <button
+            type="button"
+            class="section-toggle"
+            onclick="togglePortfolioSection('moversCard', this)"
+            aria-expanded="false"
+            aria-label="Open portfolio movers"
+            title="Open / close"
+          >+</button>
 
         </div>
 
@@ -1521,7 +1696,7 @@
          MOVING AVERAGE MONITOR
     ========================= -->
 
-    <section class="card ma-monitor-card">
+    <section class="card ma-monitor-card collapsible-card is-collapsed" id="maMonitorCard">
 
       <div class="card-header">
         <div>
@@ -1536,14 +1711,25 @@
           </div>
         </div>
 
-        <button
-          type="button"
-          class="btn btn-light"
-          onclick="refreshMovingAverages()"
-          id="maRefreshButton"
-        >
-          ↻ Refresh
-        </button>
+        <div class="card-header-actions">
+          <button
+            type="button"
+            class="btn btn-light"
+            onclick="refreshMovingAverages()"
+            id="maRefreshButton"
+          >
+            ↻ Refresh
+          </button>
+
+          <button
+            type="button"
+            class="section-toggle"
+            onclick="togglePortfolioSection('maMonitorCard', this)"
+            aria-expanded="false"
+            aria-label="Open technical position"
+            title="Open / close"
+          >+</button>
+        </div>
       </div>
 
       <div class="card-body">
@@ -1616,7 +1802,7 @@
          HOLDINGS
     ========================= -->
 
-    <section class="card holdings-card">
+    <section class="card holdings-card collapsible-card is-collapsed" id="holdingsCard">
 
       <div class="card-header">
 
@@ -1635,12 +1821,23 @@
 
         </div>
 
-        <button
-          class="btn btn-green"
-          onclick="addHolding()"
-        >
-          + Add Holding
-        </button>
+        <div class="card-header-actions">
+          <button
+            class="btn btn-green"
+            onclick="addHolding()"
+          >
+            + Add Holding
+          </button>
+
+          <button
+            type="button"
+            class="section-toggle"
+            onclick="togglePortfolioSection('holdingsCard', this)"
+            aria-expanded="false"
+            aria-label="Open holdings"
+            title="Open / close"
+          >+</button>
+        </div>
 
       </div>
 
@@ -1806,7 +2003,7 @@
          DOWNLOAD PORTFOLIO
     ========================= -->
 
-    <section class="card download-portfolio-card" id="downloadPortfolioSection">
+    <section class="card download-portfolio-card collapsible-card is-collapsed" id="downloadPortfolioSection">
 
       <div class="card-header">
 
@@ -1819,6 +2016,15 @@
             Create a clean report or download your current holdings.
           </div>
         </div>
+
+        <button
+          type="button"
+          class="section-toggle"
+          onclick="togglePortfolioSection('downloadPortfolioSection', this)"
+          aria-expanded="false"
+          aria-label="Open download portfolio"
+          title="Open / close"
+        >+</button>
 
       </div>
 
@@ -3513,6 +3719,95 @@
     -------------------------------- */
 
     /* --------------------------------
+       COLLAPSIBLE PORTFOLIO SECTIONS
+    -------------------------------- */
+
+    function updatePortfolioSectionButton(card, expanded) {
+      if (!card) return;
+
+      const button = card.querySelector('.section-toggle');
+
+      if (!button) return;
+
+      button.textContent = expanded ? '−' : '+';
+      button.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    }
+
+    function togglePortfolioSection(id, button) {
+      const card = document.getElementById(id);
+
+      if (!card) return;
+
+      const willOpen = card.classList.contains('is-collapsed');
+
+      card.classList.toggle('is-collapsed', !willOpen);
+      updatePortfolioSectionButton(card, willOpen);
+
+      try {
+        localStorage.setItem(
+          'stockgyan_section_' + id,
+          willOpen ? 'open' : 'closed'
+        );
+      } catch (error) {
+        // Ignore localStorage errors.
+      }
+    }
+
+    function openPortfolioSection(id) {
+      const card = document.getElementById(id);
+
+      if (!card) return;
+
+      card.classList.remove('is-collapsed');
+      updatePortfolioSectionButton(card, true);
+
+      try {
+        localStorage.setItem(
+          'stockgyan_section_' + id,
+          'open'
+        );
+      } catch (error) {
+        // Ignore localStorage errors.
+      }
+
+      setTimeout(function() {
+        card.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }, 20);
+    }
+
+    function restorePortfolioSectionStates() {
+      const ids = [
+        'performanceCard',
+        'moversCard',
+        'maMonitorCard',
+        'holdingsCard',
+        'downloadPortfolioSection'
+      ];
+
+      ids.forEach(function(id) {
+        const card = document.getElementById(id);
+
+        if (!card) return;
+
+        let saved = null;
+
+        try {
+          saved = localStorage.getItem('stockgyan_section_' + id);
+        } catch (error) {
+          saved = null;
+        }
+
+        const expanded = saved === 'open';
+
+        card.classList.toggle('is-collapsed', !expanded);
+        updatePortfolioSectionButton(card, expanded);
+      });
+    }
+
+    /* --------------------------------
        CONTROLLED HISTORICAL REQUESTS
     -------------------------------- */
 
@@ -4949,6 +5244,8 @@
         }
       }, 500);
     }
+
+    restorePortfolioSectionStates();
 
   </script>
 
