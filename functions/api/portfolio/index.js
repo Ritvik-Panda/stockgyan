@@ -18,7 +18,7 @@ import {
 } from "../../lib/session.js";
 
 
-function getSessionEmail(request, env) {
+async function getSessionEmail(request, env) {
 
   const cookieHeader =
     request.headers.get("Cookie") || "";
