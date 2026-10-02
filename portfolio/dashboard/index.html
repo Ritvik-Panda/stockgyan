@@ -2405,19 +2405,16 @@
        PORTFOLIO STORAGE + LIVE MARKET DATA
     -------------------------------- */
 
-    let portfolios =
-      JSON.parse(
-        localStorage.getItem("stockgyan_portfolios") || "null"
-      );
-
-    let holdings =
-      JSON.parse(
-        localStorage.getItem("stockgyan_holdings") || "{}"
-      );
+    // Portfolio data is now stored server-side in D1 and linked to the
+    // authenticated email-OTP session. localStorage is no longer used as
+    // the source of truth for portfolios or holdings.
+    let portfolios = [];
+    let holdings = {};
 
     let selectedStock = null;
     let editingHoldingKey = null;
     let removingHoldingKey = null;
+    let portfolioDataLoading = false;
 
     // Live quote cache for the selected portfolio.
     // Prices come from StockGyan's secure server-side Upstox proxy.
@@ -2430,27 +2427,109 @@
     let movingAverageRequestInProgress = false;
     let movingAverageRefreshTimer = null;
 
-    if (!portfolios || !Array.isArray(portfolios) || portfolios.length === 0) {
-
-      portfolios = [
-        {
-          id: "default",
-          name: "My Portfolio"
+    async function portfolioApi(url, options) {
+      const response = await fetch(url, Object.assign({
+        credentials: "same-origin",
+        headers: {
+          "Accept": "application/json"
         }
-      ];
+      }, options || {}));
 
-      savePortfolios();
+      let data = null;
 
+      try {
+        data = await response.json();
+      } catch (error) {
+        data = null;
+      }
+
+      if (!response.ok || !data || data.status === "error") {
+        if (response.status === 401) {
+          throw new Error("Your login session has expired. Please login again.");
+        }
+
+        throw new Error(
+          (data && data.message) ||
+          "Unable to update portfolio data."
+        );
+      }
+
+      return data;
     }
 
 
-    function savePortfolios() {
+    async function loadPortfolioData() {
+      if (portfolioDataLoading) return;
 
-      localStorage.setItem(
-        "stockgyan_portfolios",
-        JSON.stringify(portfolios)
-      );
+      portfolioDataLoading = true;
 
+      try {
+        const data = await portfolioApi("/api/portfolio");
+
+        portfolios = Array.isArray(data.portfolios)
+          ? data.portfolios
+          : [];
+
+        if (!portfolios.length) {
+          throw new Error("No portfolio is available for this account.");
+        }
+
+        renderPortfolios();
+
+        const savedId = localStorage.getItem("stockgyan_selected_portfolio_id");
+        const savedPortfolio = portfolios.find(function(item) {
+          return String(item.id) === String(savedId);
+        });
+
+        portfolioSelect.value = savedPortfolio
+          ? String(savedPortfolio.id)
+          : String(portfolios[0].id);
+
+        holdings = {};
+
+        await Promise.all(
+          portfolios.map(async function(portfolio) {
+            const holdingData = await portfolioApi(
+              "/api/portfolio/holdings?portfolio_id=" +
+              encodeURIComponent(portfolio.id)
+            );
+
+            holdings[portfolio.id] =
+              Array.isArray(holdingData.holdings)
+                ? holdingData.holdings
+                : [];
+          })
+        );
+
+        localStorage.setItem(
+          "stockgyan_selected_portfolio_id",
+          String(portfolioSelect.value)
+        );
+
+        renderHoldings();
+        updateSummary();
+        renderMovingAverageMonitor();
+        fetchPortfolioQuotes();
+        fetchCombinedPortfolioQuotes();
+        refreshMovingAverages();
+        refreshPortfolioPerformance();
+
+      } catch (error) {
+        console.error("StockGyan portfolio load error:", error);
+
+        portfolios = [];
+        holdings = {};
+        portfolioSelect.innerHTML =
+          '<option value="">Unable to load portfolio</option>';
+
+        alert(
+          error.message ||
+          "Unable to load your portfolio. Please login again and retry."
+        );
+
+      } finally {
+        portfolioDataLoading = false;
+      }
     }
 
 
@@ -2472,9 +2551,6 @@
       });
 
     }
-
-
-    renderPortfolios();
 
 
     /* --------------------------------
@@ -2501,41 +2577,51 @@
     }
 
 
-    function savePortfolio() {
+    async function savePortfolio() {
 
       const name =
         portfolioNameInput.value.trim();
 
       if (!name) {
-
         alert("Please enter a portfolio name.");
-
         return;
-
       }
 
+      try {
+        const data = await portfolioApi("/api/portfolio", {
+          method: "POST",
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            name: name.substring(0, 50)
+          })
+        });
 
-      const portfolio = {
+        if (!data.portfolio) {
+          throw new Error("Portfolio was not created.");
+        }
 
-        id:
-          "portfolio_" +
-          Date.now(),
+        portfolios.push(data.portfolio);
+        holdings[data.portfolio.id] = [];
 
-        name: name
+        renderPortfolios();
+        portfolioSelect.value = String(data.portfolio.id);
+        localStorage.setItem(
+          "stockgyan_selected_portfolio_id",
+          String(data.portfolio.id)
+        );
 
-      };
+        closeModal();
+        renderHoldings();
+        updateSummary();
+        renderMovingAverageMonitor();
+        refreshPortfolioPerformance();
 
-
-      portfolios.push(portfolio);
-
-      savePortfolios();
-
-      renderPortfolios();
-
-      portfolioSelect.value =
-        portfolio.id;
-
-      closeModal();
+      } catch (error) {
+        alert(error.message || "Unable to create portfolio.");
+      }
 
     }
 
@@ -2544,25 +2630,19 @@
        RENAME PORTFOLIO
     -------------------------------- */
 
-    function renamePortfolio() {
+    async function renamePortfolio() {
 
       const selectedId =
         portfolioSelect.value;
 
       const portfolio =
-        portfolios.find(
-          function(item) {
-            return item.id === selectedId;
-          }
-        );
-
+        portfolios.find(function(item) {
+          return String(item.id) === String(selectedId);
+        });
 
       if (!portfolio) {
-
         return;
-
       }
-
 
       const newName =
         prompt(
@@ -2570,35 +2650,42 @@
           portfolio.name
         );
 
-
       if (!newName) {
-
         return;
-
       }
-
 
       const cleanName =
-        newName.trim();
-
+        newName.trim().substring(0, 50);
 
       if (!cleanName) {
-
         return;
-
       }
 
+      try {
+        const data = await portfolioApi("/api/portfolio", {
+          method: "PATCH",
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            id: Number(selectedId),
+            name: cleanName
+          })
+        });
 
-      portfolio.name =
-        cleanName.substring(0, 50);
+        if (data.portfolio) {
+          portfolio.name = data.portfolio.name;
+        } else {
+          portfolio.name = cleanName;
+        }
 
+        renderPortfolios();
+        portfolioSelect.value = String(selectedId);
 
-      savePortfolios();
-
-      renderPortfolios();
-
-      portfolioSelect.value =
-        selectedId;
+      } catch (error) {
+        alert(error.message || "Unable to rename portfolio.");
+      }
 
     }
 
@@ -2772,9 +2859,9 @@
 
     }
 
-    function saveHolding() {
+    async function saveHolding() {
 
-      const portfolioId = portfolioSelect.value;
+      const portfolioId = Number(portfolioSelect.value);
       const quantity = Number(
         document.getElementById("holdingQuantity").value
       );
@@ -2791,75 +2878,66 @@
       }
 
       if (!Number.isFinite(quantity) || quantity <= 0) {
-        showHoldingMessage(
-          "Please enter a valid quantity.",
-          "error"
-        );
+        showHoldingMessage("Please enter a valid quantity.", "error");
         return;
       }
 
       if (!Number.isFinite(avgPrice) || avgPrice <= 0) {
-        showHoldingMessage(
-          "Please enter a valid average buy price.",
-          "error"
-        );
+        showHoldingMessage("Please enter a valid average buy price.", "error");
         return;
       }
 
-      if (!holdings[portfolioId]) {
-        holdings[portfolioId] = [];
-      }
-
-      const existing = holdings[portfolioId].find(function(item) {
-        return item.instrument_key === selectedStock.instrument_key;
-      });
-
-      if (existing) {
-
-        const oldQty = Number(existing.quantity);
-        const oldAvg = Number(existing.avg_price);
-
-        const totalQty = oldQty + quantity;
-        const totalCost =
-          (oldQty * oldAvg) +
-          (quantity * avgPrice);
-
-        existing.quantity = totalQty;
-        existing.avg_price = totalCost / totalQty;
-
-      } else {
-
-        holdings[portfolioId].push({
-          instrument_key: selectedStock.instrument_key,
-          symbol:
-            selectedStock.trading_symbol ||
-            selectedStock.symbol ||
-            "",
-          name:
-            selectedStock.name ||
-            selectedStock.trading_symbol ||
-            selectedStock.symbol ||
-            "",
-          exchange:
-            selectedStock.exchange ||
-            (selectedStock.instrument_key || "").split("_")[0],
-          quantity: quantity,
-          avg_price: avgPrice
+      try {
+        const data = await portfolioApi("/api/portfolio/holdings", {
+          method: "POST",
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            portfolio_id: portfolioId,
+            instrument_key: selectedStock.instrument_key,
+            symbol: selectedStock.trading_symbol || selectedStock.symbol || "",
+            name: selectedStock.name || selectedStock.trading_symbol || selectedStock.symbol || "",
+            exchange: selectedStock.exchange || (selectedStock.instrument_key || "").split("_")[0],
+            quantity: quantity,
+            avg_price: avgPrice
+          })
         });
 
+        if (!data.holding) {
+          throw new Error("Holding was not saved.");
+        }
+
+        if (!holdings[portfolioId]) {
+          holdings[portfolioId] = [];
+        }
+
+        const index = holdings[portfolioId].findIndex(function(item) {
+          return item.instrument_key === data.holding.instrument_key;
+        });
+
+        if (index >= 0) {
+          holdings[portfolioId][index] = data.holding;
+        } else {
+          holdings[portfolioId].push(data.holding);
+        }
+
+        closeHoldingModal();
+        renderHoldings();
+        updateSummary();
+        fetchPortfolioQuotes();
+        performanceCache = {};
+        refreshPortfolioPerformance();
+        renderMovingAverageMonitor();
+        refreshMovingAverages();
+
+      } catch (error) {
+        showHoldingMessage(
+          error.message || "Unable to save holding.",
+          "error"
+        );
       }
-
-      localStorage.setItem(
-        "stockgyan_holdings",
-        JSON.stringify(holdings)
-      );
-
-      closeHoldingModal();
-      renderHoldings();
-      updateSummary();
-      fetchPortfolioQuotes();
-      performanceCache = {};
-      refreshPortfolioPerformance();
 
     }
 
@@ -2927,7 +3005,7 @@
     }
 
 
-    function saveEditedHolding() {
+    async function saveEditedHolding() {
       const portfolioId = portfolioSelect.value;
       const list = holdings[portfolioId] || [];
 
@@ -2949,35 +3027,61 @@
       );
 
       if (!Number.isFinite(quantity) || quantity <= 0) {
-        showEditHoldingMessage(
-          "Please enter a valid quantity.",
-          "error"
-        );
+        showEditHoldingMessage("Please enter a valid quantity.", "error");
         return;
       }
 
       if (!Number.isFinite(avgPrice) || avgPrice <= 0) {
-        showEditHoldingMessage(
-          "Please enter a valid average buy price.",
-          "error"
-        );
+        showEditHoldingMessage("Please enter a valid average buy price.", "error");
         return;
       }
 
-      item.quantity = quantity;
-      item.avg_price = avgPrice;
+      if (!item.id) {
+        showEditHoldingMessage("This holding has no server ID. Please reload the portfolio.", "error");
+        return;
+      }
 
-      localStorage.setItem(
-        "stockgyan_holdings",
-        JSON.stringify(holdings)
-      );
+      try {
+        const data = await portfolioApi("/api/portfolio/holdings", {
+          method: "PUT",
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            id: Number(item.id),
+            quantity: quantity,
+            avg_price: avgPrice
+          })
+        });
 
-      closeEditHoldingModal();
-      renderHoldings();
-      updateSummary();
-      fetchPortfolioQuotes();
-      performanceCache = {};
-      refreshPortfolioPerformance();
+        if (data.holding) {
+          const index = list.findIndex(function(row) {
+            return row.id === item.id;
+          });
+          if (index >= 0) {
+            list[index] = data.holding;
+          }
+        } else {
+          item.quantity = quantity;
+          item.avg_price = avgPrice;
+        }
+
+        closeEditHoldingModal();
+        renderHoldings();
+        updateSummary();
+        fetchPortfolioQuotes();
+        performanceCache = {};
+        refreshPortfolioPerformance();
+        renderMovingAverageMonitor();
+        refreshMovingAverages();
+
+      } catch (error) {
+        showEditHoldingMessage(
+          error.message || "Unable to update holding.",
+          "error"
+        );
+      }
     }
 
 
@@ -3032,7 +3136,7 @@
     }
 
 
-    function confirmRemoveHolding() {
+    async function confirmRemoveHolding() {
       const portfolioId = portfolioSelect.value;
 
       if (!removingHoldingKey) {
@@ -3041,22 +3145,37 @@
       }
 
       const list = holdings[portfolioId] || [];
-
-      holdings[portfolioId] = list.filter(function(item) {
-        return item.instrument_key !== removingHoldingKey;
+      const item = list.find(function(row) {
+        return row.instrument_key === removingHoldingKey;
       });
 
-      localStorage.setItem(
-        "stockgyan_holdings",
-        JSON.stringify(holdings)
-      );
+      if (!item || !item.id) {
+        closeRemoveHoldingModal();
+        return;
+      }
 
-      closeRemoveHoldingModal();
-      renderHoldings();
-      updateSummary();
-      fetchPortfolioQuotes();
-      performanceCache = {};
-      refreshPortfolioPerformance();
+      try {
+        await portfolioApi(
+          "/api/portfolio/holdings?id=" + encodeURIComponent(item.id),
+          { method: "DELETE" }
+        );
+
+        holdings[portfolioId] = list.filter(function(row) {
+          return row.id !== item.id;
+        });
+
+        closeRemoveHoldingModal();
+        renderHoldings();
+        updateSummary();
+        fetchPortfolioQuotes();
+        performanceCache = {};
+        refreshPortfolioPerformance();
+        renderMovingAverageMonitor();
+        refreshMovingAverages();
+
+      } catch (error) {
+        alert(error.message || "Unable to remove holding.");
+      }
     }
 
 
@@ -5067,12 +5186,37 @@
 
     portfolioSelect.addEventListener(
       "change",
-      function() {
+      async function() {
+        const selectedId = portfolioSelect.value;
+
+        localStorage.setItem(
+          "stockgyan_selected_portfolio_id",
+          String(selectedId)
+        );
+
         quoteCache = {};
         quoteSource = "";
         movingAverageCache = {};
         performanceCache = {};
+
+        try {
+          const data = await portfolioApi(
+            "/api/portfolio/holdings?portfolio_id=" +
+            encodeURIComponent(selectedId)
+          );
+
+          holdings[selectedId] =
+            Array.isArray(data.holdings)
+              ? data.holdings
+              : [];
+
+        } catch (error) {
+          alert(error.message || "Unable to load this portfolio.");
+          return;
+        }
+
         renderHoldings();
+        updateSummary();
         renderMovingAverageMonitor();
         fetchPortfolioQuotes();
         refreshMovingAverages();
@@ -5117,18 +5261,24 @@
       document.getElementById("deletePortfolioModal").classList.remove("show");
     }
 
-    function confirmDeletePortfolio() {
+    async function confirmDeletePortfolio() {
 
-      const selectedId = portfolioSelect.value;
+      const selectedId = Number(portfolioSelect.value);
 
-      if (selectedId === "default") {
+      if (!Number.isInteger(selectedId) || selectedId <= 0) {
         closeDeletePortfolioModal();
+        return;
+      }
+
+      if (portfolios.length <= 1) {
+        closeDeletePortfolioModal();
+        alert("You must keep at least one portfolio.");
         return;
       }
 
       const portfolio =
         portfolios.find(function(item) {
-          return item.id === selectedId;
+          return Number(item.id) === selectedId;
         });
 
       if (!portfolio) {
@@ -5137,43 +5287,63 @@
       }
 
       const confirmed = confirm(
-        'Delete "' + portfolio.name +
-        '" permanently?'
+        'Delete "' + portfolio.name + '" permanently?'
       );
 
       if (!confirmed) {
         return;
       }
 
-      portfolios =
-        portfolios.filter(function(item) {
-          return item.id !== selectedId;
+      try {
+        await portfolioApi(
+          "/api/portfolio?id=" + encodeURIComponent(selectedId),
+          { method: "DELETE" }
+        );
+
+        portfolios = portfolios.filter(function(item) {
+          return Number(item.id) !== selectedId;
         });
 
-      delete holdings[selectedId];
+        delete holdings[selectedId];
 
-      savePortfolios();
+        renderPortfolios();
 
-      localStorage.setItem(
-        "stockgyan_holdings",
-        JSON.stringify(holdings)
-      );
+        const nextPortfolio = portfolios[0];
+        portfolioSelect.value = String(nextPortfolio.id);
+        localStorage.setItem(
+          "stockgyan_selected_portfolio_id",
+          String(nextPortfolio.id)
+        );
 
-      renderPortfolios();
+        closeDeletePortfolioModal();
 
-      portfolioSelect.value = "default";
+        quoteCache = {};
+        quoteSource = "";
+        movingAverageCache = {};
+        performanceCache = {};
 
-      closeDeletePortfolioModal();
+        try {
+          const data = await portfolioApi(
+            "/api/portfolio/holdings?portfolio_id=" +
+            encodeURIComponent(nextPortfolio.id)
+          );
+          holdings[nextPortfolio.id] =
+            Array.isArray(data.holdings) ? data.holdings : [];
+        } catch (error) {
+          holdings[nextPortfolio.id] = [];
+        }
 
-      quoteCache = {};
-      quoteSource = "";
-      movingAverageCache = {};
-      renderHoldings();
-      updateSummary();
-      renderMovingAverageMonitor();
-      fetchPortfolioQuotes();
-      fetchCombinedPortfolioQuotes();
-      refreshMovingAverages();
+        renderHoldings();
+        updateSummary();
+        renderMovingAverageMonitor();
+        fetchPortfolioQuotes();
+        fetchCombinedPortfolioQuotes();
+        refreshMovingAverages();
+        refreshPortfolioPerformance();
+
+      } catch (error) {
+        alert(error.message || "Unable to delete portfolio.");
+      }
 
     }
 
@@ -5478,6 +5648,9 @@
     }
 
     restorePortfolioSectionStates();
+
+    // Start loading the authenticated user's D1 portfolio.
+    loadPortfolioData();
 
   </script>
 
