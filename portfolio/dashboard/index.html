@@ -573,7 +573,7 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 1030px;
+      min-width: 1140px;
     }
 
     th {
@@ -1675,6 +1675,10 @@
 
               <th>
                 Current Value
+              </th>
+
+              <th>
+                Today Gain
               </th>
 
               <th>
@@ -3200,7 +3204,7 @@
       if (!list.length) {
         body.innerHTML =
           '<tr>' +
-            '<td colspan="9" class="empty-table">' +
+            '<td colspan="10" class="empty-table">' +
               '<strong>No holdings added yet</strong><br>' +
               '<span style="font-size:12px;">Add stocks to start tracking your portfolio.</span>' +
             '</td>' +
@@ -3232,6 +3236,13 @@
             ? formatSignedMoney(metrics.gain)
             : "—";
 
+        const todayGainHtml =
+          metrics.todayGain !== null
+            ? formatSignedMoney(metrics.todayGain)
+            : "—";
+
+        const todayGainClass = valueClass(metrics.todayGain);
+
         const percentHtml =
           metrics.gainPercent !== null
             ? formatSignedPercent(metrics.gainPercent)
@@ -3259,6 +3270,9 @@
           '<td>' + ltpHtml + '</td>' +
           '<td>₹' + formatMoney(metrics.invested) + '</td>' +
           '<td>' + currentValueHtml + '</td>' +
+          '<td class="' + todayGainClass + '" style="font-weight:800;">' +
+            todayGainHtml +
+          '</td>' +
           '<td class="' + gainClass + '" style="font-weight:800;">' +
             gainHtml +
           '</td>' +
@@ -3497,6 +3511,43 @@
     /* --------------------------------
        PORTFOLIO PERFORMANCE
     -------------------------------- */
+
+    /* --------------------------------
+       CONTROLLED HISTORICAL REQUESTS
+    -------------------------------- */
+
+    async function runWithConcurrency(items, worker, concurrency) {
+      const results = new Array(items.length);
+      let nextIndex = 0;
+
+      async function runner() {
+        while (true) {
+          const index = nextIndex++;
+
+          if (index >= items.length) {
+            return;
+          }
+
+          try {
+            results[index] = await worker(items[index], index);
+          } catch (error) {
+            results[index] = {
+              error: error
+            };
+          }
+        }
+      }
+
+      const workers = [];
+      const workerCount = Math.min(concurrency, items.length);
+
+      for (let i = 0; i < workerCount; i++) {
+        workers.push(runner());
+      }
+
+      await Promise.all(workers);
+      return results;
+    }
 
     let performanceRequestInProgress = false;
     let performanceCache = {};
@@ -3894,11 +3945,22 @@
           return;
         }
 
-        const candles = await Promise.all(
-          list.map(function(item) {
-            return fetchPerformanceCandles(item);
-          })
-        );
+        const performanceResults =
+          await runWithConcurrency(
+            list,
+            function(item) {
+              return fetchPerformanceCandles(item);
+            },
+            3
+          );
+
+        const candles = performanceResults.map(function(result) {
+          if (result && result.error) {
+            throw result.error;
+          }
+
+          return result;
+        });
 
         const livePortfolioValue =
           getLivePortfolioValue(list);
@@ -4335,8 +4397,9 @@
       try {
 
         const results =
-          await Promise.all(
-            list.map(function(item) {
+          await runWithConcurrency(
+            list,
+            function(item) {
 
               return fetchMovingAverageForHolding(item)
                 .then(function(result) {
@@ -4348,7 +4411,8 @@
 
                 });
 
-            })
+            },
+            3
           );
 
         results.forEach(function(entry) {
@@ -4753,6 +4817,8 @@
         "LTP",
         "Invested",
         "Current Value",
+        "Today Gain",
+        "Today Gain %",
         "Gain/Loss",
         "Gain/Loss %"
       ]);
@@ -4768,6 +4834,8 @@
           metrics.ltp !== null ? metrics.ltp : "",
           metrics.invested,
           metrics.currentValue !== null ? metrics.currentValue : "",
+          metrics.todayGain !== null ? metrics.todayGain : "",
+          metrics.dailyPercent !== null ? metrics.dailyPercent : "",
           metrics.gain !== null ? metrics.gain : "",
           metrics.gainPercent !== null ? metrics.gainPercent : ""
         ]);
