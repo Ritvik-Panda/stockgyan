@@ -1,26 +1,50 @@
+/*
+  StockGyan Portfolio API
+  Route: /api/portfolio
+
+  GET    /api/portfolio              -> list current user's portfolios
+  POST   /api/portfolio              -> create portfolio
+  PATCH  /api/portfolio              -> rename portfolio
+  DELETE /api/portfolio?id=123       -> delete portfolio + its holdings
+
+  Authentication:
+  Uses the same email-OTP session cookie already used by
+  /api/portfolio/holdings.
+*/
+
 import {
   verifySessionToken,
   SESSION_COOKIE_NAME
 } from "../../lib/session.js";
 
+
 function getSessionEmail(request, env) {
-  const cookieHeader = request.headers.get("Cookie") || "";
 
-  const cookies = cookieHeader
-    .split(";")
-    .map(item => item.trim());
+  const cookieHeader =
+    request.headers.get("Cookie") || "";
 
-  const sessionCookie = cookies.find(
-    item => item.startsWith(`${SESSION_COOKIE_NAME}=`)
-  );
+  const cookies =
+    cookieHeader
+      .split(";")
+      .map(function(item) {
+        return item.trim();
+      });
+
+  const sessionCookie =
+    cookies.find(function(item) {
+      return item.startsWith(
+        `${SESSION_COOKIE_NAME}=`
+      );
+    });
 
   if (!sessionCookie) {
     return null;
   }
 
-  const token = sessionCookie.substring(
-    SESSION_COOKIE_NAME.length + 1
-  );
+  const token =
+    sessionCookie.substring(
+      SESSION_COOKIE_NAME.length + 1
+    );
 
   return verifySessionToken(
     token,
@@ -28,7 +52,9 @@ function getSessionEmail(request, env) {
   );
 }
 
+
 async function authenticate(context) {
+
   const { request, env } = context;
 
   if (!env.DB) {
@@ -36,7 +62,8 @@ async function authenticate(context) {
       error: Response.json(
         {
           status: "error",
-          message: "Database binding DB is not configured"
+          message:
+            "Database binding DB is not configured"
         },
         { status: 500 }
       )
@@ -48,24 +75,27 @@ async function authenticate(context) {
       error: Response.json(
         {
           status: "error",
-          message: "SESSION_SECRET is not configured"
+          message:
+            "SESSION_SECRET is not configured"
         },
         { status: 500 }
       )
     };
   }
 
-  const session = await getSessionEmail(
-    request,
-    env
-  );
+  const session =
+    await getSessionEmail(
+      request,
+      env
+    );
 
-  if (!session || !session.email) {
+  if (!session) {
     return {
       error: Response.json(
         {
           status: "error",
-          message: "Not authenticated"
+          message:
+            "Not authenticated"
         },
         { status: 401 }
       )
@@ -74,55 +104,89 @@ async function authenticate(context) {
 
   return {
     env,
-    email: session.email
+    session
   };
 }
 
+
+/*
+  Make sure the existing portfolio table exists.
+
+  IMPORTANT:
+  We use the existing schema:
+    id
+    user_email
+    name
+    created_at
+    updated_at
+
+  We do NOT create a new user_id schema.
+*/
 async function ensurePortfolioTable(env) {
-  await env.DB
-    .prepare(`
-      CREATE TABLE IF NOT EXISTS portfolios (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_email TEXT NOT NULL,
-        name TEXT NOT NULL,
-        created_at INTEGER NOT NULL,
-        updated_at INTEGER NOT NULL
-      )
-    `)
-    .run();
+
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS portfolios (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_email TEXT NOT NULL,
+      name TEXT NOT NULL,
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL
+    )
+  `).run();
+
 }
 
+
+/*
+  GET /api/portfolio
+
+  Returns ONLY portfolios belonging to
+  the authenticated email.
+*/
 export async function onRequestGet(context) {
+
   try {
-    const auth = await authenticate(context);
+
+    const auth =
+      await authenticate(context);
 
     if (auth.error) {
       return auth.error;
     }
 
-    const { env, email } = auth;
+    const {
+      env,
+      session
+    } = auth;
 
     await ensurePortfolioTable(env);
 
-    let result = await env.DB
-      .prepare(`
+    let result =
+      await env.DB.prepare(`
         SELECT
           id,
+          user_email,
           name,
           created_at,
           updated_at
         FROM portfolios
         WHERE user_email = ?
-        ORDER BY created_at ASC
+        ORDER BY id ASC
       `)
-      .bind(email)
+      .bind(session.email)
       .all();
 
+    /*
+      New user:
+      automatically create My Portfolio.
+    */
     if (!result.results.length) {
-      const now = Date.now();
 
-      await env.DB
-        .prepare(`
+      const now =
+        Date.now();
+
+      const inserted =
+        await env.DB.prepare(`
           INSERT INTO portfolios
           (
             user_email,
@@ -131,28 +195,27 @@ export async function onRequestGet(context) {
             updated_at
           )
           VALUES (?, ?, ?, ?)
+          RETURNING
+            id,
+            user_email,
+            name,
+            created_at,
+            updated_at
         `)
         .bind(
-          email,
+          session.email,
           "My Portfolio",
           now,
           now
         )
-        .run();
+        .first();
 
-      result = await env.DB
-        .prepare(`
-          SELECT
-            id,
-            name,
-            created_at,
-            updated_at
-          FROM portfolios
-          WHERE user_email = ?
-          ORDER BY created_at ASC
-        `)
-        .bind(email)
-        .all();
+      result = {
+        results: inserted
+          ? [inserted]
+          : []
+      };
+
     }
 
     return Response.json({
@@ -161,6 +224,7 @@ export async function onRequestGet(context) {
     });
 
   } catch (error) {
+
     return Response.json(
       {
         status: "error",
@@ -170,51 +234,67 @@ export async function onRequestGet(context) {
       },
       { status: 500 }
     );
+
   }
+
 }
 
+
+/*
+  POST /api/portfolio
+
+  Body:
+  {
+    "name": "Long Term Portfolio"
+  }
+*/
 export async function onRequestPost(context) {
+
   try {
-    const auth = await authenticate(context);
+
+    const auth =
+      await authenticate(context);
 
     if (auth.error) {
       return auth.error;
     }
 
-    const { request, env, email } = context;
-    const body = await request.json();
+    const {
+      request,
+      env,
+      session
+    } = auth;
 
     await ensurePortfolioTable(env);
 
-    const name = String(
-      body.name || ""
-    ).trim();
+    const body =
+      await request.json();
+
+    const name =
+      String(
+        body.name || ""
+      )
+      .trim()
+      .substring(0, 50);
 
     if (!name) {
-      return Response.json(
-        {
-          status: "error",
-          message: "Portfolio name is required"
-        },
-        { status: 400 }
-      );
-    }
 
-    if (name.length > 100) {
       return Response.json(
         {
           status: "error",
           message:
-            "Portfolio name must be 100 characters or less"
+            "Portfolio name is required"
         },
         { status: 400 }
       );
+
     }
 
-    const now = Date.now();
+    const now =
+      Date.now();
 
-    const result = await env.DB
-      .prepare(`
+    const portfolio =
+      await env.DB.prepare(`
         INSERT INTO portfolios
         (
           user_email,
@@ -225,12 +305,13 @@ export async function onRequestPost(context) {
         VALUES (?, ?, ?, ?)
         RETURNING
           id,
+          user_email,
           name,
           created_at,
           updated_at
       `)
       .bind(
-        email,
+        session.email,
         name,
         now,
         now
@@ -239,10 +320,11 @@ export async function onRequestPost(context) {
 
     return Response.json({
       status: "success",
-      portfolio: result
+      portfolio: portfolio
     });
 
   } catch (error) {
+
     return Response.json(
       {
         status: "error",
@@ -252,61 +334,84 @@ export async function onRequestPost(context) {
       },
       { status: 500 }
     );
+
   }
+
 }
 
+
+/*
+  PATCH /api/portfolio
+
+  Body:
+  {
+    "id": 1,
+    "name": "Long Term"
+  }
+*/
 export async function onRequestPatch(context) {
+
   try {
-    const auth = await authenticate(context);
+
+    const auth =
+      await authenticate(context);
 
     if (auth.error) {
       return auth.error;
     }
 
-    const { request, env, email } = auth;
+    const {
+      request,
+      env,
+      session
+    } = auth;
 
     await ensurePortfolioTable(env);
 
-    const body = await request.json();
+    const body =
+      await request.json();
 
-    const id = Number(body.id);
-    const name = String(
-      body.name || ""
-    ).trim();
+    const id =
+      Number(body.id);
 
-    if (!Number.isInteger(id) || id <= 0) {
-      return Response.json(
-        {
-          status: "error",
-          message: "Valid portfolio id is required"
-        },
-        { status: 400 }
-      );
-    }
+    const name =
+      String(
+        body.name || ""
+      )
+      .trim()
+      .substring(0, 50);
 
-    if (!name) {
-      return Response.json(
-        {
-          status: "error",
-          message: "Portfolio name is required"
-        },
-        { status: 400 }
-      );
-    }
+    if (
+      !Number.isInteger(id) ||
+      id <= 0
+    ) {
 
-    if (name.length > 100) {
       return Response.json(
         {
           status: "error",
           message:
-            "Portfolio name must be 100 characters or less"
+            "Valid portfolio id is required"
         },
         { status: 400 }
       );
+
     }
 
-    const result = await env.DB
-      .prepare(`
+    if (!name) {
+
+      return Response.json(
+        {
+          status: "error",
+          message:
+            "Portfolio name is required"
+        },
+        { status: 400 }
+      );
+
+    }
+
+    const updated =
+      await env.DB.prepare(`
         UPDATE portfolios
         SET
           name = ?,
@@ -316,6 +421,7 @@ export async function onRequestPatch(context) {
           AND user_email = ?
         RETURNING
           id,
+          user_email,
           name,
           created_at,
           updated_at
@@ -324,26 +430,30 @@ export async function onRequestPatch(context) {
         name,
         Date.now(),
         id,
-        email
+        session.email
       )
       .first();
 
-    if (!result) {
+    if (!updated) {
+
       return Response.json(
         {
           status: "error",
-          message: "Portfolio not found"
+          message:
+            "Portfolio not found"
         },
         { status: 404 }
       );
+
     }
 
     return Response.json({
       status: "success",
-      portfolio: result
+      portfolio: updated
     });
 
   } catch (error) {
+
     return Response.json(
       {
         status: "error",
@@ -353,85 +463,125 @@ export async function onRequestPatch(context) {
       },
       { status: 500 }
     );
+
   }
+
 }
 
+
+/*
+  DELETE /api/portfolio?id=123
+
+  Deletes the portfolio and all holdings
+  belonging to that portfolio, but ONLY when
+  the portfolio belongs to the authenticated user.
+*/
 export async function onRequestDelete(context) {
+
   try {
-    const auth = await authenticate(context);
+
+    const auth =
+      await authenticate(context);
 
     if (auth.error) {
       return auth.error;
     }
 
-    const { request, env, email } = auth;
+    const {
+      request,
+      env,
+      session
+    } = auth;
 
     await ensurePortfolioTable(env);
 
-    const url = new URL(request.url);
-    const id = Number(
-      url.searchParams.get("id")
-    );
+    const url =
+      new URL(request.url);
 
-    if (!Number.isInteger(id) || id <= 0) {
+    const id =
+      Number(
+        url.searchParams.get("id")
+      );
+
+    if (
+      !Number.isInteger(id) ||
+      id <= 0
+    ) {
+
       return Response.json(
         {
           status: "error",
-          message: "Valid portfolio id is required"
+          message:
+            "Valid portfolio id is required"
         },
         { status: 400 }
       );
+
     }
 
-    const portfolio = await env.DB
-      .prepare(`
+    const portfolio =
+      await env.DB.prepare(`
         SELECT id
         FROM portfolios
-        WHERE id = ? AND user_email = ?
+        WHERE
+          id = ?
+          AND user_email = ?
       `)
-      .bind(id, email)
+      .bind(
+        id,
+        session.email
+      )
       .first();
 
     if (!portfolio) {
+
       return Response.json(
         {
           status: "error",
-          message: "Portfolio not found"
+          message:
+            "Portfolio not found"
         },
         { status: 404 }
       );
+
     }
 
-    try {
-      await env.DB
-        .prepare(`
-          DELETE FROM portfolio_holdings
-          WHERE portfolio_id = ?
-          AND user_email = ?
-        `)
-        .bind(id, email)
-        .run();
-    } catch (error) {
-      /*
-        portfolio_holdings may not exist yet on a brand-new
-        deployment. The portfolio itself can still be deleted.
-      */
-    }
+    /*
+      Delete holdings first because the existing
+      database schema may not enforce ON DELETE CASCADE.
+    */
+    await env.DB.prepare(`
+      DELETE FROM portfolio_holdings
+      WHERE
+        portfolio_id = ?
+        AND user_email = ?
+    `)
+    .bind(
+      id,
+      session.email
+    )
+    .run();
 
-    await env.DB
-      .prepare(`
-        DELETE FROM portfolios
-        WHERE id = ? AND user_email = ?
-      `)
-      .bind(id, email)
-      .run();
+    await env.DB.prepare(`
+      DELETE FROM portfolios
+      WHERE
+        id = ?
+        AND user_email = ?
+    `)
+    .bind(
+      id,
+      session.email
+    )
+    .run();
 
     return Response.json({
       status: "success",
-      message: "Portfolio deleted"
+      message:
+        "Portfolio deleted successfully"
     });
 
   } catch (error) {
+
     return Response.json(
       {
         status: "error",
@@ -441,5 +591,7 @@ export async function onRequestDelete(context) {
       },
       { status: 500 }
     );
+
   }
+
 }
