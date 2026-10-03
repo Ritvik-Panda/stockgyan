@@ -1869,6 +1869,109 @@
 
 
 
+
+    <!-- =========================
+         PORTFOLIO HEALTH
+    ========================= -->
+
+    <section class="card" id="portfolioHealthSection" style="margin-top:18px;">
+
+      <div class="card-header">
+
+        <div>
+          <div class="card-title">❤️ Portfolio Health</div>
+          <div class="card-subtitle">
+            A data-based view of valuation, business quality, profitability and diversification.
+          </div>
+        </div>
+
+        <button type="button" class="btn btn-light" onclick="refreshPortfolioHealth()">
+          ↻ Refresh Health
+        </button>
+
+      </div>
+
+      <div class="card-body">
+
+        <div style="display:grid;grid-template-columns:minmax(220px,320px) 1fr;gap:18px;align-items:stretch;">
+
+          <div style="border:1px solid var(--border);border-radius:14px;padding:20px;background:#fff;text-align:center;">
+
+            <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">
+              Overall Portfolio Health
+            </div>
+
+            <div id="portfolioHealthScore"
+                 style="font-size:52px;font-weight:900;color:var(--navy);line-height:1.1;margin-top:10px;">
+              —
+            </div>
+
+            <div id="portfolioHealthStatus"
+                 style="font-size:16px;font-weight:800;color:var(--navy);margin-top:5px;">
+              Waiting for analysis
+            </div>
+
+            <div id="portfolioHealthCoverage"
+                 style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.5;">
+              Waiting for fundamental data.
+            </div>
+
+          </div>
+
+          <div style="border:1px solid var(--border);border-radius:14px;padding:18px;background:#fff;">
+
+            <div style="font-weight:800;color:var(--navy);margin-bottom:14px;">
+              Health Factors
+            </div>
+
+            <div id="portfolioHealthFactors"
+                 style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;">
+              <div style="font-size:13px;color:var(--muted);">
+                Add holdings and refresh to calculate health.
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <div style="margin-top:16px;border:1px solid var(--border);border-radius:14px;padding:16px;background:#fff;">
+
+          <div style="font-weight:800;color:var(--navy);margin-bottom:4px;">
+            Stock-wise Health
+          </div>
+
+          <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">
+            P/E, ROE and ROCE are retrieved using the holding's ISIN.
+          </div>
+
+          <div id="portfolioHealthHoldings" style="font-size:13px;">
+            Health analysis will appear here.
+          </div>
+
+        </div>
+
+        <div style="margin-top:12px;padding:12px 14px;border-radius:10px;background:#f7f9fc;font-size:11px;line-height:1.55;color:var(--muted);">
+
+          <strong>Health methodology:</strong>
+          Business Quality 30% · ROCE 20% · P/E / Valuation 20% ·
+          Earnings Growth 15% · Debt / Financial Strength 10% ·
+          Portfolio Concentration 5%.
+
+          Only factors with available data are included in the calculated score.
+          Missing data is not treated as zero.
+
+          <br><br>
+
+          <strong>Data source:</strong> Upstox Company Fundamentals API.
+          This is an educational portfolio indicator and not investment advice.
+
+        </div>
+
+      </div>
+    </section>
+
+
     <!-- =========================
          PORTFOLIO ANALYTICS & INSIGHTS
     ========================= -->
@@ -1912,28 +2015,22 @@
 
         </div>
 
-        <div style="margin-top:16px;border:1px solid var(--border);border-radius:12px;background:#fff;overflow:hidden;">
-          <details id="portfolioNewsCollapse">
-            <summary style="list-style:none;cursor:pointer;background:#159447;color:#fff;padding:13px 16px;font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
-              <span>📰 Portfolio News</span>
-              <span style="font-size:12px;font-weight:700;opacity:.95;">▼ Open / Close</span>
-            </summary>
-
-            <div style="padding:16px;">
-              <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
-                <div style="font-size:11px;color:var(--muted);">
-                  Latest company news is opened directly from Google News.
-                </div>
-                <button type="button" class="btn btn-light" style="padding:7px 10px;font-size:12px;" onclick="loadPortfolioNews()">
-                  Refresh News
-                </button>
-              </div>
-
-              <div id="portfolioNewsList" style="font-size:13px;">
-                News will appear here when holdings are available.
+        <div style="margin-top:16px;border:1px solid var(--border);border-radius:12px;padding:16px;background:#fff;">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;">
+            <div>
+              <div style="font-weight:800;color:var(--navy);">📰 Portfolio News</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:3px;">
+                Recent news related to stocks in this portfolio.
               </div>
             </div>
-          </details>
+            <button type="button" class="btn btn-light" style="padding:7px 10px;font-size:12px;" onclick="loadPortfolioNews()">
+              Refresh News
+            </button>
+          </div>
+
+          <div id="portfolioNewsList" style="font-size:13px;">
+            News will appear here when holdings are available.
+          </div>
         </div>
 
         <div style="margin-top:12px;font-size:11px;color:var(--muted);">
@@ -2485,6 +2582,7 @@
           refreshMovingAverages();
           refreshPortfolioPerformance();
           refreshPortfolioAnalytics();
+          refreshPortfolioHealth();
 
           return true;
         }
@@ -2527,6 +2625,7 @@
           fetchPortfolioQuotes();
           refreshMovingAverages();
           refreshPortfolioPerformance();
+          refreshPortfolioHealth();
 
           // Save only the fresh default state for this logged-in email.
           await syncPortfolioToServer();
@@ -5577,20 +5676,15 @@
       const list = getCurrentPortfolioHoldings();
 
       if (!list.length) {
-        box.innerHTML =
-          '<div style="color:var(--muted);padding:8px 0;">Add holdings to view relevant portfolio news.</div>';
+        box.innerHTML = "Add holdings to search relevant portfolio news.";
         return;
       }
 
-      // Google News is opened directly from the user's browser. This avoids
-      // third-party RSS/CORS/server-feed failures while keeping the dashboard
-      // independent of the holdings, D1 sync and market-data systems.
       const holdings = list.slice(0, 12).map(function(item) {
         const symbol = String(item.symbol || "").trim();
         const name = String(item.name || symbol || "Stock").trim();
-        const searchText = (name + " " + symbol + " NSE stock India").trim();
-        const url = "https://news.google.com/search?q=" +
-          encodeURIComponent(searchText) +
+        const query = (name + " " + symbol + " NSE stock India").trim();
+        const url = "https://news.google.com/search?q=" + encodeURIComponent(query) +
           "&hl=en-IN&gl=IN&ceid=IN:en";
 
         return {
@@ -5610,10 +5704,10 @@
 
       box.innerHTML =
         '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;">' +
-          '<div style="font-size:12px;color:var(--muted);">News is searched live from Google News for your portfolio holdings.</div>' +
+          '<div style="font-size:12px;color:var(--muted);">Latest company news is opened directly from Google News.</div>' +
           '<a href="' + escapeHtml(allUrl) + '" target="_blank" rel="noopener noreferrer" ' +
             'style="display:inline-block;padding:7px 10px;border-radius:8px;background:var(--navy);color:#fff;text-decoration:none;font-size:12px;font-weight:800;">' +
-            'Open All Portfolio News ↗' +
+            'Open All Portfolio News' +
           '</a>' +
         '</div>' +
         holdings.map(function(item) {
@@ -5635,6 +5729,590 @@
           );
         }).join("");
     }
+
+
+    /* --------------------------------
+       PORTFOLIO HEALTH
+    -------------------------------- */
+
+    const portfolioFundamentalCache = {};
+    let portfolioHealthRequestInProgress = false;
+
+    function portfolioHealthParseNumber(value) {
+      if (value === null || value === undefined || value === "") return null;
+
+      const text = String(value)
+        .replace(/,/g, "")
+        .replace(/%/g, "")
+        .trim();
+
+      const number = Number(text);
+
+      return Number.isFinite(number) ? number : null;
+    }
+
+    function portfolioHealthClamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function portfolioHealthFindRatio(data, name) {
+      if (!data || !Array.isArray(data.data)) return null;
+
+      const row = data.data.find(function(item) {
+        return String(item.name || "").trim().toUpperCase() === name.toUpperCase();
+      });
+
+      if (!row) return null;
+
+      return {
+        company: portfolioHealthParseNumber(row.company_value),
+        sector: portfolioHealthParseNumber(row.sector_value)
+      };
+    }
+
+    function portfolioHealthRelativeScore(company, sector, inverse) {
+      if (!Number.isFinite(company)) return null;
+
+      if (!Number.isFinite(sector) || sector <= 0) {
+        return null;
+      }
+
+      const difference = inverse
+        ? (sector - company) / sector
+        : (company - sector) / sector;
+
+      return portfolioHealthClamp(
+        50 + difference * 50,
+        0,
+        100
+      );
+    }
+
+    function portfolioHealthStatus(score) {
+      if (!Number.isFinite(score)) return "Waiting for analysis";
+      if (score >= 75) return "Strong";
+      if (score >= 60) return "Healthy";
+      if (score >= 45) return "Moderate";
+      return "Needs Attention";
+    }
+
+    function portfolioHealthStatusClass(score) {
+      if (!Number.isFinite(score)) return "";
+      if (score >= 75) return "health-positive";
+      if (score >= 60) return "health-positive";
+      if (score >= 45) return "health-neutral";
+      return "health-negative";
+    }
+
+    function portfolioHealthFactorCard(title, score, detail) {
+      let value = "Not available";
+      let valueColor = "var(--muted)";
+
+      if (Number.isFinite(score)) {
+        value = Math.round(score) + "/100";
+        valueColor = score >= 60
+          ? "#067647"
+          : score >= 45
+            ? "#b54708"
+            : "#b42318";
+      }
+
+      return (
+        '<div style="border:1px solid var(--border);border-radius:10px;padding:12px;background:#fff;">' +
+          '<div style="font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;">' +
+            escapeHtml(title) +
+          '</div>' +
+          '<div style="font-size:22px;font-weight:900;margin-top:5px;color:' +
+            valueColor + ';">' +
+            escapeHtml(value) +
+          '</div>' +
+          '<div style="font-size:11px;color:var(--muted);margin-top:3px;line-height:1.45;">' +
+            escapeHtml(detail || "") +
+          '</div>' +
+        '</div>'
+      );
+    }
+
+    async function fetchPortfolioHealthFundamentals(item) {
+
+      const isin = String(item && item.isin || "").trim().toUpperCase();
+
+      if (!isin) {
+        return {
+          status: "missing_isin",
+          isin: "",
+          ratios: null
+        };
+      }
+
+      if (portfolioFundamentalCache[isin]) {
+        return portfolioFundamentalCache[isin];
+      }
+
+      try {
+
+        const response = await fetch(
+          "/api/fundamentals/key-ratios?isin=" +
+          encodeURIComponent(isin),
+          {
+            method: "GET",
+            credentials: "include",
+            cache: "no-store"
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || data.status !== "success") {
+
+          const result = {
+            status: "error",
+            isin: isin,
+            ratios: null,
+            message: data.message || "Fundamental data unavailable"
+          };
+
+          portfolioFundamentalCache[isin] = result;
+
+          return result;
+        }
+
+        const result = {
+          status: "success",
+          isin: isin,
+          ratios: data
+        };
+
+        portfolioFundamentalCache[isin] = result;
+
+        return result;
+
+      } catch (error) {
+
+        const result = {
+          status: "error",
+          isin: isin,
+          ratios: null,
+          message: error.message || "Fundamental data unavailable"
+        };
+
+        portfolioFundamentalCache[isin] = result;
+
+        return result;
+      }
+    }
+
+    function portfolioHealthConcentrationScore(list) {
+
+      if (!list.length) return null;
+
+      let total = 0;
+
+      const rows = list.map(function(item) {
+        const metrics = holdingMetrics(item);
+        return Number(metrics.currentValue);
+      }).filter(function(value) {
+        return Number.isFinite(value) && value > 0;
+      });
+
+      if (!rows.length) return null;
+
+      total = rows.reduce(function(sum, value) {
+        return sum + value;
+      }, 0);
+
+      if (total <= 0) return null;
+
+      rows.sort(function(a, b) {
+        return b - a;
+      });
+
+      const top1 = rows[0] / total * 100;
+
+      const top5 = rows
+        .slice(0, 5)
+        .reduce(function(sum, value) {
+          return sum + value;
+        }, 0) / total * 100;
+
+      let top1Score;
+
+      if (top1 <= 10) top1Score = 100;
+      else if (top1 <= 15) top1Score = 85;
+      else if (top1 <= 20) top1Score = 70;
+      else if (top1 <= 30) top1Score = 50;
+      else top1Score = 25;
+
+      let top5Score;
+
+      if (top5 <= 40) top5Score = 100;
+      else if (top5 <= 55) top5Score = 80;
+      else if (top5 <= 70) top5Score = 60;
+      else if (top5 <= 85) top5Score = 40;
+      else top5Score = 20;
+
+      return {
+        score: top1Score * 0.6 + top5Score * 0.4,
+        top1: top1,
+        top5: top5
+      };
+    }
+
+    function portfolioHealthBuildRow(item, result) {
+
+      const name = item.name || item.symbol || "Stock";
+      const symbol = item.symbol || name;
+
+      if (!result || result.status !== "success") {
+
+        return (
+          '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid #eef2f6;">' +
+            '<div>' +
+              '<div style="font-weight:800;color:var(--navy);">' +
+                escapeHtml(symbol) +
+              '</div>' +
+              '<div style="font-size:11px;color:var(--muted);">' +
+                escapeHtml(name) +
+              '</div>' +
+            '</div>' +
+            '<div style="text-align:right;color:var(--muted);font-size:11px;">' +
+              (result && result.status === "missing_isin"
+                ? "ISIN not available"
+                : "Fundamental data unavailable") +
+            '</div>' +
+          '</div>'
+        );
+      }
+
+      const pe = portfolioHealthFindRatio(result.ratios, "P/E");
+      const roe = portfolioHealthFindRatio(result.ratios, "ROE");
+      const roce = portfolioHealthFindRatio(result.ratios, "ROCE");
+
+      const peText = pe && Number.isFinite(pe.company)
+        ? pe.company.toFixed(2)
+        : "—";
+
+      const roeText = roe && Number.isFinite(roe.company)
+        ? roe.company.toFixed(2) + "%"
+        : "—";
+
+      const roceText = roce && Number.isFinite(roce.company)
+        ? roce.company.toFixed(2) + "%"
+        : "—";
+
+      return (
+        '<div style="display:grid;grid-template-columns:minmax(150px,1fr) repeat(3,minmax(80px,110px));gap:10px;align-items:center;padding:11px 0;border-bottom:1px solid #eef2f6;">' +
+          '<div>' +
+            '<div style="font-weight:800;color:var(--navy);">' +
+              escapeHtml(symbol) +
+            '</div>' +
+            '<div style="font-size:11px;color:var(--muted);">' +
+              escapeHtml(name) +
+            '</div>' +
+          '</div>' +
+          '<div style="text-align:right;">' +
+            '<div style="font-size:10px;color:var(--muted);">P/E</div>' +
+            '<div style="font-weight:800;">' + escapeHtml(peText) + '</div>' +
+          '</div>' +
+          '<div style="text-align:right;">' +
+            '<div style="font-size:10px;color:var(--muted);">ROE</div>' +
+            '<div style="font-weight:800;">' + escapeHtml(roeText) + '</div>' +
+          '</div>' +
+          '<div style="text-align:right;">' +
+            '<div style="font-size:10px;color:var(--muted);">ROCE</div>' +
+            '<div style="font-weight:800;">' + escapeHtml(roceText) + '</div>' +
+          '</div>' +
+        '</div>'
+      );
+    }
+
+    async function refreshPortfolioHealth() {
+
+      const list = getCurrentPortfolioHoldings();
+
+      const scoreBox = document.getElementById("portfolioHealthScore");
+      const statusBox = document.getElementById("portfolioHealthStatus");
+      const coverageBox = document.getElementById("portfolioHealthCoverage");
+      const factorsBox = document.getElementById("portfolioHealthFactors");
+      const holdingsBox = document.getElementById("portfolioHealthHoldings");
+
+      if (!scoreBox || !statusBox || !coverageBox || !factorsBox || !holdingsBox) {
+        return;
+      }
+
+      if (!list.length) {
+
+        scoreBox.textContent = "—";
+        statusBox.textContent = "No holdings";
+        coverageBox.textContent = "Add or import holdings to calculate Portfolio Health.";
+
+        factorsBox.innerHTML =
+          portfolioHealthFactorCard(
+            "Business Quality",
+            null,
+            "Waiting for holdings"
+          ) +
+          portfolioHealthFactorCard(
+            "ROCE",
+            null,
+            "Waiting for holdings"
+          ) +
+          portfolioHealthFactorCard(
+            "P/E / Valuation",
+            null,
+            "Waiting for holdings"
+          ) +
+          portfolioHealthFactorCard(
+            "Concentration",
+            null,
+            "Waiting for holdings"
+          );
+
+        holdingsBox.innerHTML = "Add holdings to generate stock-wise health.";
+        return;
+      }
+
+      if (portfolioHealthRequestInProgress) {
+        return;
+      }
+
+      portfolioHealthRequestInProgress = true;
+
+      scoreBox.textContent = "…";
+      statusBox.textContent = "Loading fundamentals";
+      coverageBox.textContent = "Fetching available company fundamentals.";
+
+      factorsBox.innerHTML =
+        '<div style="font-size:13px;color:var(--muted);grid-column:1/-1;">Loading fundamental data…</div>';
+
+      holdingsBox.innerHTML =
+        '<div style="font-size:13px;color:var(--muted);">Loading company fundamentals…</div>';
+
+      try {
+
+        const results = await Promise.all(
+          list.map(function(item) {
+            return fetchPortfolioHealthFundamentals(item);
+          })
+        );
+
+        let businessQualityTotal = 0;
+        let businessQualityWeight = 0;
+
+        let roceTotal = 0;
+        let roceWeight = 0;
+
+        let peTotal = 0;
+        let peWeight = 0;
+
+        let successCount = 0;
+
+        const rows = [];
+
+        results.forEach(function(result, index) {
+
+          const item = list[index];
+
+          rows.push({
+            item: item,
+            result: result
+          });
+
+          if (!result || result.status !== "success") {
+            return;
+          }
+
+          successCount++;
+
+          const pe = portfolioHealthFindRatio(result.ratios, "P/E");
+          const roe = portfolioHealthFindRatio(result.ratios, "ROE");
+          const roce = portfolioHealthFindRatio(result.ratios, "ROCE");
+
+          const metrics = holdingMetrics(item);
+
+          const weightBase = Number(metrics.currentValue);
+
+          const weight =
+            Number.isFinite(weightBase) && weightBase > 0
+              ? weightBase
+              : Number(metrics.invested) > 0
+                ? Number(metrics.invested)
+                : 1;
+
+          const businessScore =
+            roe && Number.isFinite(roe.company)
+              ? portfolioHealthRelativeScore(
+                  roe.company,
+                  roe.sector,
+                  false
+                )
+              : null;
+
+          const roceScore =
+            roce && Number.isFinite(roce.company)
+              ? portfolioHealthRelativeScore(
+                  roce.company,
+                  roce.sector,
+                  false
+                )
+              : null;
+
+          const peScore =
+            pe && Number.isFinite(pe.company)
+              ? portfolioHealthRelativeScore(
+                  pe.company,
+                  pe.sector,
+                  true
+                )
+              : null;
+
+          if (Number.isFinite(businessScore)) {
+            businessQualityTotal += businessScore * weight;
+            businessQualityWeight += weight;
+          }
+
+          if (Number.isFinite(roceScore)) {
+            roceTotal += roceScore * weight;
+            roceWeight += weight;
+          }
+
+          if (Number.isFinite(peScore)) {
+            peTotal += peScore * weight;
+            peWeight += weight;
+          }
+
+        });
+
+        const businessQuality =
+          businessQualityWeight > 0
+            ? businessQualityTotal / businessQualityWeight
+            : null;
+
+        const roceScore =
+          roceWeight > 0
+            ? roceTotal / roceWeight
+            : null;
+
+        const peScore =
+          peWeight > 0
+            ? peTotal / peWeight
+            : null;
+
+        const concentration =
+          portfolioHealthConcentrationScore(list);
+
+        const factors = [
+          {
+            name: "Business Quality",
+            score: businessQuality,
+            weight: 30,
+            detail: "ROE relative to sector benchmark"
+          },
+          {
+            name: "ROCE",
+            score: roceScore,
+            weight: 20,
+            detail: "ROCE relative to sector benchmark"
+          },
+          {
+            name: "P/E / Valuation",
+            score: peScore,
+            weight: 20,
+            detail: "Lower P/E relative to sector scores higher"
+          },
+          {
+            name: "Earnings Growth",
+            score: null,
+            weight: 15,
+            detail: "Income-statement growth will be added next"
+          },
+          {
+            name: "Debt / Financial Strength",
+            score: null,
+            weight: 10,
+            detail: "Balance-sheet analysis will be added next"
+          },
+          {
+            name: "Concentration",
+            score: concentration ? concentration.score : null,
+            weight: 5,
+            detail: concentration
+              ? "Top 1: " + concentration.top1.toFixed(1) +
+                "% · Top 5: " + concentration.top5.toFixed(1) + "%"
+              : "Current values not available"
+          }
+        ];
+
+        let weightedTotal = 0;
+        let availableWeight = 0;
+
+        factors.forEach(function(factor) {
+
+          if (Number.isFinite(factor.score)) {
+            weightedTotal += factor.score * factor.weight;
+            availableWeight += factor.weight;
+          }
+
+        });
+
+        const overall =
+          availableWeight > 0
+            ? weightedTotal / availableWeight
+            : null;
+
+        if (Number.isFinite(overall)) {
+
+          scoreBox.textContent = Math.round(overall);
+          statusBox.textContent = portfolioHealthStatus(overall);
+
+          statusBox.style.color =
+            overall >= 60
+              ? "#067647"
+              : overall >= 45
+                ? "#b54708"
+                : "#b42318";
+
+        } else {
+
+          scoreBox.textContent = "—";
+          statusBox.textContent = "Insufficient data";
+          statusBox.style.color = "var(--navy)";
+
+        }
+
+        coverageBox.textContent =
+          successCount + " of " + list.length +
+          " holdings have fundamental data. " +
+          availableWeight + "% of the planned scoring weight is currently available.";
+
+        factorsBox.innerHTML = factors.map(function(factor) {
+          return portfolioHealthFactorCard(
+            factor.name,
+            factor.score,
+            factor.detail +
+            " · Planned weight " + factor.weight + "%"
+          );
+        }).join("");
+
+        holdingsBox.innerHTML =
+          '<div style="display:grid;grid-template-columns:minmax(150px,1fr) repeat(3,minmax(80px,110px));gap:10px;padding-bottom:8px;border-bottom:1px solid var(--border);font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;">' +
+            '<div>Holding</div>' +
+            '<div style="text-align:right;">P/E</div>' +
+            '<div style="text-align:right;">ROE</div>' +
+            '<div style="text-align:right;">ROCE</div>' +
+          '</div>' +
+          rows.map(function(row) {
+            return portfolioHealthBuildRow(row.item, row.result);
+          }).join("");
+
+      } finally {
+
+        portfolioHealthRequestInProgress = false;
+
+      }
+
+    }
+
 
     /* --------------------------------
        CLOSE MODAL WHEN CLICKING OUTSIDE
@@ -5708,6 +6386,7 @@
     refreshMovingAverages();
     refreshPortfolioPerformance();
     refreshPortfolioAnalytics();
+    refreshPortfolioHealth();
     loadPortfolioFromServer();
 
 
