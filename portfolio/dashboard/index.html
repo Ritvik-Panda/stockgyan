@@ -5815,21 +5815,49 @@
 
     async function resolvePortfolioHoldingIsin(item) {
 
-      const existingIsin = String(item && item.isin || "").trim().toUpperCase();
+      const existingIsin =
+        String(item && item.isin || "")
+          .trim()
+          .toUpperCase();
 
       if (existingIsin) {
         return existingIsin;
       }
 
-      const instrumentKey = String(item && item.instrument_key || "").trim();
+      const instrumentKey =
+        String(item && item.instrument_key || "")
+          .trim()
+          .toUpperCase();
 
       if (!instrumentKey) {
         return "";
       }
 
+      /*
+       * Upstox NSE equity instrument keys are commonly:
+       * NSE_EQ|INE002A01018
+       *
+       * The part after | is the ISIN.
+       */
+      const parts = instrumentKey.split("|");
+
+      if (
+        parts.length === 2 &&
+        parts[0] === "NSE_EQ" &&
+        /^[A-Z]{2}[A-Z0-9]{9}[0-9]$/.test(parts[1])
+      ) {
+        return parts[1];
+      }
+
+      /*
+       * Fallback for older holdings that may not contain
+       * the ISIN directly in the instrument key.
+       */
       const map = await loadPortfolioUniverseMap();
 
-      return String(map[instrumentKey] || "").trim().toUpperCase();
+      return String(map[instrumentKey] || "")
+        .trim()
+        .toUpperCase();
     }
 
     function portfolioHealthParseNumber(value) {
