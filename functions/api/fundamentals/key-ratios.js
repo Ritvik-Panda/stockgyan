@@ -14,13 +14,15 @@ export async function onRequestGet(context) {
 
     const url = new URL(context.request.url);
 
-    const isin = url.searchParams.get("isin");
+    const isin = (url.searchParams.get("isin") || "")
+      .trim()
+      .toUpperCase();
 
-    if (!isin) {
+    if (!isin || !/^[A-Z]{2}[A-Z0-9]{9}[0-9]$/.test(isin)) {
       return Response.json(
         {
           status: "error",
-          message: "ISIN is required"
+          message: "Valid ISIN is required"
         },
         { status: 400 }
       );
