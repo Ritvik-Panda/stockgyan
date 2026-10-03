@@ -1588,17 +1588,29 @@
           </div>
         </div>
 
-        <button
-          type="button"
-          class="btn btn-light"
-          onclick="refreshMovingAverages()"
-          id="maRefreshButton"
-        >
-          ↻ Refresh
-        </button>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end;">
+          <button
+            type="button"
+            class="btn btn-light"
+            onclick="refreshMovingAverages()"
+            id="maRefreshButton"
+          >
+            ↻ Refresh
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-green"
+            id="technicalPositionToggle"
+            aria-expanded="true"
+            onclick="togglePortfolioSection('technicalPositionContent','technicalPositionToggle','Technical Position')"
+          >
+            ▾ Technical Position
+          </button>
+        </div>
       </div>
 
-      <div class="card-body">
+      <div class="card-body" id="technicalPositionContent">
 
         <div class="ma-summary-grid">
 
@@ -1703,6 +1715,16 @@
             + Add Holding
           </button>
 
+          <button
+            class="btn btn-green"
+            type="button"
+            id="holdingsToggle"
+            aria-expanded="true"
+            onclick="togglePortfolioSection('holdingsContent','holdingsToggle','Holdings')"
+          >
+            ▾ Holdings
+          </button>
+
           <input
             id="holdingsCsvInput"
             type="file"
@@ -1715,7 +1737,7 @@
       </div>
 
 
-      <div class="table-wrap">
+      <div class="table-wrap" id="holdingsContent">
 
         <table>
 
@@ -2023,13 +2045,28 @@
                 Recent news related to stocks in this portfolio.
               </div>
             </div>
-            <button type="button" class="btn btn-light" style="padding:7px 10px;font-size:12px;" onclick="loadPortfolioNews()">
-              Refresh News
-            </button>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end;">
+              <button type="button" class="btn btn-light" style="padding:7px 10px;font-size:12px;" onclick="loadPortfolioNews()">
+                Refresh News
+              </button>
+
+              <button
+                type="button"
+                class="btn btn-green"
+                id="portfolioNewsToggle"
+                aria-expanded="true"
+                style="padding:7px 10px;font-size:12px;"
+                onclick="togglePortfolioSection('portfolioNewsContent','portfolioNewsToggle','Portfolio News')"
+              >
+                ▾ Portfolio News
+              </button>
+            </div>
           </div>
 
-          <div id="portfolioNewsList" style="font-size:13px;">
-            News will appear here when holdings are available.
+          <div id="portfolioNewsContent">
+            <div id="portfolioNewsList" style="font-size:13px;">
+              News will appear here when holdings are available.
+            </div>
           </div>
         </div>
 
@@ -5338,6 +5375,30 @@
         }
       );
     }
+
+    function togglePortfolioSection(contentId, buttonId, title) {
+
+      const content = document.getElementById(contentId);
+      const button = document.getElementById(buttonId);
+
+      if (!content || !button) {
+        return;
+      }
+
+      const isExpanded =
+        button.getAttribute("aria-expanded") !== "false";
+
+      if (isExpanded) {
+        content.style.display = "none";
+        button.setAttribute("aria-expanded", "false");
+        button.textContent = "▸ " + title;
+      } else {
+        content.style.display = "";
+        button.setAttribute("aria-expanded", "true");
+        button.textContent = "▾ " + title;
+      }
+    }
+
 
     function escapeHtml(value) {
 
