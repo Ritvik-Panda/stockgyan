@@ -5738,6 +5738,100 @@
     const portfolioFundamentalCache = {};
     let portfolioHealthRequestInProgress = false;
 
+    // Existing holdings store instrument_key but may not store ISIN.
+    // Resolve ISINs from StockGyan's secure NSE universe endpoint so
+    // Portfolio Health can fetch Upstox fundamentals automatically.
+    let portfolioUniversePromise = null;
+    let portfolioUniverseMap = null;
+
+    async function loadPortfolioUniverseMap() {
+
+      if (portfolioUniverseMap) {
+        return portfolioUniverseMap;
+      }
+
+      if (portfolioUniversePromise) {
+        return portfolioUniversePromise;
+      }
+
+      portfolioUniversePromise = (async function() {
+
+        try {
+
+          const response = await fetch(
+            "/api/market/universe",
+            {
+              method: "GET",
+              credentials: "include",
+              cache: "no-store",
+              headers: {
+                "Accept": "application/json"
+              }
+            }
+          );
+
+          const data = await response.json();
+
+          if (!response.ok || data.status !== "success" || !Array.isArray(data.data)) {
+            throw new Error(
+              data.message || "Unable to load NSE stock universe"
+            );
+          }
+
+          const map = {};
+
+          data.data.forEach(function(stock) {
+            const key = String(stock.instrument_key || "").trim();
+            const isin = String(stock.isin || "").trim().toUpperCase();
+
+            if (key && isin) {
+              map[key] = isin;
+            }
+          });
+
+          portfolioUniverseMap = map;
+
+          return map;
+
+        } catch (error) {
+
+          console.warn(
+            "StockGyan: unable to resolve portfolio ISINs",
+            error
+          );
+
+          portfolioUniverseMap = {};
+
+          return portfolioUniverseMap;
+
+        } finally {
+          portfolioUniversePromise = null;
+        }
+
+      })();
+
+      return portfolioUniversePromise;
+    }
+
+    async function resolvePortfolioHoldingIsin(item) {
+
+      const existingIsin = String(item && item.isin || "").trim().toUpperCase();
+
+      if (existingIsin) {
+        return existingIsin;
+      }
+
+      const instrumentKey = String(item && item.instrument_key || "").trim();
+
+      if (!instrumentKey) {
+        return "";
+      }
+
+      const map = await loadPortfolioUniverseMap();
+
+      return String(map[instrumentKey] || "").trim().toUpperCase();
+    }
+
     function portfolioHealthParseNumber(value) {
       if (value === null || value === undefined || value === "") return null;
 
@@ -5835,7 +5929,7 @@
 
     async function fetchPortfolioHealthFundamentals(item) {
 
-      const isin = String(item && item.isin || "").trim().toUpperCase();
+      const isin = await resolvePortfolioHoldingIsin(item);
 
       if (!isin) {
         return {
