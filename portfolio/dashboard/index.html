@@ -6024,7 +6024,9 @@
         return {
           status: "missing_isin",
           isin: "",
-          ratios: null
+          ratios: null,
+          incomeStatement: null,
+          balanceSheet: null
         };
       }
 
@@ -6035,7 +6037,7 @@
       try {
 
         const response = await fetch(
-          "/api/fundamentals/key-ratios?isin=" +
+          "/api/fundamentals/health-data?isin=" +
           encodeURIComponent(isin),
           {
             method: "GET",
@@ -6052,6 +6054,8 @@
             status: "error",
             isin: isin,
             ratios: null,
+            incomeStatement: null,
+            balanceSheet: null,
             message: data.message || "Fundamental data unavailable"
           };
 
@@ -6063,7 +6067,15 @@
         const result = {
           status: "success",
           isin: isin,
-          ratios: data
+          ratios: data.data && data.data.key_ratios
+            ? data.data.key_ratios
+            : null,
+          incomeStatement: data.data && data.data.income_statement
+            ? data.data.income_statement
+            : null,
+          balanceSheet: data.data && data.data.balance_sheet
+            ? data.data.balance_sheet
+            : null
         };
 
         portfolioFundamentalCache[isin] = result;
@@ -6076,6 +6088,8 @@
           status: "error",
           isin: isin,
           ratios: null,
+          incomeStatement: null,
+          balanceSheet: null,
           message: error.message || "Fundamental data unavailable"
         };
 
@@ -6083,6 +6097,238 @@
 
         return result;
       }
+    }
+
+    function portfolioHealthFindIncomeCategory(data, category) {
+
+      const list = Array.isArray(data)
+        ? data
+        : data && data.data && Array.isArray(data.data.income_statement)
+          ? data.data.income_statement
+          : null;
+
+      if (!list) return null;
+
+      return list.find(function(item) {
+        return String(item.category || "").trim().toLowerCase() ===
+          String(category || "").trim().toLowerCase();
+      }) || null;
+    }
+
+    function portfolioHealthLatestGrowth(category) {
+
+      if (!category || !Array.isArray(category.history)) {
+        return null;
+      }
+
+      const history = category.history;
+
+      if (!history.length) return null;
+
+      const latest = history[0];
+
+      if (latest && latest.change !== undefined && latest.change !== null) {
+        const parsed = portfolioHealthParseNumber(latest.change);
+
+        if (Number.isFinite(parsed)) {
+          return parsed;
+        }
+      }
+
+      return null;
+    }
+
+    function portfolioHealthCagr(category) {
+
+      if (!category || !Array.isArray(category.history)) {
+        return null;
+      }
+
+      const history = category.history;
+
+      if (history.length < 3) return null;
+
+      const latest = portfolioHealthParseNumber(history[0].value);
+      const oldest = portfolioHealthParseNumber(
+        history[history.length - 1].value
+      );
+
+      if (!Number.isFinite(latest) || !Number.isFinite(oldest)) {
+        return null;
+      }
+
+      if (latest <= 0 || oldest <= 0) {
+        return null;
+      }
+
+      const years = history.length - 1;
+      const cagr =
+        (Math.pow(latest / oldest, 1 / years) - 1) * 100;
+
+      return Number.isFinite(cagr) ? cagr : null;
+    }
+
+    function portfolioHealthEarningsGrowthScore(result) {
+
+      if (!result || !result.incomeStatement) return null;
+
+      const revenue = portfolioHealthFindIncomeCategory(
+        result.incomeStatement,
+        "revenue"
+      );
+
+      const netProfit = portfolioHealthFindIncomeCategory(
+        result.incomeStatement,
+        "net_profit"
+      );
+
+      const revenueGrowth =
+        portfolioHealthLatestGrowth(revenue) !== null
+          ? portfolioHealthLatestGrowth(revenue)
+          : portfolioHealthCagr(revenue);
+
+      const profitGrowth =
+        portfolioHealthLatestGrowth(netProfit) !== null
+          ? portfolioHealthLatestGrowth(netProfit)
+          : portfolioHealthCagr(netProfit);
+
+      const values = [revenueGrowth, profitGrowth].filter(function(value) {
+        return Number.isFinite(value);
+      });
+
+      if (!values.length) return null;
+
+      const averageGrowth =
+        values.reduce(function(sum, value) {
+          return sum + value;
+        }, 0) / values.length;
+
+      /*
+       * Educational scoring scale:
+       * 0% growth = 50/100
+       * +25% growth = 100/100
+       * -25% growth = 0/100
+       */
+      return portfolioHealthClamp(
+        50 + averageGrowth * 2,
+        0,
+        100
+      );
+    }
+
+    function portfolioHealthEarningsGrowthDetail(result) {
+
+      if (!result || !result.incomeStatement) {
+        return "Income-statement growth data unavailable";
+      }
+
+      const revenue = portfolioHealthFindIncomeCategory(
+        result.incomeStatement,
+        "revenue"
+      );
+
+      const netProfit = portfolioHealthFindIncomeCategory(
+        result.incomeStatement,
+        "net_profit"
+      );
+
+      const revenueGrowth =
+        portfolioHealthLatestGrowth(revenue) !== null
+          ? portfolioHealthLatestGrowth(revenue)
+          : portfolioHealthCagr(revenue);
+
+      const profitGrowth =
+        portfolioHealthLatestGrowth(netProfit) !== null
+          ? portfolioHealthLatestGrowth(netProfit)
+          : portfolioHealthCagr(netProfit);
+
+      const parts = [];
+
+      if (Number.isFinite(revenueGrowth)) {
+        parts.push("Revenue " + revenueGrowth.toFixed(1) + "%");
+      }
+
+      if (Number.isFinite(profitGrowth)) {
+        parts.push("Net profit " + profitGrowth.toFixed(1) + "%");
+      }
+
+      return parts.length
+        ? parts.join(" · ") + " · Latest annual growth"
+        : "Income-statement growth data unavailable";
+    }
+
+    function portfolioHealthBalanceSheetHistory(result) {
+
+      if (
+        !result ||
+        !result.balanceSheet ||
+        !result.balanceSheet.data ||
+        !Array.isArray(result.balanceSheet.data.history)
+      ) {
+        return [];
+      }
+
+      return result.balanceSheet.data.history;
+    }
+
+    function portfolioHealthFinancialStrengthScore(result) {
+
+      const history = portfolioHealthBalanceSheetHistory(result);
+
+      if (!history.length) return null;
+
+      const latest = history[0];
+
+      const assets = portfolioHealthParseNumber(latest.total_asset);
+      const liabilities = portfolioHealthParseNumber(latest.total_liability);
+
+      if (
+        !Number.isFinite(assets) ||
+        !Number.isFinite(liabilities) ||
+        assets <= 0 ||
+        liabilities < 0
+      ) {
+        return null;
+      }
+
+      const liabilityRatio = liabilities / assets * 100;
+
+      /*
+       * Educational balance-sheet proxy:
+       * lower total liabilities relative to assets scores higher.
+       * This is a financial-strength proxy, not a debt rating.
+       */
+      return portfolioHealthClamp(
+        100 - liabilityRatio,
+        0,
+        100
+      );
+    }
+
+    function portfolioHealthFinancialStrengthDetail(result) {
+
+      const history = portfolioHealthBalanceSheetHistory(result);
+
+      if (!history.length) {
+        return "Balance-sheet data unavailable";
+      }
+
+      const latest = history[0];
+
+      const assets = portfolioHealthParseNumber(latest.total_asset);
+      const liabilities = portfolioHealthParseNumber(latest.total_liability);
+
+      if (
+        !Number.isFinite(assets) ||
+        !Number.isFinite(liabilities) ||
+        assets <= 0
+      ) {
+        return "Balance-sheet data unavailable";
+      }
+
+      const ratio = liabilities / assets * 100;
+
+      return "Liabilities / assets " + ratio.toFixed(1) + "% · Latest annual balance sheet";
     }
 
     function portfolioHealthConcentrationScore(list) {
@@ -6288,6 +6534,12 @@
         let peTotal = 0;
         let peWeight = 0;
 
+        let earningsGrowthTotal = 0;
+        let earningsGrowthWeight = 0;
+
+        let financialStrengthTotal = 0;
+        let financialStrengthWeight = 0;
+
         let successCount = 0;
 
         const rows = [];
@@ -6310,6 +6562,12 @@
           const pe = portfolioHealthFindRatio(result.ratios, "P/E");
           const roe = portfolioHealthFindRatio(result.ratios, "ROE");
           const roce = portfolioHealthFindRatio(result.ratios, "ROCE");
+
+          const earningsGrowthScore =
+            portfolioHealthEarningsGrowthScore(result);
+
+          const financialStrengthScore =
+            portfolioHealthFinancialStrengthScore(result);
 
           const metrics = holdingMetrics(item);
 
@@ -6364,6 +6622,16 @@
             peWeight += weight;
           }
 
+          if (Number.isFinite(earningsGrowthScore)) {
+            earningsGrowthTotal += earningsGrowthScore * weight;
+            earningsGrowthWeight += weight;
+          }
+
+          if (Number.isFinite(financialStrengthScore)) {
+            financialStrengthTotal += financialStrengthScore * weight;
+            financialStrengthWeight += weight;
+          }
+
         });
 
         const businessQuality =
@@ -6379,6 +6647,16 @@
         const peScore =
           peWeight > 0
             ? peTotal / peWeight
+            : null;
+
+        const earningsGrowthScore =
+          earningsGrowthWeight > 0
+            ? earningsGrowthTotal / earningsGrowthWeight
+            : null;
+
+        const financialStrengthScore =
+          financialStrengthWeight > 0
+            ? financialStrengthTotal / financialStrengthWeight
             : null;
 
         const concentration =
@@ -6405,15 +6683,19 @@
           },
           {
             name: "Earnings Growth",
-            score: null,
+            score: earningsGrowthScore,
             weight: 15,
-            detail: "Income-statement growth will be added next"
+            detail: earningsGrowthWeight > 0
+              ? "Revenue and net-profit growth · Annual data"
+              : "Income-statement growth data unavailable"
           },
           {
             name: "Debt / Financial Strength",
-            score: null,
+            score: financialStrengthScore,
             weight: 10,
-            detail: "Balance-sheet analysis will be added next"
+            detail: financialStrengthWeight > 0
+              ? "Liabilities relative to assets · Balance-sheet proxy"
+              : "Balance-sheet data unavailable"
           },
           {
             name: "Concentration",
