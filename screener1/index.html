@@ -1211,13 +1211,6 @@ function buildHealthRecord(
   });
 
 
-  const healthScore =
-    availableWeight > 0
-      ? weightedTotal /
-        availableWeight
-      : null;
-
-
   const availableMetrics =
     factors.filter(function(
       factor
@@ -1230,6 +1223,21 @@ function buildHealthRecord(
     }).length;
 
 
+  /*
+   * A Health Score is only meaningful when at least
+   * 4 of the 6 Health factors are available.
+   *
+   * We still keep the available fundamental values
+   * visible, but we do not rank incomplete records.
+   */
+  const healthScore =
+    availableMetrics >= 4 &&
+    availableWeight > 0
+      ? weightedTotal /
+        availableWeight
+      : null;
+
+
   return {
 
     ...stock,
@@ -1238,9 +1246,10 @@ function buildHealthRecord(
 
     healthScore:healthScore,
 
-    label:scoreLabel(
-      healthScore
-    ),
+    label:
+      availableMetrics >= 4
+        ? scoreLabel(healthScore)
+        : "Insufficient Data",
 
     businessQuality:
       businessQualityScore,
