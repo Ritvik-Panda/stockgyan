@@ -618,6 +618,14 @@ tr:hover td{
 
       <br><br>
 
+      <strong>Data Quality Rule:</strong>
+      A Health Score is shown only when at least 4 of the 6
+      fundamental factors have valid data. Stocks with fewer
+      than 4 available factors are marked as Insufficient Data
+      and are not given a Health Score.
+
+      <br><br>
+
       The Health Score is a StockGyan educational screening indicator.
       Missing fundamental data is not treated as zero.
 
@@ -1211,13 +1219,6 @@ function buildHealthRecord(
   });
 
 
-  const healthScore =
-    availableWeight > 0
-      ? weightedTotal /
-        availableWeight
-      : null;
-
-
   const availableMetrics =
     factors.filter(function(
       factor
@@ -1230,6 +1231,21 @@ function buildHealthRecord(
     }).length;
 
 
+  /*
+   * A Health Score is only considered reliable when
+   * at least 4 of the 6 fundamental factors are available.
+   *
+   * This prevents a stock with only one or two available
+   * metrics from incorrectly receiving an Excellent/100 score.
+   */
+
+  const healthScore =
+    availableMetrics >= 4 && availableWeight > 0
+      ? weightedTotal /
+        availableWeight
+      : null;
+
+
   return {
 
     ...stock,
@@ -1238,9 +1254,12 @@ function buildHealthRecord(
 
     healthScore:healthScore,
 
-    label:scoreLabel(
-      healthScore
-    ),
+    label:
+      availableMetrics < 4
+        ? "Insufficient Data"
+        : scoreLabel(
+            healthScore
+          ),
 
     businessQuality:
       businessQualityScore,
@@ -2138,7 +2157,7 @@ function renderTable(){
 
             ? '<span class="status-pill status-ready">Ready</span>'
 
-            : '<span class="status-pill status-partial">Partial</span>';
+            : '<span class="status-pill status-partial">Insufficient Data</span>';
 
 
       return (
