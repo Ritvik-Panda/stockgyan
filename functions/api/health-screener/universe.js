@@ -12,63 +12,81 @@ export async function onRequestGet(context) {
       return cached;
     }
 
-    async function loadInstrumentFile(url) {
-      const response = await fetch(url);
+    const url =
+      "https://assets.upstox.com/market-quote/instruments/exchange/complete.json.gz";
 
-      if (!response.ok) {
-        throw new Error(
-          `Upstox instrument file returned HTTP ${response.status}`
-        );
-      }
+    const response = await fetch(url);
 
-      const contentType =
-        response.headers.get("content-type") || "";
+    if (!response.ok) {
+      return Response.json(
+        {
+          status: "error",
+          message:
+            "Upstox Complete instrument file returned HTTP " +
+            response.status
+        },
+        { status: 502 }
+      );
+    }
 
-      const encoding =
-        response.headers.get("content-encoding") || "";
+    const contentType =
+      response.headers.get("content-type") || "";
 
-      let text;
+    const encoding =
+      response.headers.get("content-encoding") || "";
 
-      if (
-        encoding.includes("gzip") ||
-        contentType.includes("gzip")
-      ) {
+    let text;
+
+    if (
+      encoding.includes("gzip") ||
+      contentType.includes("gzip")
+    ) {
+      try {
         const stream =
           response.body.pipeThrough(
             new DecompressionStream("gzip")
           );
 
         text = await new Response(stream).text();
-      } else {
-        text = await response.text();
-      }
 
-      try {
-        return JSON.parse(text);
       } catch (error) {
-        throw new Error(
-          "Unable to parse Upstox instrument data"
+        return Response.json(
+          {
+            status: "error",
+            message:
+              "Gzip decompression failed: " +
+              error.message
+          },
+          { status: 500 }
         );
       }
+    } else {
+      text = await response.text();
     }
 
-    const nseUrl =
-      "https://assets.upstox.com/market-quote/instruments/exchange/NSE.json.gz";
+    let instruments;
 
-    const bseUrl =
-      "https://assets.upstox.com/market-quote/instruments/exchange/BSE.json.gz";
-
-    const [nseInstruments, bseInstruments] =
-      await Promise.all([
-        loadInstrumentFile(nseUrl),
-        loadInstrumentFile(bseUrl)
-      ]);
+    try {
+      instruments = JSON.parse(text);
+    } catch (error) {
+      return Response.json(
+        {
+          status: "error",
+          message:
+            "Unable to parse Upstox Complete instrument data",
+          content_type: contentType,
+          content_encoding: encoding,
+          sample: text.substring(0, 200)
+        },
+        { status: 500 }
+      );
+    }
 
     const companies = new Map();
 
-    function addInstrument(item, exchange) {
+    for (const item of instruments) {
       if (!item) {
-        return;
+        continue;
       }
 
       const segment =
@@ -83,28 +101,30 @@ export async function onRequestGet(context) {
           .toUpperCase();
 
       if (!isin) {
-        return;
+        continue;
       }
 
       if (
-        segment !== `${exchange}_EQ` ||
-        instrumentType !== "EQ"
+        instrumentType !== "EQ" ||
+        (
+          segment !== "NSE_EQ" &&
+          segment !== "BSE_EQ"
+        )
       ) {
-        return;
+        continue;
       }
 
       const instrumentKey =
         String(item.instrument_key || "").trim();
 
       if (!instrumentKey) {
-        return;
+        continue;
       }
 
-      const existing = companies.get(isin);
+      let company = companies.get(isin);
 
-      const record =
-        existing ||
-        {
+      if (!company) {
+        company = {
           isin,
           name:
             item.name ||
@@ -124,69 +144,76 @@ export async function onRequestGet(context) {
           nse_symbol: "",
           bse_symbol: "",
 
-          exchange: ""
-        };
+          exchange: "",
 
-      if (exchange === "NSE") {
-        record.nse_instrument_key =
+          instrument_key: "",
+          symbol: ""
+        };
+      }
+
+      if (segment === "NSE_EQ") {
+        company.nse_instrument_key =
           instrumentKey;
 
-        record.nse_symbol =
+        company.nse_symbol =
           item.trading_symbol || "";
       }
 
-      if (exchange === "BSE") {
-        record.bse_instrument_key =
+      if (segment === "BSE_EQ") {
+        company.bse_instrument_key =
           instrumentKey;
 
-        record.bse_symbol =
+        company.bse_symbol =
           item.trading_symbol || "";
       }
 
       const exchanges = [];
 
-      if (record.nse_instrument_key) {
+      if (company.nse_instrument_key) {
         exchanges.push("NSE");
       }
 
-      if (record.bse_instrument_key) {
+      if (company.bse_instrument_key) {
         exchanges.push("BSE");
       }
 
-      record.exchange =
+      company.exchange =
         exchanges.join(" / ");
 
       /*
-       * Prefer NSE as the primary listing when
-       * the company is available on both exchanges.
+       * Use NSE as the primary instrument when
+       * the company is listed on both exchanges.
        */
-      record.instrument_key =
-        record.nse_instrument_key ||
-        record.bse_instrument_key;
+      company.instrument_key =
+        company.nse_instrument_key ||
+        company.bse_instrument_key;
 
-      record.symbol =
-        record.nse_symbol ||
-        record.bse_symbol ||
+      company.symbol =
+        company.nse_symbol ||
+        company.bse_symbol ||
         "";
 
-      companies.set(isin, record);
+      companies.set(isin, company);
     }
 
-    for (const item of nseInstruments) {
-      addInstrument(item, "NSE");
-    }
+    const stocks =
+      Array.from(companies.values())
+        .filter(item => item.instrument_key)
+        .sort((a, b) =>
+          String(a.name).localeCompare(
+            String(b.name)
+          )
+        );
 
-    for (const item of bseInstruments) {
-      addInstrument(item, "BSE");
-    }
+    const nseCount =
+      stocks.filter(item =>
+        item.nse_instrument_key
+      ).length;
 
-    const stocks = Array.from(companies.values())
-      .filter(item => item.instrument_key)
-      .sort((a, b) =>
-        String(a.name).localeCompare(
-          String(b.name)
-        )
-      );
+    const bseCount =
+      stocks.filter(item =>
+        item.bse_instrument_key
+      ).length;
 
     const result = Response.json(
       {
@@ -195,18 +222,15 @@ export async function onRequestGet(context) {
         count: stocks.length,
 
         exchanges: {
-          NSE: stocks.filter(item =>
-            item.nse_instrument_key
-          ).length,
-
-          BSE: stocks.filter(item =>
-            item.bse_instrument_key
-          ).length
+          NSE: nseCount,
+          BSE: bseCount
         },
 
         data: stocks
       },
       {
+        status: 200,
+
         headers: {
           "Cache-Control":
             "public, max-age=21600"
@@ -227,7 +251,7 @@ export async function onRequestGet(context) {
         status: "error",
         message:
           error.message ||
-          "Unable to load NSE and BSE Health Screener universe"
+          "Unable to load Health Screener universe"
       },
       { status: 500 }
     );
