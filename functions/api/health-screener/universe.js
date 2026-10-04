@@ -1,15 +1,7 @@
 export async function onRequestGet(context) {
   try {
-    /*
-     * Health Screener uses the same proven NSE universe
-     * already used by StockGyan's existing market system.
-     *
-     * We deliberately do not download another Upstox
-     * instrument file here.
-     */
-
     const response = await fetch(
-      "https://stockgyan.in/api/market/universe",
+      "https://stockgyan.in/assets/nse-universe.json",
       {
         method: "GET",
         headers: {
@@ -23,46 +15,53 @@ export async function onRequestGet(context) {
         {
           status: "error",
           message:
-            "Unable to load existing NSE stock universe",
+            "Unable to load NSE universe",
           upstream_status: response.status
         },
         { status: 502 }
       );
     }
 
-    const data = await response.json();
+    const source = await response.json();
 
     if (
-      !data ||
-      data.status !== "success" ||
-      !Array.isArray(data.data)
+      !source ||
+      !Array.isArray(source.data)
     ) {
       return Response.json(
         {
           status: "error",
           message:
-            "Existing NSE universe returned invalid data"
+            "Invalid NSE universe data"
         },
         { status: 502 }
       );
     }
 
-    /*
-     * Keep only the fields required by Health Screener.
-     * ISIN is the identity used to retrieve fundamentals.
-     */
-    const stocks = data.data
+    const stocks = source.data
       .filter(item =>
         item &&
-        item.isin &&
-        item.instrument_key
+        item.instrument_key &&
+        item.isin
       )
       .map(item => ({
-        symbol: item.symbol || "",
-        name: item.name || item.symbol || "",
-        isin: String(item.isin)
-          .trim()
-          .toUpperCase(),
+        symbol:
+          item.symbol ||
+          item.trading_symbol ||
+          "",
+
+        name:
+          item.name ||
+          item.company_name ||
+          item.symbol ||
+          item.trading_symbol ||
+          "",
+
+        isin:
+          String(item.isin)
+            .trim()
+            .toUpperCase(),
+
         instrument_key:
           item.instrument_key
       }));
@@ -70,8 +69,8 @@ export async function onRequestGet(context) {
     return Response.json(
       {
         status: "success",
-        count: stocks.length,
         exchange: "NSE",
+        count: stocks.length,
         data: stocks
       },
       {
@@ -89,7 +88,7 @@ export async function onRequestGet(context) {
         status: "error",
         message:
           error.message ||
-          "Unable to load Health Screener NSE universe"
+          "Unable to load NSE Health Screener universe"
       },
       { status: 500 }
     );
