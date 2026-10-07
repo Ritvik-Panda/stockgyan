@@ -475,9 +475,9 @@ tr:hover td{
       <button
         id="analyzeBtn"
         class="btn-green"
-        onclick="startHealthAnalysis()"
+        onclick="loadHealthData()"
       >
-        Analyze NSE Health
+        Refresh Health Data
       </button>
 
       <button
@@ -637,10 +637,8 @@ tr:hover td{
 const UNIVERSE_API =
   "/api/health-screener/universe";
 
-const HEALTH_API =
-  "/api/fundamentals/health-screener";
-
-const BATCH_SIZE = 20;
+const HEALTH_DATA_API =
+  "/api/fundamentals/health-screener-data";
 
 
 /* =========================================================
@@ -681,17 +679,6 @@ function num(value){
     : null;
 }
 
-
-function clamp(value,min,max){
-
-  return Math.max(
-    min,
-    Math.min(max,value)
-  );
-
-}
-
-
 function escapeHtml(value){
 
   return String(value ?? "")
@@ -700,599 +687,6 @@ function escapeHtml(value){
     .replace(/>/g,"&gt;")
     .replace(/"/g,"&quot;")
     .replace(/'/g,"&#039;");
-
-}
-
-
-/* =========================================================
-   RELATIVE SECTOR SCORE
-   ========================================================= */
-
-function relativeScore(
-  company,
-  sector,
-  inverse
-){
-
-  if(
-    !Number.isFinite(company) ||
-    !Number.isFinite(sector) ||
-    sector <= 0
-  ){
-    return null;
-  }
-
-  const difference =
-    inverse
-      ? (sector - company) / sector
-      : (company - sector) / sector;
-
-  return clamp(
-    50 + difference * 50,
-    0,
-    100
-  );
-
-}
-
-
-/* =========================================================
-   FIND KEY RATIO
-   ========================================================= */
-
-function findRatio(
-  data,
-  name
-){
-
-  if(
-    !data ||
-    !Array.isArray(data.data)
-  ){
-    return null;
-  }
-
-  const wanted =
-    name
-      .trim()
-      .toUpperCase();
-
-  const row =
-    data.data.find(function(item){
-
-      return String(
-        item.name || ""
-      )
-      .trim()
-      .toUpperCase()
-      === wanted;
-
-    });
-
-  if(!row){
-    return null;
-  }
-
-  return {
-
-    company:
-      num(row.company_value),
-
-    sector:
-      num(row.sector_value)
-
-  };
-
-}
-
-
-/* =========================================================
-   EARNINGS GROWTH
-   ========================================================= */
-
-function findNetProfitGrowth(
-  income
-){
-
-  if(
-    !income ||
-    !income.data
-  ){
-    return null;
-  }
-
-  const statement =
-    income.data.income_statement;
-
-  if(
-    !Array.isArray(statement)
-  ){
-    return null;
-  }
-
-  const row =
-    statement.find(function(item){
-
-      return String(
-        item.category || ""
-      )
-      .trim()
-      .toLowerCase()
-      === "net_profit";
-
-    });
-
-  if(
-    !row ||
-    !Array.isArray(row.history) ||
-    !row.history.length
-  ){
-    return null;
-  }
-
-  const latest =
-    row.history[0];
-
-  if(
-    latest &&
-    latest.change !== undefined
-  ){
-
-    return num(latest.change);
-
-  }
-
-  return null;
-
-}
-
-
-/* =========================================================
-   FINANCIAL STRENGTH
-   ========================================================= */
-
-function calculateFinancialStrength(
-  balance
-){
-
-  if(
-    !balance ||
-    !balance.data ||
-    !Array.isArray(balance.data.history) ||
-    !balance.data.history.length
-  ){
-    return null;
-  }
-
-  const latest =
-    balance.data.history[0];
-
-  const assets =
-    num(latest.total_asset);
-
-  const liabilities =
-    num(latest.total_liability);
-
-  if(
-    !Number.isFinite(assets) ||
-    !Number.isFinite(liabilities) ||
-    assets <= 0
-  ){
-    return null;
-  }
-
-  const liabilityRatio =
-    liabilities / assets * 100;
-
-  let score;
-
-  if(liabilityRatio <= 30){
-    score = 100;
-  }
-  else if(liabilityRatio <= 40){
-    score = 90;
-  }
-  else if(liabilityRatio <= 50){
-    score = 80;
-  }
-  else if(liabilityRatio <= 60){
-    score = 65;
-  }
-  else if(liabilityRatio <= 70){
-    score = 50;
-  }
-  else if(liabilityRatio <= 80){
-    score = 35;
-  }
-  else{
-    score = 20;
-  }
-
-  return {
-
-    score:score,
-
-    liabilityRatio:liabilityRatio
-
-  };
-
-}
-
-
-/* =========================================================
-   EARNINGS GROWTH SCORE
-   ========================================================= */
-
-function growthScore(
-  growth
-){
-
-  if(
-    !Number.isFinite(growth)
-  ){
-    return null;
-  }
-
-  if(growth >= 20){
-    return 100;
-  }
-
-  if(growth >= 15){
-    return 90;
-  }
-
-  if(growth >= 10){
-    return 80;
-  }
-
-  if(growth >= 5){
-    return 70;
-  }
-
-  if(growth >= 0){
-    return 60;
-  }
-
-  if(growth >= -5){
-    return 45;
-  }
-
-  if(growth >= -10){
-    return 30;
-  }
-
-  return 15;
-
-}
-
-
-/* =========================================================
-   SCORE LABEL
-   ========================================================= */
-
-function scoreLabel(
-  score
-){
-
-  if(!Number.isFinite(score)){
-    return "No Score";
-  }
-
-  if(score >= 80){
-    return "Excellent";
-  }
-
-  if(score >= 65){
-    return "Good";
-  }
-
-  if(score >= 50){
-    return "Average";
-  }
-
-  return "Weak";
-
-}
-
-
-/* =========================================================
-   SCORE CLASS
-   ========================================================= */
-
-function scoreClass(
-  score
-){
-
-  if(!Number.isFinite(score)){
-    return "";
-  }
-
-  if(score >= 80){
-    return "score-excellent";
-  }
-
-  if(score >= 65){
-    return "score-good";
-  }
-
-  if(score >= 50){
-    return "score-average";
-  }
-
-  return "score-weak";
-
-}
-
-
-/* =========================================================
-   BUILD HEALTH RECORD
-   ========================================================= */
-
-function buildHealthRecord(
-  stock,
-  result
-){
-
-  if(
-    !result ||
-    result.success !== true
-  ){
-
-    return {
-
-      ...stock,
-
-      success:false,
-
-      healthScore:null,
-
-      label:"Data unavailable"
-
-    };
-
-  }
-
-
-  const ratios =
-    result.key_ratios;
-
-
-  const pe =
-    findRatio(
-      ratios,
-      "P/E"
-    );
-
-
-  const roe =
-    findRatio(
-      ratios,
-      "ROE"
-    );
-
-
-  const roce =
-    findRatio(
-      ratios,
-      "ROCE"
-    );
-
-
-  const roa =
-    findRatio(
-      ratios,
-      "ROA"
-    );
-
-
-  const earningsGrowth =
-    findNetProfitGrowth(
-      result.income_statement
-    );
-
-
-  const financial =
-    calculateFinancialStrength(
-      result.balance_sheet
-    );
-
-
-  const businessQualityScore =
-    roe
-      ? relativeScore(
-          roe.company,
-          roe.sector,
-          false
-        )
-      : null;
-
-
-  const roceScore =
-    roce
-      ? relativeScore(
-          roce.company,
-          roce.sector,
-          false
-        )
-      : null;
-
-
-  const peScore =
-    pe
-      ? relativeScore(
-          pe.company,
-          pe.sector,
-          true
-        )
-      : null;
-
-
-  const growthScoreValue =
-    growthScore(
-      earningsGrowth
-    );
-
-
-  const profitabilityScore =
-    roa
-      ? relativeScore(
-          roa.company,
-          roa.sector,
-          false
-        )
-      : null;
-
-
-  const financialScore =
-    financial
-      ? financial.score
-      : null;
-
-
-  const factors = [
-
-    {
-      score:businessQualityScore,
-      weight:30
-    },
-
-    {
-      score:roceScore,
-      weight:20
-    },
-
-    {
-      score:peScore,
-      weight:20
-    },
-
-    {
-      score:growthScoreValue,
-      weight:15
-    },
-
-    {
-      score:financialScore,
-      weight:10
-    },
-
-    {
-      score:profitabilityScore,
-      weight:5
-    }
-
-  ];
-
-
-  let weightedTotal = 0;
-
-  let availableWeight = 0;
-
-
-  factors.forEach(function(
-    factor
-  ){
-
-    if(
-      Number.isFinite(
-        factor.score
-      )
-    ){
-
-      weightedTotal +=
-        factor.score *
-        factor.weight;
-
-      availableWeight +=
-        factor.weight;
-
-    }
-
-  });
-
-
-  const availableMetrics =
-    factors.filter(function(
-      factor
-    ){
-
-      return Number.isFinite(
-        factor.score
-      );
-
-    }).length;
-
-
-  /*
-   * A Health Score is only meaningful when at least
-   * 4 of the 6 Health factors are available.
-   *
-   * We still keep the available fundamental values
-   * visible, but we do not rank incomplete records.
-   */
-  const healthScore =
-    availableMetrics >= 4 &&
-    availableWeight > 0
-      ? weightedTotal /
-        availableWeight
-      : null;
-
-
-  return {
-
-    ...stock,
-
-    success:true,
-
-    healthScore:healthScore,
-
-    label:
-      availableMetrics >= 4
-        ? scoreLabel(healthScore)
-        : "Insufficient Data",
-
-    businessQuality:
-      businessQualityScore,
-
-    roceScore:
-      roceScore,
-
-    roe:
-      roe
-        ? roe.company
-        : null,
-
-    pe:
-      pe
-        ? pe.company
-        : null,
-
-    earningsGrowth:
-      earningsGrowth,
-
-    growthScore:
-      growthScoreValue,
-
-    financialScore:
-      financialScore,
-
-    liabilityRatio:
-      financial
-        ? financial.liabilityRatio
-        : null,
-
-    roa:
-      roa
-        ? roa.company
-        : null,
-
-    profitabilityScore:
-      profitabilityScore,
-
-    availableMetrics:
-      availableMetrics
-
-  };
 
 }
 
@@ -1307,158 +701,49 @@ async function loadUniverse(){
     return;
   }
 
-  const status =
-    document.getElementById(
-      "status"
-    );
+  const status = document.getElementById("status");
+  const table = document.getElementById("stockTable");
 
-  const table =
-    document.getElementById(
-      "stockTable"
-    );
-
-  status.textContent =
-    "Loading NSE universe...";
-
-  table.innerHTML =
-    '<tr><td colspan="11" class="empty">Loading NSE universe...</td></tr>';
+  status.textContent = "Loading NSE universe...";
+  table.innerHTML = '<tr><td colspan="11" class="empty">Loading NSE universe...</td></tr>';
 
   try{
 
-    const response =
-      await fetch(
-        UNIVERSE_API,
-        {
-          method:"GET",
-          cache:"no-store",
-          headers:{
-            "Accept":
-              "application/json"
-          }
-        }
-      );
+    const response = await fetch(UNIVERSE_API,{
+      method:"GET",
+      cache:"no-store",
+      headers:{"Accept":"application/json"}
+    });
 
+    const data = await response.json();
 
-    const data =
-      await response.json();
-
-
-    if(
-      !response.ok ||
-      data.status !== "success" ||
-      !Array.isArray(data.data)
-    ){
-
-      throw new Error(
-        data.message ||
-        "Unable to load NSE universe"
-      );
-
+    if(!response.ok || data.status !== "success" || !Array.isArray(data.data)){
+      throw new Error(data.message || "Unable to load NSE universe");
     }
 
+    universe = data.data
+      .filter(function(stock){
+        return stock && stock.isin && /^[A-Z]{2}[A-Z0-9]{9}[0-9]$/.test(String(stock.isin).toUpperCase());
+      })
+      .map(function(stock){
+        return {
+          symbol: stock.symbol || stock.trading_symbol || "",
+          name: stock.name || stock.symbol || "",
+          isin: String(stock.isin).trim().toUpperCase(),
+          instrument_key: stock.instrument_key || ""
+        };
+      });
 
-    universe =
-      data.data
-        .filter(function(stock){
+    document.getElementById("universeCount").textContent = universe.length.toLocaleString();
 
-          return stock &&
-            stock.isin &&
-            /^[A-Z]{2}[A-Z0-9]{9}[0-9]$/
-              .test(
-                String(
-                  stock.isin
-                ).toUpperCase()
-              );
-
-        })
-        .map(function(stock){
-
-          return {
-
-            symbol:
-              stock.symbol ||
-              stock.trading_symbol ||
-              "",
-
-            name:
-              stock.name ||
-              stock.symbol ||
-              "",
-
-            isin:
-              String(
-                stock.isin
-              )
-              .trim()
-              .toUpperCase(),
-
-            instrument_key:
-              stock.instrument_key ||
-              ""
-
-          };
-
-        });
-
-
-    healthData = [];
-
-
-    document.getElementById(
-      "universeCount"
-    ).textContent =
-      universe.length.toLocaleString();
-
-
-    document.getElementById(
-      "dataCount"
-    ).textContent =
-      "0";
-
-
-    document.getElementById(
-      "excellentCount"
-    ).textContent =
-      "0";
-
-
-    document.getElementById(
-      "goodCount"
-    ).textContent =
-      "0";
-
-
-    document.getElementById(
-      "displayedCount"
-    ).textContent =
-      universe.length.toLocaleString();
-
-
-    document.getElementById(
-      "progressBar"
-    ).style.width =
-      "0%";
-
-
-    status.textContent =
-      universe.length.toLocaleString() +
-      " NSE stocks loaded. Click Analyze NSE Health to calculate Health Scores.";
-
-
-    renderTable();
-
+    await loadHealthData();
 
   }
   catch(error){
 
     console.error(error);
-
-    status.textContent =
-      "Error: " +
-      error.message;
-
-    table.innerHTML =
-      '<tr><td colspan="11" class="empty">Unable to load NSE universe.</td></tr>';
+    status.textContent = "Error: " + error.message;
+    table.innerHTML = '<tr><td colspan="11" class="empty">Unable to load NSE universe.</td></tr>';
 
   }
 
@@ -1466,293 +751,99 @@ async function loadUniverse(){
 
 
 /* =========================================================
-   HEALTH API BATCH
+   LOAD STORED HEALTH DATA
+   =========================================================
+   IMPORTANT: This reads StockGyan D1 only.
+   It does NOT call Upstox.
    ========================================================= */
 
-async function fetchHealthBatch(
-  stocks
-){
+async function loadHealthData(){
 
-  const isins =
-    stocks.map(function(
-      stock
-    ){
+  if(analysisRunning){
+    return;
+  }
 
-      return stock.isin;
+  analysisRunning = true;
 
-    });
+  const button = document.getElementById("analyzeBtn");
+  const loadButton = document.getElementById("loadUniverseBtn");
+  const status = document.getElementById("status");
+  const progress = document.getElementById("progressBar");
 
+  button.disabled = true;
+  loadButton.disabled = true;
+
+  status.textContent = "Loading Health Data from StockGyan storage...";
+  progress.style.width = "15%";
 
   try{
 
-    const response =
-      await fetch(
-        HEALTH_API,
-        {
-          method:"POST",
-          cache:"no-store",
-          headers:{
-            "Content-Type":
-              "application/json",
+    const response = await fetch(HEALTH_DATA_API,{
+      method:"GET",
+      cache:"no-store",
+      headers:{"Accept":"application/json"}
+    });
 
-            "Accept":
-              "application/json"
-          },
+    const data = await response.json();
 
-          body:
-            JSON.stringify({
-              isins:isins
-            })
-
-        }
-      );
-
-
-    const data =
-      await response.json();
-
-
-    if(
-      !response.ok ||
-      data.status !== "success" ||
-      !Array.isArray(data.data)
-    ){
-
-      throw new Error(
-        data.message ||
-        "Health API request failed"
-      );
-
+    if(!response.ok || data.status !== "success" || !Array.isArray(data.data)){
+      throw new Error(data.message || "Unable to load stored Health Data");
     }
 
+    healthData = data.data.map(function(row){
 
-    const resultMap = {};
-
-
-    data.data.forEach(function(
-      item
-    ){
-
-      resultMap[
-        String(
-          item.isin || ""
-        )
-        .trim()
-        .toUpperCase()
-      ] =
-        item;
-
-    });
-
-
-    return stocks.map(function(
-      stock
-    ){
-
-      return buildHealthRecord(
-        stock,
-        resultMap[
-          stock.isin
-        ]
-      );
-
-    });
-
-
-  }
-  catch(error){
-
-    console.error(
-      "Health batch error",
-      error
-    );
-
-
-    return stocks.map(function(
-      stock
-    ){
+      const availableMetrics = Number(row.available_metrics);
 
       return {
-
-        ...stock,
-
-        success:false,
-
-        healthScore:null,
-
-        label:"Data unavailable",
-
-        error:error.message
-
+        symbol: row.symbol || "",
+        name: row.company_name || row.symbol || "",
+        isin: row.isin || "",
+        exchange: row.exchange || "NSE",
+        success: row.data_status === "complete" || row.data_status === "partial",
+        healthScore: num(row.health_score),
+        label: row.quality_label || "Insufficient Data",
+        businessQuality: num(row.business_quality),
+        roce: num(row.roce),
+        roe: num(row.roe),
+        pe: num(row.pe_ratio),
+        earningsGrowth: num(row.earnings_growth),
+        financialScore: null,
+        liabilityRatio: null,
+        roa: num(row.profitability),
+        profitabilityScore: null,
+        availableMetrics: Number.isFinite(availableMetrics) ? availableMetrics : 0,
+        dataStatus: row.data_status || "pending",
+        updatedAt: row.updated_at || ""
       };
 
     });
 
-  }
-
-}
-
-
-/* =========================================================
-   ANALYZE NSE
-   ========================================================= */
-
-async function startHealthAnalysis(){
-
-  if(
-    analysisRunning ||
-    !universe.length
-  ){
-    return;
-  }
-
-
-  analysisRunning = true;
-
-
-  const button =
-    document.getElementById(
-      "analyzeBtn"
-    );
-
-
-  button.disabled = true;
-
-
-  document.getElementById(
-    "loadUniverseBtn"
-  ).disabled = true;
-
-
-  healthData = [];
-
-
-  const totalBatches =
-    Math.ceil(
-      universe.length /
-      BATCH_SIZE
-    );
-
-
-  const status =
-    document.getElementById(
-      "status"
-    );
-
-
-  const progress =
-    document.getElementById(
-      "progressBar"
-    );
-
-
-  for(
-    let batchIndex = 0;
-    batchIndex < totalBatches;
-    batchIndex++
-  ){
-
-    const start =
-      batchIndex *
-      BATCH_SIZE;
-
-
-    const batch =
-      universe.slice(
-        start,
-        start + BATCH_SIZE
-      );
-
-
-    status.textContent =
-      "Analyzing NSE Health: batch " +
-      (batchIndex + 1) +
-      " of " +
-      totalBatches +
-      " (" +
-      Math.min(
-        start + batch.length,
-        universe.length
-      ).toLocaleString() +
-      " / " +
-      universe.length.toLocaleString() +
-      " stocks)";
-
-
-    const results =
-      await fetchHealthBatch(
-        batch
-      );
-
-
-    healthData =
-      healthData.concat(
-        results
-      );
-
-
-    const percent =
-      Math.round(
-        (
-          healthData.length /
-          universe.length
-        ) * 100
-      );
-
-
-    progress.style.width =
-      percent + "%";
-
-
+    progress.style.width = "100%";
     updateStats();
-
-
     renderTable();
 
-
-    /*
-     * Small pause between batches.
-     * This prevents the browser from firing
-     * hundreds of requests continuously.
-     */
-
-    await new Promise(
-      function(resolve){
-        setTimeout(
-          resolve,
-          150
-        );
-      }
-    );
+    status.textContent =
+      healthData.length.toLocaleString() +
+      " Health Data records loaded from StockGyan storage. No Upstox request was made by this page.";
 
   }
+  catch(error){
 
+    console.error("Stored Health Data error",error);
+    healthData = [];
+    updateStats();
+    renderTable();
+    progress.style.width = "0%";
+    status.textContent = "Error: " + error.message;
 
-  analysisRunning = false;
+  }
+  finally{
 
+    analysisRunning = false;
+    button.disabled = false;
+    loadButton.disabled = false;
 
-  button.disabled = false;
-
-
-  document.getElementById(
-    "loadUniverseBtn"
-  ).disabled = false;
-
-
-  status.textContent =
-    "Health analysis completed for " +
-    healthData.length.toLocaleString() +
-    " NSE stocks.";
-
-
-  progress.style.width =
-    "100%";
-
-
-  updateStats();
-
-
-  renderTable();
+  }
 
 }
 
@@ -2000,8 +1091,8 @@ function getFilteredData(){
       case "roceDesc":
 
         return (
-          (b.roceScore ?? -Infinity) -
-          (a.roceScore ?? -Infinity)
+          (b.roce ?? -Infinity) -
+          (a.roce ?? -Infinity)
         );
 
 
@@ -2139,15 +1230,15 @@ function renderTable(){
 
 
       const dataStatus =
-        !stock.success
+        stock.dataStatus === "complete"
 
-          ? '<span class="status-pill status-unavailable">Not analyzed</span>'
+          ? '<span class="status-pill status-ready">Ready</span>'
 
-          : stock.availableMetrics >= 4
+          : stock.dataStatus === "partial"
 
-            ? '<span class="status-pill status-ready">Ready</span>'
+            ? '<span class="status-pill status-partial">Partial</span>'
 
-            : '<span class="status-pill status-partial">Partial</span>';
+            : '<span class="status-pill status-unavailable">Not loaded</span>';
 
 
       return (
@@ -2190,8 +1281,8 @@ function renderTable(){
           '</td>' +
 
           '<td>' +
-            formatNumber(
-              stock.roceScore
+            formatPercent(
+              stock.roce
             ) +
           '</td>' +
 
@@ -2215,37 +1306,12 @@ function renderTable(){
           '</td>' +
 
           '<td>' +
-
             (
-              Number.isFinite(
-                stock.financialScore
-              )
-
-              ?
-
-              '<div>' +
-                Math.round(
-                  stock.financialScore
-                ) +
-                '</div>' +
-
-                '<div style="font-size:10px;color:#697386;">' +
-                  (
-                    Number.isFinite(
-                      stock.liabilityRatio
-                    )
-                      ? stock.liabilityRatio.toFixed(1) +
-                        "% liabilities/assets"
-                      : ""
-                  ) +
-                '</div>'
-
-              :
-
-              '—'
-            )
-
-          + '</td>' +
+              Number.isFinite(stock.financialScore)
+                ? Math.round(stock.financialScore)
+                : '—'
+            ) +
+          '</td>' +
 
           '<td>' +
             formatPercent(
