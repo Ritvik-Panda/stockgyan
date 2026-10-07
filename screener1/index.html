@@ -130,9 +130,6 @@ button:hover{
   opacity:.92;
 }
 
-.btn-green{
-  background:#159447;
-}
 
 .btn-orange{
   background:#f28c28;
@@ -154,20 +151,7 @@ button:disabled{
   color:#536174;
 }
 
-.progress{
-  margin-top:10px;
-  height:8px;
-  background:#e7edf5;
-  border-radius:20px;
-  overflow:hidden;
-}
 
-.progress-bar{
-  width:0;
-  height:100%;
-  background:#159447;
-  transition:width .25s;
-}
 
 .table-container{
   overflow:hidden;
@@ -471,16 +455,7 @@ tr:hover td{
       >
         Refresh NSE
       </button>
-
-      <button
-        id="analyzeBtn"
-        class="btn-green"
-        onclick="loadHealthData()"
-      >
-        Refresh Health Data
-      </button>
-
-      <button
+<button
         class="btn-light"
         onclick="clearFilters()"
       >
@@ -490,17 +465,9 @@ tr:hover td{
     </div>
 
     <div class="status" id="status">
-      Loading NSE universe...
+      Loading StockGyan Health Data...
     </div>
-
-    <div class="progress">
-      <div
-        class="progress-bar"
-        id="progressBar"
-      ></div>
-    </div>
-
-  </section>
+</section>
 
 
   <!-- =========================
@@ -516,7 +483,7 @@ tr:hover td{
       </div>
 
       <div id="resultInfo">
-        Preparing Health Screener...
+        Loading stored Health data...
       </div>
 
     </div>
@@ -618,8 +585,9 @@ tr:hover td{
 
       <br><br>
 
-      The Health Score is a StockGyan educational screening indicator.
-      Missing fundamental data is not treated as zero.
+      The Health Score is calculated by the StockGyan backend refresh engine
+      and stored in StockGyan D1. This screener only reads stored data;
+      it does not make live Upstox requests. Missing fundamental data is not treated as zero.
 
     </div>
 
@@ -629,772 +597,563 @@ tr:hover td{
 
 
 <script>
-
 /* =========================================================
-   STOCKGYAN HEALTH SCREENER
+   STOCKGYAN HEALTH SCREENER — D1 ONLY
+   =========================================================
+   IMPORTANT:
+   This page ONLY reads data already stored in StockGyan D1.
+   It does NOT call Upstox and does NOT run a browser scan.
    ========================================================= */
 
-const UNIVERSE_API =
-  "/api/health-screener/universe";
-
-const HEALTH_DATA_API =
-  "/api/fundamentals/health-screener-data";
-
-
-/* =========================================================
-   STATE
-   ========================================================= */
+const UNIVERSE_API = "/api/health-screener/universe";
+const HEALTH_DATA_API = "/api/fundamentals/health-screener-data";
 
 let universe = [];
-
 let healthData = [];
-
-let analysisRunning = false;
-
 
 /* =========================================================
    HELPERS
    ========================================================= */
 
 function num(value){
-
-  if(
-    value === null ||
-    value === undefined ||
-    value === ""
-  ){
+  if(value === null || value === undefined || value === ""){
     return null;
   }
 
-  const n =
-    Number(
-      String(value)
-        .replace(/,/g,"")
-        .replace(/%/g,"")
-        .trim()
-    );
+  const n = Number(
+    String(value)
+      .replace(/,/g,"")
+      .replace(/%/g,"")
+      .trim()
+  );
 
-  return Number.isFinite(n)
-    ? n
-    : null;
+  return Number.isFinite(n) ? n : null;
 }
 
 function escapeHtml(value){
-
   return String(value ?? "")
     .replace(/&/g,"&amp;")
     .replace(/</g,"&lt;")
     .replace(/>/g,"&gt;")
     .replace(/"/g,"&quot;")
     .replace(/'/g,"&#039;");
-
 }
 
+function scoreLabel(score){
+  if(!Number.isFinite(score)){
+    return "Insufficient Data";
+  }
+
+  if(score >= 80) return "Excellent";
+  if(score >= 65) return "Good";
+  if(score >= 50) return "Average";
+  return "Weak";
+}
+
+function scoreClass(score){
+  if(!Number.isFinite(score)) return "status-unavailable";
+  if(score >= 80) return "score-excellent";
+  if(score >= 65) return "score-good";
+  if(score >= 50) return "score-average";
+  return "score-weak";
+}
+
+function formatNumber(value, decimals=2){
+  return Number.isFinite(value)
+    ? value.toFixed(decimals)
+    : "—";
+}
+
+function formatPercent(value){
+  if(!Number.isFinite(value)) return "—";
+  return `${value.toFixed(2)}%`;
+}
+
+function formatPE(value){
+  if(!Number.isFinite(value)) return "—";
+  return value.toFixed(2);
+}
 
 /* =========================================================
    LOAD NSE UNIVERSE
    ========================================================= */
 
 async function loadUniverse(){
-
-  if(analysisRunning){
-    return;
-  }
-
   const status = document.getElementById("status");
-  const table = document.getElementById("stockTable");
-
-  status.textContent = "Loading NSE universe...";
-  table.innerHTML = '<tr><td colspan="11" class="empty">Loading NSE universe...</td></tr>';
 
   try{
+    status.textContent = "Loading NSE universe...";
 
-    const response = await fetch(UNIVERSE_API,{
-      method:"GET",
-      cache:"no-store",
-      headers:{"Accept":"application/json"}
-    });
+    const response = await fetch(
+      UNIVERSE_API,
+      {
+        cache:"no-store",
+        headers:{Accept:"application/json"}
+      }
+    );
 
-    const data = await response.json();
-
-    if(!response.ok || data.status !== "success" || !Array.isArray(data.data)){
-      throw new Error(data.message || "Unable to load NSE universe");
+    if(!response.ok){
+      throw new Error(`Universe request failed: ${response.status}`);
     }
 
-    universe = data.data
-      .filter(function(stock){
-        return stock && stock.isin && /^[A-Z]{2}[A-Z0-9]{9}[0-9]$/.test(String(stock.isin).toUpperCase());
-      })
-      .map(function(stock){
-        return {
-          symbol: stock.symbol || stock.trading_symbol || "",
-          name: stock.name || stock.symbol || "",
-          isin: String(stock.isin).trim().toUpperCase(),
-          instrument_key: stock.instrument_key || ""
-        };
-      });
+    const payload = await response.json();
 
-    document.getElementById("universeCount").textContent = universe.length.toLocaleString();
+    const rows =
+      Array.isArray(payload)
+        ? payload
+        : Array.isArray(payload.data)
+          ? payload.data
+          : Array.isArray(payload.stocks)
+            ? payload.stocks
+            : [];
 
-    await loadHealthData();
+    universe = rows;
 
+    document.getElementById("universeCount").textContent =
+      universe.length.toLocaleString();
+
+    status.textContent =
+      `NSE universe loaded: ${universe.length.toLocaleString()} stocks. Loading stored Health data...`;
+
+  }catch(error){
+    console.error("Universe load error:", error);
+
+    universe = [];
+
+    document.getElementById("universeCount").textContent = "—";
+
+    status.textContent =
+      "NSE universe could not be loaded. Stored Health data can still be displayed.";
   }
-  catch(error){
 
-    console.error(error);
-    status.textContent = "Error: " + error.message;
-    table.innerHTML = '<tr><td colspan="11" class="empty">Unable to load NSE universe.</td></tr>';
-
-  }
-
+  renderTable();
 }
 
-
 /* =========================================================
-   LOAD STORED HEALTH DATA
-   =========================================================
-   IMPORTANT: This reads StockGyan D1 only.
-   It does NOT call Upstox.
+   LOAD HEALTH DATA FROM D1
    ========================================================= */
 
 async function loadHealthData(){
-
-  if(analysisRunning){
-    return;
-  }
-
-  analysisRunning = true;
-
-  const button = document.getElementById("analyzeBtn");
-  const loadButton = document.getElementById("loadUniverseBtn");
   const status = document.getElementById("status");
-  const progress = document.getElementById("progressBar");
-
-  button.disabled = true;
-  loadButton.disabled = true;
-
-  status.textContent = "Loading Health Data from StockGyan storage...";
-  progress.style.width = "15%";
 
   try{
+    status.textContent =
+      "Loading stored StockGyan Health data...";
 
-    const response = await fetch(HEALTH_DATA_API,{
-      method:"GET",
-      cache:"no-store",
-      headers:{"Accept":"application/json"}
-    });
+    const response = await fetch(
+      HEALTH_DATA_API,
+      {
+        cache:"no-store",
+        headers:{Accept:"application/json"}
+      }
+    );
 
-    const data = await response.json();
-
-    if(!response.ok || data.status !== "success" || !Array.isArray(data.data)){
-      throw new Error(data.message || "Unable to load stored Health Data");
+    if(!response.ok){
+      throw new Error(`Health data request failed: ${response.status}`);
     }
 
-    healthData = data.data.map(function(row){
+    const payload = await response.json();
 
-      const availableMetrics = Number(row.available_metrics);
+    if(payload.status !== "success"){
+      throw new Error(
+        payload.message || "Health data API returned an error"
+      );
+    }
 
-      return {
-        symbol: row.symbol || "",
-        name: row.company_name || row.symbol || "",
-        isin: row.isin || "",
-        exchange: row.exchange || "NSE",
-        success: row.data_status === "complete" || row.data_status === "partial",
-        healthScore: num(row.health_score),
-        label: row.quality_label || "Insufficient Data",
-        businessQuality: num(row.business_quality),
-        roce: num(row.roce),
-        roe: num(row.roe),
-        pe: num(row.pe_ratio),
-        earningsGrowth: num(row.earnings_growth),
-        financialScore: null,
-        liabilityRatio: null,
-        roa: num(row.profitability),
-        profitabilityScore: null,
-        availableMetrics: Number.isFinite(availableMetrics) ? availableMetrics : 0,
-        dataStatus: row.data_status || "pending",
-        updatedAt: row.updated_at || ""
-      };
+    const rows =
+      Array.isArray(payload.data)
+        ? payload.data
+        : [];
 
-    });
+    healthData = rows.map(row => ({
+      symbol: row.symbol || "",
+      name: row.company_name || row.symbol || "",
+      isin: row.isin || "",
+      exchange: row.exchange || "NSE",
 
-    progress.style.width = "100%";
-    updateStats();
-    renderTable();
+      healthScore: num(row.health_score),
+
+      label:
+        row.quality_label ||
+        (
+          Number.isFinite(num(row.health_score))
+            ? scoreLabel(num(row.health_score))
+            : "Insufficient Data"
+        ),
+
+      businessQuality: num(row.business_quality),
+
+      roce: num(row.roce),
+
+      roe: num(row.roe),
+
+      pe: num(row.pe_ratio),
+
+      earningsGrowth: num(row.earnings_growth),
+
+      financialScore: null,
+
+      debtEquity: num(row.debt_equity),
+
+      profitability: num(row.profitability),
+
+      availableMetrics: Number(row.available_metrics || 0),
+
+      dataStatus: row.data_status || "pending",
+
+      updatedAt: row.updated_at || ""
+    }));
+
+    document.getElementById("dataCount").textContent =
+      healthData.length.toLocaleString();
 
     status.textContent =
-      healthData.length.toLocaleString() +
-      " Health Data records loaded from StockGyan storage. No Upstox request was made by this page.";
+      `Loaded ${healthData.length.toLocaleString()} stored Health records from StockGyan D1. No live Upstox requests are made by this screener.`;
 
-  }
-  catch(error){
-
-    console.error("Stored Health Data error",error);
-    healthData = [];
     updateStats();
-    renderTable();
-    progress.style.width = "0%";
-    status.textContent = "Error: " + error.message;
 
+  }catch(error){
+    console.error("Health D1 load error:", error);
+
+    healthData = [];
+
+    document.getElementById("dataCount").textContent = "0";
+
+    status.textContent =
+      "Unable to load stored Health data from StockGyan D1.";
+
+    updateStats();
   }
-  finally{
 
-    analysisRunning = false;
-    button.disabled = false;
-    loadButton.disabled = false;
-
-  }
-
+  renderTable();
 }
 
-
 /* =========================================================
-   UPDATE STATS
-   ========================================================= */
-
-function updateStats(){
-
-  const valid =
-    healthData.filter(
-      function(stock){
-        return stock.success;
-      }
-    );
-
-
-  const excellent =
-    valid.filter(
-      function(stock){
-        return Number.isFinite(
-          stock.healthScore
-        ) &&
-        stock.healthScore >= 80;
-      }
-    );
-
-
-  const good =
-    valid.filter(
-      function(stock){
-        return Number.isFinite(
-          stock.healthScore
-        ) &&
-        stock.healthScore >= 65 &&
-        stock.healthScore < 80;
-      }
-    );
-
-
-  document.getElementById(
-    "dataCount"
-  ).textContent =
-    valid.length.toLocaleString();
-
-
-  document.getElementById(
-    "excellentCount"
-  ).textContent =
-    excellent.length.toLocaleString();
-
-
-  document.getElementById(
-    "goodCount"
-  ).textContent =
-    good.length.toLocaleString();
-
-}
-
-
-/* =========================================================
-   FILTER + SORT
+   FILTER / SORT
    ========================================================= */
 
 function getFilteredData(){
-
   const search =
-    document.getElementById(
-      "search"
+    String(
+      document.getElementById("search").value || ""
     )
-    .value
     .trim()
     .toLowerCase();
 
+  const filter =
+    document.getElementById("healthFilter").value;
 
-  const healthFilter =
-    document.getElementById(
-      "healthFilter"
-    )
-    .value;
+  const sort =
+    document.getElementById("sortBy").value;
 
+  let rows = healthData.filter(row => {
 
-  const sortBy =
-    document.getElementById(
-      "sortBy"
-    )
-    .value;
+    const matchesSearch =
+      !search ||
+      String(row.symbol).toLowerCase().includes(search) ||
+      String(row.name).toLowerCase().includes(search);
 
+    if(!matchesSearch) return false;
 
-  let rows =
-    healthData.length
-      ? healthData.slice()
-      : universe.map(function(
-          stock
-        ){
-
-          return {
-
-            ...stock,
-
-            success:false,
-
-            healthScore:null
-
-          };
-
-        });
-
-
-  if(search){
-
-    rows =
-      rows.filter(function(
-        stock
-      ){
-
-        return String(
-          stock.symbol || ""
-        )
-        .toLowerCase()
-        .includes(search)
-
-        ||
-
-        String(
-          stock.name || ""
-        )
-        .toLowerCase()
-        .includes(search);
-
-      });
-
-  }
-
-
-  if(
-    healthFilter !== "all"
-  ){
-
-    const minimum =
-      Number(
-        healthFilter
-      );
-
-
-    if(
-      minimum === 80
-    ){
-
-      rows =
-        rows.filter(function(
-          stock
-        ){
-
-          return Number.isFinite(
-            stock.healthScore
-          ) &&
-          stock.healthScore >= 80;
-
-        });
-
+    if(filter === "all"){
+      return true;
     }
 
-    else if(
-      minimum === 65
-    ){
+    const score = row.healthScore;
 
-      rows =
-        rows.filter(function(
-          stock
-        ){
-
-          return Number.isFinite(
-            stock.healthScore
-          ) &&
-          stock.healthScore >= 65;
-
-        });
-
+    if(!Number.isFinite(score)){
+      return false;
     }
 
-    else if(
-      minimum === 50
-    ){
+    if(filter === "80") return score >= 80;
+    if(filter === "65") return score >= 65;
+    if(filter === "50") return score >= 50;
 
-      rows =
-        rows.filter(function(
-          stock
-        ){
+    if(filter === "0") return score < 50;
 
-          return Number.isFinite(
-            stock.healthScore
-          ) &&
-          stock.healthScore >= 50;
-
-        });
-
-    }
-
-    else if(
-      minimum === 0
-    ){
-
-      rows =
-        rows.filter(function(
-          stock
-        ){
-
-          return Number.isFinite(
-            stock.healthScore
-          ) &&
-          stock.healthScore < 50;
-
-        });
-
-    }
-
-  }
-
-
-  rows.sort(function(
-    a,
-    b
-  ){
-
-    switch(sortBy){
-
-      case "healthAsc":
-
-        return (
-          (a.healthScore ?? -1) -
-          (b.healthScore ?? -1)
-        );
-
-
-      case "roeDesc":
-
-        return (
-          (b.roe ?? -Infinity) -
-          (a.roe ?? -Infinity)
-        );
-
-
-      case "roceDesc":
-
-        return (
-          (b.roce ?? -Infinity) -
-          (a.roce ?? -Infinity)
-        );
-
-
-      case "peAsc":
-
-        return (
-          (a.pe ?? Infinity) -
-          (b.pe ?? Infinity)
-        );
-
-
-      case "growthDesc":
-
-        return (
-          (b.earningsGrowth ?? -Infinity) -
-          (a.earningsGrowth ?? -Infinity)
-        );
-
-
-      case "symbol":
-
-        return String(
-          a.symbol || ""
-        ).localeCompare(
-          String(
-            b.symbol || ""
-          )
-        );
-
-
-      case "healthDesc":
-
-      default:
-
-        return (
-          (b.healthScore ?? -1) -
-          (a.healthScore ?? -1)
-        );
-
-    }
-
+    return true;
   });
 
+  rows.sort((a,b) => {
+
+    const av = keyValue(a, sort);
+    const bv = keyValue(b, sort);
+
+    if(typeof av === "string" || typeof bv === "string"){
+      return String(av).localeCompare(String(bv));
+    }
+
+    const aValid = Number.isFinite(av);
+    const bValid = Number.isFinite(bv);
+
+    if(!aValid && !bValid) return 0;
+    if(!aValid) return 1;
+    if(!bValid) return -1;
+
+    return sort === "healthAsc" ? av - bv : bv - av;
+  });
 
   return rows;
-
 }
 
+function keyValue(row, sort){
+  switch(sort){
+    case "healthAsc":
+    case "healthDesc":
+      return row.healthScore;
+
+    case "roeDesc":
+      return row.roe;
+
+    case "roceDesc":
+      return row.roce;
+
+    case "peAsc":
+      return row.pe;
+
+    case "growthDesc":
+      return row.earningsGrowth;
+
+    case "symbol":
+      return String(row.symbol || "");
+
+    default:
+      return row.healthScore;
+  }
+}
 
 /* =========================================================
-   FORMAT
+   STATS
    ========================================================= */
 
-function formatNumber(
-  value,
-  decimals=1
-){
+function updateStats(){
+  const excellent =
+    healthData.filter(
+      row => Number.isFinite(row.healthScore) &&
+             row.healthScore >= 80
+    ).length;
 
-  return Number.isFinite(value)
-    ? value.toFixed(decimals)
-    : "—";
+  const good =
+    healthData.filter(
+      row => Number.isFinite(row.healthScore) &&
+             row.healthScore >= 65 &&
+             row.healthScore < 80
+    ).length;
 
+  document.getElementById("excellentCount").textContent =
+    excellent.toLocaleString();
+
+  document.getElementById("goodCount").textContent =
+    good.toLocaleString();
+
+  const displayed =
+    getFilteredData().length;
+
+  document.getElementById("displayedCount").textContent =
+    displayed.toLocaleString();
 }
-
-
-function formatPercent(
-  value
-){
-
-  return Number.isFinite(value)
-    ? value.toFixed(1) + "%"
-    : "—";
-
-}
-
 
 /* =========================================================
    RENDER TABLE
    ========================================================= */
 
 function renderTable(){
+  const tbody =
+    document.getElementById("stockTable");
 
-  const table =
-    document.getElementById(
-      "stockTable"
-    );
+  if(!tbody) return;
 
+  const rows = getFilteredData();
 
-  const rows =
-    getFilteredData();
-
-
-  document.getElementById(
-    "displayedCount"
-  ).textContent =
+  document.getElementById("displayedCount").textContent =
     rows.length.toLocaleString();
 
-
-  document.getElementById(
-    "resultInfo"
-  ).textContent =
-    rows.length.toLocaleString() +
-    " stocks";
-
+  document.getElementById("resultInfo").textContent =
+    `${rows.length.toLocaleString()} stored Health records`;
 
   if(!rows.length){
-
-    table.innerHTML =
-      '<tr><td colspan="11" class="empty">No stocks match the selected filters.</td></tr>';
-
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="11" class="empty">
+          ${
+            healthData.length
+              ? "No stocks match the current filters."
+              : "No stored Health data available yet."
+          }
+        </td>
+      </tr>
+    `;
     return;
-
   }
 
+  tbody.innerHTML = rows.map(row => {
 
-  table.innerHTML =
-    rows.map(function(
-      stock
-    ){
+    const score = row.healthScore;
 
-      const health =
-        stock.healthScore;
+    const label =
+      row.label ||
+      scoreLabel(score);
 
+    const scoreText =
+      Number.isFinite(score)
+        ? score.toFixed(2)
+        : "—";
 
-      const healthDisplay =
-        Number.isFinite(
-          health
-        )
-          ? '<span class="score ' +
-            scoreClass(health) +
-            '">' +
-            Math.round(health) +
-            '</span>'
-          : '<span class="muted">—</span>';
+    const businessText =
+      Number.isFinite(row.businessQuality)
+        ? row.businessQuality.toFixed(2)
+        : "—";
 
+    const financialText =
+      Number.isFinite(row.financialScore)
+        ? row.financialScore.toFixed(2)
+        : "—";
 
-      const dataStatus =
-        stock.dataStatus === "complete"
+    const profitabilityText =
+      formatPercent(row.profitability);
 
-          ? '<span class="status-pill status-ready">Ready</span>'
+    let dataClass = "status-unavailable";
+    let dataText = "Pending";
 
-          : stock.dataStatus === "partial"
+    if(row.dataStatus === "complete"){
+      dataClass = "status-ready";
+      dataText = `${row.availableMetrics}/6`;
+    }
+    else if(row.availableMetrics > 0){
+      dataClass = "status-partial";
+      dataText = `${row.availableMetrics}/6`;
+    }
 
-            ? '<span class="status-pill status-partial">Partial</span>'
+    const growthClass =
+      Number.isFinite(row.earningsGrowth)
+        ? row.earningsGrowth >= 0
+          ? "positive"
+          : "negative"
+        : "muted";
 
-            : '<span class="status-pill status-unavailable">Not loaded</span>';
+    return `
+      <tr>
 
+        <td class="symbol">
+          ${escapeHtml(row.symbol)}
+        </td>
 
-      return (
+        <td class="company" title="${escapeHtml(row.name)}">
+          ${escapeHtml(row.name)}
+        </td>
 
-        '<tr>' +
+        <td>
+          <span class="score ${scoreClass(score)}">
+            ${scoreText}
+          </span>
+          <div class="muted" style="font-size:10px;margin-top:3px;">
+            ${escapeHtml(label)}
+          </div>
+        </td>
 
-          '<td>' +
-            '<div class="symbol">' +
-              escapeHtml(
-                stock.symbol
-              ) +
-            '</div>' +
-          '</td>' +
+        <td>
+          ${businessText}
+        </td>
 
-          '<td>' +
-            '<div class="company" title="' +
-              escapeHtml(
-                stock.name
-              ) +
-            '">' +
-              escapeHtml(
-                stock.name
-              ) +
-            '</div>' +
-          '</td>' +
+        <td>
+          ${
+            Number.isFinite(row.roce)
+              ? formatPercent(row.roce)
+              : "—"
+          }
+        </td>
 
-          '<td>' +
-            healthDisplay +
-            '<div style="font-size:10px;margin-top:3px;color:#697386;">' +
-              escapeHtml(
-                stock.label || ""
-              ) +
-            '</div>' +
-          '</td>' +
+        <td>
+          ${
+            Number.isFinite(row.roe)
+              ? formatPercent(row.roe)
+              : "—"
+          }
+        </td>
 
-          '<td>' +
-            formatNumber(
-              stock.businessQuality
-            ) +
-          '</td>' +
+        <td>
+          ${formatPE(row.pe)}
+        </td>
 
-          '<td>' +
-            formatPercent(
-              stock.roce
-            ) +
-          '</td>' +
+        <td class="${growthClass}">
+          ${formatPercent(row.earningsGrowth)}
+        </td>
 
-          '<td>' +
-            formatPercent(
-              stock.roe
-            ) +
-          '</td>' +
+        <td>
+          ${
+            financialText !== "—"
+              ? financialText
+              : Number.isFinite(row.debtEquity)
+                ? `D/E ${row.debtEquity.toFixed(2)}`
+                : "—"
+          }
+        </td>
 
-          '<td>' +
-            formatNumber(
-              stock.pe,
-              2
-            ) +
-          '</td>' +
+        <td>
+          ${profitabilityText}
+        </td>
 
-          '<td>' +
-            formatPercent(
-              stock.earningsGrowth
-            ) +
-          '</td>' +
+        <td>
+          <span class="status-pill ${dataClass}">
+            ${dataText}
+          </span>
+        </td>
 
-          '<td>' +
-            (
-              Number.isFinite(stock.financialScore)
-                ? Math.round(stock.financialScore)
-                : '—'
-            ) +
-          '</td>' +
-
-          '<td>' +
-            formatPercent(
-              stock.roa
-            ) +
-          '</td>' +
-
-          '<td>' +
-            dataStatus +
-          '</td>' +
-
-        '</tr>'
-
-      );
-
-    }).join("");
-
+      </tr>
+    `;
+  }).join("");
 }
 
-
 /* =========================================================
-   CLEAR FILTERS
+   FILTER RESET
    ========================================================= */
 
 function clearFilters(){
+  document.getElementById("search").value = "";
+  document.getElementById("healthFilter").value = "all";
+  document.getElementById("sortBy").value = "healthDesc";
 
-  document.getElementById(
-    "search"
-  ).value = "";
-
-
-  document.getElementById(
-    "healthFilter"
-  ).value = "all";
-
-
-  document.getElementById(
-    "sortBy"
-  ).value = "healthDesc";
-
-
+  updateStats();
   renderTable();
-
 }
-
 
 /* =========================================================
    EVENTS
    ========================================================= */
 
-document.getElementById(
-  "search"
-)
-.addEventListener(
-  "input",
-  renderTable
-);
+document.getElementById("search")
+  .addEventListener("input", function(){
+    updateStats();
+    renderTable();
+  });
 
+document.getElementById("healthFilter")
+  .addEventListener("change", function(){
+    updateStats();
+    renderTable();
+  });
 
-document.getElementById(
-  "healthFilter"
-)
-.addEventListener(
-  "change",
-  renderTable
-);
-
-
-document.getElementById(
-  "sortBy"
-)
-.addEventListener(
-  "change",
-  renderTable
-);
-
+document.getElementById("sortBy")
+  .addEventListener("change", function(){
+    updateStats();
+    renderTable();
+});
 
 /* =========================================================
-   START
+   INITIAL LOAD
    ========================================================= */
 
-loadUniverse();
+(async function init(){
 
+  document.getElementById("status").textContent =
+    "Loading StockGyan Health data...";
+
+  await Promise.all([
+    loadUniverse(),
+    loadHealthData()
+  ]);
+
+})();
 </script>
 
 </body>
