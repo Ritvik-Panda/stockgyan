@@ -314,8 +314,17 @@ export async function onRequestPost(context) {
       );
     }
 
+    /*
+     * Accept the dedicated technical header.
+     *
+     * Backward compatibility:
+     * The scheduler Worker currently sends X-Refresh-Secret.
+     * Both headers are checked against the same
+     * TECHNICAL_REFRESH_SECRET value.
+     */
     const suppliedSecret =
-      context.request.headers.get("X-Technical-Refresh-Secret");
+      context.request.headers.get("X-Technical-Refresh-Secret") ||
+      context.request.headers.get("X-Refresh-Secret");
 
     if (
       !suppliedSecret ||
