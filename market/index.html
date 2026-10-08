@@ -274,6 +274,7 @@ button,input{font:inherit}
 <script>
 const API="/api/market/quote";
 const OHLC="/api/market/ohlc";
+const TECHNICAL_CHART="/api/market/technical-chart-data";
 const SEARCH="/api/market/search";
 const BATCH="/api/market/batch";
 
@@ -907,32 +908,78 @@ function appendLiveDailyCandle(candles,q){
 }
 
 async function loadChart(){
-  const isIntraday=currentRange==="1D";
-  $("chartStatus").textContent=isIntraday?"Loading intraday data…":"Loading historical data…";
-  try{
-    const interval=currentRange==="1D"?currentInterval:"1d";
-    const res=await fetch(OHLC+"?instrument_key="+encodeURIComponent(selectedKey)+"&interval="+interval,{cache:"no-store"});
-    const data=await res.json();
-    if(!res.ok)throw new Error(data?.message||"Historical data failed");
-    allCandles=parseCandles(data?.data?.candles);
+  const isIntraday = currentRange === "1D";
+  const interval = isIntraday ? currentInterval : "1d";
 
-    // Historical daily candles can end with the previous completed session.
-    // Merge today's live OHLC into 1W/1M/3M/1Y/ALL so the latest candle is current.
-    if(currentRange!=="1D"){
-      const live=await quote(selectedKey,selectedName);
-      allCandles=appendLiveDailyCandle(allCandles,live);
+  $("chartStatus").textContent =
+    isIntraday
+      ? "Loading stored intraday data…"
+      : "Loading stored historical data…";
+
+  try {
+    const url =
+      TECHNICAL_CHART +
+      "?instrument_key=" +
+      encodeURIComponent(selectedKey) +
+      "&interval=" +
+      encodeURIComponent(interval);
+
+    const res = await fetch(url, {
+      cache: "no-store"
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data?.message || "Technical chart API failed");
     }
 
-    if(!allCandles.length) throw new Error("No candles returned");
-    if(currentRange==="1D") renderIntraday(); else renderRange();
-    $("chartStatus").textContent=currentRange==="1D"
-      ? `${allCandles.length} candles • ${currentInterval}`
-      : `${allCandles.length} candles • daily + live`;
-  }catch(e){
-    console.error(e);
-    candleSeries?.setData([]);
-    volumeSeries?.setData([]);
-    $("chartStatus").textContent="Chart data unavailable";
+    const candles = parseCandles(data?.data?.candles);
+
+    if (!candles.length) {
+      throw new Error("No stored candles available");
+    }
+
+    allCandles = candles;
+
+    if (currentRange === "1D") {
+      renderIntraday();
+    } else {
+      renderRange();
+    }
+
+    const updatedAt = data?.updated_at
+      ? new Date(data.updated_at).toLocaleTimeString(
+          "en-IN",
+          {
+            timeZone: "Asia/Kolkata",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true
+          }
+        )
+      : "";
+
+    $("chartStatus").textContent =
+      `${candles.length} candles • ${interval}` +
+      (updatedAt ? ` • Updated ${updatedAt}` : "");
+
+  } catch (e) {
+    console.error("Central technical chart data failed:", e);
+
+    if (allCandles && allCandles.length) {
+      if (currentRange === "1D") {
+        renderIntraday();
+      } else {
+        renderRange();
+      }
+
+      $("chartStatus").textContent =
+        "Showing last available chart data";
+    } else {
+      $("chartStatus").textContent =
+        "Chart data not available";
+    }
   }
 }
 
