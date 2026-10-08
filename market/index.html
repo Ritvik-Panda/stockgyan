@@ -456,7 +456,19 @@ async function loadIndex(id,key){
     const chg=Number.isFinite(rawChange)?rawChange:(Number.isFinite(p)&&Number.isFinite(prev)?p-prev:NaN);
     const pct=prev&&Number.isFinite(chg)?chg/prev*100:NaN;
     $(id+"Price").textContent=money(p);
-    $(id+"Change").textContent=Number.isFinite(pct)?`${chg>=0?"+":""}${pct.toFixed(2)}%`:"—";
+
+    // Show both absolute point change and percentage change.
+    // Example: -39.70 (-2.46%) or +39.70 (+2.46%)
+    if(Number.isFinite(chg) && Number.isFinite(pct)){
+      const pointText = `${chg>=0?"+":""}${chg.toFixed(2)}`;
+      const pctText = `${pct>=0?"+":""}${pct.toFixed(2)}%`;
+      $(id+"Change").textContent=`${pointText} (${pctText})`;
+    }else if(Number.isFinite(chg)){
+      $(id+"Change").textContent=`${chg>=0?"+":""}${chg.toFixed(2)}`;
+    }else{
+      $(id+"Change").textContent="—";
+    }
+
     $(id+"Change").className=chg>=0?"up":"down";
   }catch(e){console.warn(e)}
 }
@@ -846,28 +858,18 @@ function createChart(){
 function parseCandles(raw){
   const arr=Array.isArray(raw)?raw:[];
   const parsed=arr.map(c=>{
-    // Central Technical Chart API returns candle objects:
-    // { time, open, high, low, close, volume }
-    // Keep support for the older array format as well.
-    const rawTime = Array.isArray(c) ? c?.[0] : c?.time;
-
+    const rawTime=c?.[0];
     const ms=typeof rawTime==="number"
       ? (rawTime>1e12?rawTime:rawTime*1000)
       : new Date(rawTime).getTime();
 
-    const open = Array.isArray(c) ? c?.[1] : c?.open;
-    const high = Array.isArray(c) ? c?.[2] : c?.high;
-    const low = Array.isArray(c) ? c?.[3] : c?.low;
-    const close = Array.isArray(c) ? c?.[4] : c?.close;
-    const volume = Array.isArray(c) ? c?.[5] : c?.volume;
-
     return {
       time:Math.floor(ms/1000),
-      open:Number(open),
-      high:Number(high),
-      low:Number(low),
-      close:Number(close),
-      volume:Number(volume||0)
+      open:Number(c?.[1]),
+      high:Number(c?.[2]),
+      low:Number(c?.[3]),
+      close:Number(c?.[4]),
+      volume:Number(c?.[5]||0)
     };
   }).filter(c=>
     Number.isFinite(c.time) &&
