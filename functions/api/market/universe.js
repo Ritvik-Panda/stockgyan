@@ -82,7 +82,7 @@ export async function onRequestGet(context) {
      * decompressed, while others may return the actual
      * gzip bytes.
      *
-     * We therefore inspect the first two bytes:
+     * We inspect the first two bytes:
      *
      * gzip magic number = 1F 8B
      *
@@ -260,7 +260,7 @@ export async function onRequestGet(context) {
      * -----------------------------------------------------
      * PARSE JSON
      * -----------------------------------------------------
-     */
+ */
 
     let instruments;
 
@@ -404,7 +404,7 @@ export async function onRequestGet(context) {
      * -----------------------------------------------------
      * FINAL RESPONSE
      * -----------------------------------------------------
-     */
+ */
 
     const result =
       Response.json(
@@ -429,7 +429,7 @@ export async function onRequestGet(context) {
      *
      * 6 hours.
      * -----------------------------------------------------
-     */
+ */
 
     await cache.put(
       cacheKey,
