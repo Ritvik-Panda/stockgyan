@@ -35,6 +35,13 @@ button,input{font:inherit}
 .chart-tools button{border:1px solid var(--border);background:#fff;color:var(--navy);padding:7px 12px;border-radius:8px;cursor:pointer;font-weight:700}
 .chart-tools button.active{background:var(--navy);color:#fff;border-color:var(--navy)}
 .chart-status{margin-left:auto;color:var(--muted);font-size:12px}
+.chart-fullscreen-btn{border:1px solid var(--border);background:#fff;color:var(--navy);padding:7px 10px;border-radius:8px;cursor:pointer;font-weight:800;font-size:12px}
+.chart-fullscreen-btn:hover{background:#f3f7fc}
+.chart-fullscreen-btn.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.chart-panel:fullscreen{background:#fff;padding:12px;overflow:auto}
+.chart-panel:fullscreen #chart{height:calc(100vh - 125px)!important;min-height:500px}
+.chart-panel:fullscreen .stats{display:none}
+.chart-panel:fullscreen .chart-tools{position:sticky;top:0;background:#fff;z-index:5}
 .intraday-tools{display:flex;gap:5px;align-items:center;margin-left:4px}.intraday-tools .interval-btn{padding:6px 9px;font-size:12px}.intraday-tools .interval-btn.active{background:var(--green);border-color:var(--green);color:#fff}.intraday-label{font-size:11px;color:var(--muted);font-weight:800;margin-right:2px}
 #chart{height:470px;width:100%}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:16px}
@@ -143,7 +150,7 @@ button,input{font:inherit}
   </div>
 
   <div class="main">
-    <section class="card">
+    <section class="card chart-panel" id="chartPanel">
       <div class="stock-head">
         <div class="stock-name">
           <h1 id="stockTitle">RELIANCE</h1>
@@ -169,6 +176,9 @@ button,input{font:inherit}
           <button data-interval="15m" class="interval-btn">15 Min</button>
           <button data-interval="30m" class="interval-btn">30 Min</button>
         </span>
+        <button id="chartFullscreenBtn" class="chart-fullscreen-btn" type="button" title="Expand chart">
+          ⛶ Full Screen
+        </button>
         <span class="chart-status" id="chartStatus">Loading chart…</span>
       </div>
 
@@ -456,7 +466,18 @@ async function loadIndex(id,key){
     const chg=Number.isFinite(rawChange)?rawChange:(Number.isFinite(p)&&Number.isFinite(prev)?p-prev:NaN);
     const pct=prev&&Number.isFinite(chg)?chg/prev*100:NaN;
     $(id+"Price").textContent=money(p);
-    $(id+"Change").textContent=Number.isFinite(pct)?`${chg>=0?"+":""}${pct.toFixed(2)}%`:"—";
+
+    // Show absolute point change together with percentage change.
+    if(Number.isFinite(chg) && Number.isFinite(pct)){
+      const pointText=`${chg>=0?"+":""}${chg.toFixed(2)}`;
+      const pctText=`${pct>=0?"+":""}${pct.toFixed(2)}%`;
+      $(id+"Change").textContent=`${pointText} (${pctText})`;
+    }else if(Number.isFinite(chg)){
+      $(id+"Change").textContent=`${chg>=0?"+":""}${chg.toFixed(2)}`;
+    }else{
+      $(id+"Change").textContent="—";
+    }
+
     $(id+"Change").className=chg>=0?"up":"down";
   }catch(e){console.warn(e)}
 }
@@ -1077,6 +1098,59 @@ document.querySelectorAll('.interval-btn').forEach(b=>b.addEventListener('click'
 }));
 
 $("intradayTools").style.display="flex";
+
+const chartPanel=$("chartPanel");
+const chartFullscreenBtn=$("chartFullscreenBtn");
+
+async function toggleChartFullscreen(){
+  try{
+    if(!document.fullscreenElement){
+      await chartPanel.requestFullscreen();
+    }else if(document.fullscreenElement===chartPanel){
+      await document.exitFullscreen();
+    }else{
+      await document.exitFullscreen();
+      await chartPanel.requestFullscreen();
+    }
+  }catch(e){
+    console.warn("Chart fullscreen unavailable",e);
+  }
+}
+
+chartFullscreenBtn.addEventListener("click",toggleChartFullscreen);
+
+document.addEventListener("fullscreenchange",()=>{
+  const active=document.fullscreenElement===chartPanel;
+
+  chartFullscreenBtn.classList.toggle("active",active);
+  chartFullscreenBtn.textContent=active?"⛶ Exit Full Screen":"⛶ Full Screen";
+
+  requestAnimationFrame(()=>{
+    if(chart){
+      const h=active
+        ? Math.max(500,window.innerHeight-125)
+        : 470;
+
+      chart.applyOptions({
+        width:$("chart").clientWidth,
+        height:h
+      });
+
+      chart.timeScale().fitContent();
+    }
+  });
+});
+
+window.addEventListener("resize",()=>{
+  if(chart){
+    chart.applyOptions({
+      width:$("chart").clientWidth,
+      height:document.fullscreenElement===chartPanel
+        ? Math.max(500,window.innerHeight-125)
+        : $("chart").clientHeight
+    });
+  }
+});
 
 (async function init(){
   createChart();
