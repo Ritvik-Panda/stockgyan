@@ -846,18 +846,28 @@ function createChart(){
 function parseCandles(raw){
   const arr=Array.isArray(raw)?raw:[];
   const parsed=arr.map(c=>{
-    const rawTime=c?.[0];
+    // Central Technical Chart API returns candle objects:
+    // { time, open, high, low, close, volume }
+    // Keep support for the older array format as well.
+    const rawTime = Array.isArray(c) ? c?.[0] : c?.time;
+
     const ms=typeof rawTime==="number"
       ? (rawTime>1e12?rawTime:rawTime*1000)
       : new Date(rawTime).getTime();
 
+    const open = Array.isArray(c) ? c?.[1] : c?.open;
+    const high = Array.isArray(c) ? c?.[2] : c?.high;
+    const low = Array.isArray(c) ? c?.[3] : c?.low;
+    const close = Array.isArray(c) ? c?.[4] : c?.close;
+    const volume = Array.isArray(c) ? c?.[5] : c?.volume;
+
     return {
       time:Math.floor(ms/1000),
-      open:Number(c?.[1]),
-      high:Number(c?.[2]),
-      low:Number(c?.[3]),
-      close:Number(c?.[4]),
-      volume:Number(c?.[5]||0)
+      open:Number(open),
+      high:Number(high),
+      low:Number(low),
+      close:Number(close),
+      volume:Number(volume||0)
     };
   }).filter(c=>
     Number.isFinite(c.time) &&
