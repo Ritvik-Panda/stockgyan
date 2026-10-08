@@ -36,6 +36,14 @@ button,input{font:inherit}
 .chart-tools button.active{background:var(--navy);color:#fff;border-color:var(--navy)}
 .chart-status{margin-left:auto;color:var(--muted);font-size:12px}
 .chart-fullscreen-btn{border:1px solid var(--border);background:#fff;color:var(--navy);padding:7px 10px;border-radius:8px;cursor:pointer;font-weight:800;font-size:12px}
+@keyframes stockgyanLivePulse{
+  0%{opacity:1;filter:brightness(1)}
+  50%{opacity:.45;filter:brightness(1.35)}
+  100%{opacity:1;filter:brightness(1)}
+}
+#chart.live-candle-pulse{
+  animation:stockgyanLivePulse .65s ease-in-out 1;
+}
 .chart-fullscreen-btn:hover{background:#f3f7fc}
 .chart-fullscreen-btn.active{background:var(--navy);color:#fff;border-color:var(--navy)}
 .chart-panel:fullscreen{background:#fff;padding:12px;overflow:auto}
@@ -180,6 +188,7 @@ button,input{font:inherit}
           ⛶ Full Screen
         </button>
         <span class="chart-status" id="chartStatus">Loading chart…</span>
+        <span class="chart-live-status" id="chartLiveStatus" style="display:none;margin-left:8px;font-size:11px;font-weight:800;">● LIVE</span>
       </div>
 
       <div id="chart" style="position:relative;"><div id="chartTooltip" class="chart-tooltip"></div></div>
@@ -1152,13 +1161,144 @@ window.addEventListener("resize",()=>{
   }
 });
 
+let livePollTimer=null;
+let liveCandleSignature="";
+let livePollingBusy=false;
+
+function pulseLiveCandle(){
+  const el=$("chart");
+  el.classList.remove("live-candle-pulse");
+  void el.offsetWidth;
+  el.classList.add("live-candle-pulse");
+  setTimeout(()=>el.classList.remove("live-candle-pulse"),700);
+}
+
+function updateLiveStatus(isLive){
+  const el=$("chartLiveStatus");
+  if(!el)return;
+
+  if(isLive){
+    el.style.display="inline";
+    el.textContent="● LIVE";
+    el.style.color="#159447";
+  }else{
+    el.style.display="none";
+  }
+}
+
+async function refreshCurrentIntradayCandle(){
+  if(currentRange!=="1D" || livePollingBusy || !selectedKey)return;
+
+  livePollingBusy=true;
+
+  try{
+    const url=
+      TECHNICAL_CHART+
+      "?instrument_key="+
+      encodeURIComponent(selectedKey)+
+      "&interval="+
+      encodeURIComponent(currentInterval);
+
+    const res=await fetch(url,{cache:"no-store"});
+    const data=await res.json();
+
+    if(!res.ok)throw new Error(data?.message||"Live chart refresh failed");
+
+    const candles=parseCandles(data?.data?.candles);
+
+    if(!candles.length)throw new Error("No stored candles available");
+
+    const previousLast=allCandles?.length
+      ? allCandles[allCandles.length-1]
+      : null;
+
+    const latest=candles[candles.length-1];
+
+    const signature=latest
+      ? [
+          latest.time,
+          latest.open,
+          latest.high,
+          latest.low,
+          latest.close,
+          latest.volume
+        ].join("|")
+      : "";
+
+    const changed=signature && signature!==liveCandleSignature;
+
+    allCandles=candles;
+    renderIntraday();
+
+    if(changed && previousLast){
+      pulseLiveCandle();
+    }
+
+    liveCandleSignature=signature;
+    updateLiveStatus(true);
+
+    const updatedAt=data?.updated_at
+      ? new Date(data.updated_at).toLocaleTimeString(
+          "en-IN",
+          {
+            timeZone:"Asia/Kolkata",
+            hour:"2-digit",
+            minute:"2-digit",
+            second:"2-digit",
+            hour12:true
+          }
+        )
+      : "";
+
+    $("chartStatus").textContent=
+      `${candles.length} candles • ${currentInterval}`+
+      (updatedAt?` • Updated ${updatedAt}`:"");
+
+  }catch(e){
+    console.warn("Live candle refresh failed:",e);
+    updateLiveStatus(false);
+  }finally{
+    livePollingBusy=false;
+  }
+}
+
+function startLiveCandlePolling(){
+  if(livePollTimer)clearInterval(livePollTimer);
+
+  livePollTimer=setInterval(
+    refreshCurrentIntradayCandle,
+    15000
+  );
+}
+
+startLiveCandlePolling();
+
 (async function init(){
   createChart();
   $("searchInput").value="RELIANCE";
   await quote(selectedKey,"RELIANCE");
   await Promise.all([loadIndices(),loadWatch(),loadMovers()]);
   await loadChart();
-  setInterval(async()=>{await quote(selectedKey,selectedName);await loadIndices();await loadWatch();await loadMovers()},30000);
+
+  if(currentRange==="1D" && allCandles?.length){
+    const latest=allCandles[allCandles.length-1];
+    liveCandleSignature=[
+      latest?.time,
+      latest?.open,
+      latest?.high,
+      latest?.low,
+      latest?.close,
+      latest?.volume
+    ].join("|");
+    updateLiveStatus(true);
+  }
+
+  setInterval(async()=>{
+    await quote(selectedKey,selectedName);
+    await loadIndices();
+    await loadWatch();
+    await loadMovers();
+  },30000);
 })();
 </script>
 </body>
