@@ -358,6 +358,7 @@ const moverUniverse=[
 let selectedKey=instruments.RELIANCE;
 let selectedName="RELIANCE";
 let allCandles=[];
+let lastLoadedInstrumentKey="";
 let currentRange="1D";
 let currentInterval="1m";
 let chart, candleSeries, volumeSeries;
@@ -981,6 +982,7 @@ async function loadChart(){
     }
 
     allCandles = candles;
+    lastLoadedInstrumentKey = selectedKey;
 
     if (currentRange === "1D") {
       renderIntraday();
@@ -1007,7 +1009,11 @@ async function loadChart(){
   } catch (e) {
     console.error("Central technical chart data failed:", e);
 
-    if (allCandles && allCandles.length) {
+    if (
+      lastLoadedInstrumentKey === selectedKey &&
+      allCandles &&
+      allCandles.length
+    ) {
       if (currentRange === "1D") {
         renderIntraday();
       } else {
@@ -1017,8 +1023,16 @@ async function loadChart(){
       $("chartStatus").textContent =
         "Showing last available chart data";
     } else {
+      allCandles = [];
+      liveCandleSignature = "";
+
+      if (candleSeries) candleSeries.setData([]);
+      if (volumeSeries) volumeSeries.setData([]);
+
       $("chartStatus").textContent =
-        "Chart data not available";
+        "Chart data not available for this stock yet";
+
+      updateLiveStatus(false);
     }
   }
 }
@@ -1042,9 +1056,24 @@ function renderRange(){
 }
 
 async function selectStock(key,name){
-  selectedKey=key;selectedName=name;
-  $("results").style.display="none";$("searchInput").value=name;
-  await quote(key,name);await loadChart();
+  selectedKey=key;
+  selectedName=name;
+
+  // Never carry the previous stock's candles into a new selection.
+  allCandles=[];
+  lastLoadedInstrumentKey="";
+  liveCandleSignature="";
+  updateLiveStatus(false);
+
+  if (candleSeries) candleSeries.setData([]);
+  if (volumeSeries) volumeSeries.setData([]);
+
+  $("chartStatus").textContent="Loading chart data…";
+  $("results").style.display="none";
+  $("searchInput").value=name;
+
+  await quote(key,name);
+  await loadChart();
 }
 
 let searchTimer;
