@@ -1,6 +1,7 @@
-// StockGyan — Central Technical Indicator Data API
-// Reads calculated indicators from D1.
-// No Upstox calls.
+
+ // StockGyan — Advanced Technical Indicator Data API
+ // Reads all calculated indicators from D1.
+ // No direct Upstox calls.
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -12,6 +13,57 @@ function json(data, status = 200) {
   });
 }
 
+const INDICATOR_FIELDS = `
+  instrument_key,
+  symbol,
+  company_name,
+  isin,
+  exchange,
+
+  dma20,
+  dma50,
+  dma100,
+  dma200,
+
+  ema9,
+  ema21,
+  ema50,
+
+  rsi14,
+
+  macd,
+  macd_signal,
+  macd_histogram,
+
+  stochastic_k,
+  stochastic_d,
+
+  bollinger_middle,
+  bollinger_upper,
+  bollinger_lower,
+  bollinger_width,
+
+  atr14,
+  atr_percent,
+
+  adx14,
+  plus_di14,
+  minus_di14,
+
+  roc12,
+  volume_sma20,
+  obv,
+
+  technical_score,
+  technical_signal,
+  signal_details,
+
+  candle_count,
+  latest_candle_time,
+  data_status,
+  updated_at
+`;
+
 export async function onRequestGet(context) {
   try {
     const url = new URL(context.request.url);
@@ -22,97 +74,25 @@ export async function onRequestGet(context) {
     const symbol =
       url.searchParams.get("symbol");
 
-    let row = null;
-
-    if (instrumentKey) {
-      row = await context.env.DB.prepare(`
-        SELECT
-          instrument_key,
-          symbol,
-          company_name,
-          isin,
-          exchange,
-
-          dma20,
-          dma50,
-          dma100,
-          dma200,
-
-          rsi14,
-
-          macd,
-          macd_signal,
-          macd_histogram,
-
-          stochastic_k,
-          stochastic_d,
-
-          bollinger_middle,
-          bollinger_upper,
-          bollinger_lower,
-
-          atr14,
-
-          candle_count,
-          latest_candle_time,
-          data_status,
-          updated_at
-
-        FROM technical_indicator_data
-        WHERE instrument_key = ?
-        LIMIT 1
-      `)
-        .bind(instrumentKey)
-        .first();
-
-    } else if (symbol) {
-      row = await context.env.DB.prepare(`
-        SELECT
-          instrument_key,
-          symbol,
-          company_name,
-          isin,
-          exchange,
-
-          dma20,
-          dma50,
-          dma100,
-          dma200,
-
-          rsi14,
-
-          macd,
-          macd_signal,
-          macd_histogram,
-
-          stochastic_k,
-          stochastic_d,
-
-          bollinger_middle,
-          bollinger_upper,
-          bollinger_lower,
-
-          atr14,
-
-          candle_count,
-          latest_candle_time,
-          data_status,
-          updated_at
-
-        FROM technical_indicator_data
-        WHERE symbol = ?
-        LIMIT 1
-      `)
-        .bind(symbol.toUpperCase())
-        .first();
-
-    } else {
+    if (!instrumentKey && !symbol) {
       return json({
         status: "error",
-        message:
-          "Provide instrument_key or symbol"
+        message: "Provide instrument_key or symbol"
       }, 400);
     }
+
+    const sql = `
+      SELECT ${INDICATOR_FIELDS}
+      FROM technical_indicator_data
+      WHERE ${instrumentKey ? "instrument_key = ?" : "UPPER(symbol) = ?"}
+      LIMIT 1
+    `;
+
+    const lookupValue = instrumentKey || symbol.trim().toUpperCase();
+
+    const row = await context.env.DB.prepare(sql)
+      .bind(lookupValue)
+      .first();
 
     if (!row) {
       return json({
@@ -131,10 +111,7 @@ export async function onRequestGet(context) {
     });
 
   } catch (error) {
-    console.error(
-      "Technical indicator data API error:",
-      error
-    );
+    console.error("Technical indicator data API error:", error);
 
     return json({
       status: "error",
