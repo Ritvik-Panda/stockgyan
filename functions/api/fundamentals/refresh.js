@@ -948,6 +948,36 @@ export async function onRequestPost(context) {
          SAVE TO D1
          ================================================= */
 
+      // Save complete company fundamentals to D1 before updating the
+      // existing Health Screener summary.
+      await db.prepare(`
+        INSERT INTO company_fundamentals (
+          isin,
+          symbol,
+          company_name,
+          key_ratios,
+          income_statement,
+          balance_sheet,
+          updated_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(isin) DO UPDATE SET
+          symbol = excluded.symbol,
+          company_name = excluded.company_name,
+          key_ratios = excluded.key_ratios,
+          income_statement = excluded.income_statement,
+          balance_sheet = excluded.balance_sheet,
+          updated_at = excluded.updated_at
+      `).bind(
+        result.isin,
+        stock.symbol || "",
+        stock.company_name || "",
+        JSON.stringify(result.keyRatios),
+        JSON.stringify(result.incomeStatement),
+        JSON.stringify(result.balanceSheet),
+        updatedAt
+      ).run();
+
       await db.prepare(
         `
         INSERT INTO health_screener_data (
