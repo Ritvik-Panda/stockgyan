@@ -27,11 +27,14 @@
       <button class="menu-btn" type="button" aria-label="Open navigation" aria-expanded="false">☰</button>
 
       <nav class="nav" aria-label="Main navigation">
+        <a class="active" href="/">Home</a>
         <a href="/market">Market</a>
         <a href="/portfolio">Portfolio</a>
         <a href="/screener">Stock Screener</a>
         <a href="/screener1">Health Screener</a>
-        <a class="nav-cta" href="/portfolio">Open Portfolio <span aria-hidden="true">↗</span></a>
+        <a href="#analysis">Learn</a>
+        <a class="nav-login" href="/portfolio">Login</a>
+        <a class="nav-cta" href="/portfolio">Sign Up <span aria-hidden="true">↗</span></a>
       </nav>
     </div>
   </header>
@@ -85,6 +88,26 @@
           <div class="floating-note note-top"><span class="note-icon green">✓</span><div><b>One clear view</b><small>Tools for your next step</small></div></div>
           <div class="floating-note note-bottom"><span class="note-icon blue">◎</span><div><b>Your portfolio</b><small>Holdings in one place</small></div></div>
           <div class="visual-caption">A smarter workspace for market learners and investors</div>
+        </div>
+        <aside class="signup-card" aria-label="Start your StockGyan journey">
+          <h2>Start Your Journey<br>with StockGyan</h2>
+          <div class="signup-tabs"><span class="selected">Sign Up</span><a href="/portfolio">Login</a></div>
+          <p>Explore market tools and bring your investing workspace together.</p>
+          <a class="button button-primary signup-button" href="/portfolio">Create Account <span aria-hidden="true">→</span></a>
+          <small>Already have an account? <a href="/portfolio">Login</a></small>
+        </aside>
+      </div>
+    </section>
+
+    <section class="market-today">
+      <div class="container">
+        <div class="market-today-head"><div><span class="live-indicator"></span><strong>Market Today</strong><span class="market-time">Illustrative preview · Connect live market data for current values</span></div><a href="/market">View Detailed Market →</a></div>
+        <div class="market-today-grid">
+          <a class="market-tile" href="/market"><small>NIFTY 50</small><strong>Explore market</strong><span>Indices & movers ↗</span><i class="market-spark green"></i></a>
+          <a class="market-tile" href="/market"><small>BANK NIFTY</small><strong>Banking index</strong><span>View current data ↗</span><i class="market-spark green"></i></a>
+          <a class="market-tile" href="/market"><small>SENSEX</small><strong>Market index</strong><span>View current data ↗</span><i class="market-spark green"></i></a>
+          <a class="market-tile" href="/market"><small>INDIA VIX</small><strong>Market volatility</strong><span>View current data ↗</span><i class="market-spark red"></i></a>
+          <a class="market-tile" href="/market"><small>GOLD (MCX)</small><strong>Commodity market</strong><span>View current data ↗</span><i class="market-spark green"></i></a>
         </div>
       </div>
     </section>
