@@ -341,20 +341,12 @@ tr:hover td{
   }
 }
 
-/* Smart scans and local-only advanced filters */
-.smart-panel{background:#fff;border:1px solid #e7edf5;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05);padding:16px;margin-bottom:18px}
-.smart-title{font-size:17px;font-weight:800;color:#082a63;margin-bottom:5px}
-.smart-help{font-size:12px;color:#697386;line-height:1.5;margin-bottom:13px}
-.preset-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:15px}
-.preset-btn{height:36px;padding:0 13px;background:#edf2f8;color:#17335f;border:1px solid #dbe4ef;font-size:12px}
-.preset-btn.active{background:#082a63;color:#fff}
-.filter-grid{display:grid;grid-template-columns:repeat(6,minmax(115px,1fr));gap:10px}
-.filter-field{display:flex;flex-direction:column;gap:5px;font-size:12px;color:#536174;font-weight:700}
-.filter-field input,.filter-field select{width:100%;height:38px;border:1px solid #ccd5e2;border-radius:7px;padding:0 9px;background:#fff;color:#172033;font-size:13px;min-width:0}
-.smart-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:13px}
-.view-note{font-size:12px;color:#697386;margin-top:10px;line-height:1.5}
-@media(max-width:1000px){.filter-grid{grid-template-columns:repeat(3,minmax(110px,1fr))}}
-@media(max-width:600px){.filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.preset-btn{flex:1 1 42%}}
+.strategy-btn{background:#edf2f8;color:#17335f;border:1px solid #d7e0ec}
+.strategy-btn.active{background:#082a63;color:#fff;border-color:#082a63}
+#strategyPanel label{display:flex;align-items:center;gap:6px;font-size:12px;color:#536174;flex-wrap:wrap}
+#strategyPanel input[type=number]{height:36px;border:1px solid #ccd5e2;border-radius:7px;padding:0 8px;font:inherit;color:#172033;min-width:75px}
+#strategyPanel .control-row{align-items:center}
+@media(max-width:600px){#strategyPanel label{width:100%;justify-content:space-between}#strategyPanel input[type=number]{flex:1}}
 
 </style>
 </head>
@@ -411,43 +403,6 @@ tr:hover td{
   </section>
 
 
-
-  <section class="smart-panel" aria-label="Smart scans and advanced filters">
-    <div class="smart-title">Smart Scans &amp; Advanced Filters</div>
-    <div class="smart-help">One-click fundamental scans use only metrics already loaded by this page. Thresholds are screening shortcuts, not investment recommendations.</div>
-    <div class="preset-row" id="presetRow">
-      <button type="button" class="preset-btn" data-preset="all">All Stocks</button>
-      <button type="button" class="preset-btn" data-preset="quality">Quality</button>
-      <button type="button" class="preset-btn" data-preset="value">Value</button>
-      <button type="button" class="preset-btn" data-preset="growth">Growth</button>
-      <button type="button" class="preset-btn" data-preset="lowDebt">Low Debt</button>
-      <button type="button" class="preset-btn" data-preset="qualityGrowth">Quality + Growth</button>
-      <button type="button" class="preset-btn" data-preset="piotroski">Piotroski F-Score &gt; 7</button>
-    </div>
-    <div class="filter-grid">
-      <label class="filter-field">Analysis View
-        <select id="analysisView"><option value="all">All Metrics</option><option value="quality">Quality View</option><option value="value">Value View</option><option value="growth">Growth View</option></select>
-      </label>
-      <label class="filter-field">Min Health Score<input id="minHealth" type="number" min="0" max="100" placeholder="No minimum"></label>
-      <label class="filter-field">Max Health Score<input id="maxHealth" type="number" min="0" max="100" placeholder="No maximum"></label>
-      <label class="filter-field">Min ROCE (%)<input id="minRoce" type="number" step="any" placeholder="No minimum"></label>
-      <label class="filter-field">Max ROCE (%)<input id="maxRoce" type="number" step="any" placeholder="No maximum"></label>
-      <label class="filter-field">Min ROE (%)<input id="minRoe" type="number" step="any" placeholder="No minimum"></label>
-      <label class="filter-field">Max ROE (%)<input id="maxRoe" type="number" step="any" placeholder="No maximum"></label>
-      <label class="filter-field">Min P/E<input id="minPe" type="number" min="0" step="any" placeholder="No minimum"></label>
-      <label class="filter-field">Max P/E<input id="maxPe" type="number" min="0" step="any" placeholder="No maximum"></label>
-      <label class="filter-field">Min Earnings Growth (%)<input id="minGrowth" type="number" step="any" placeholder="No minimum"></label>
-      <label class="filter-field">Max Earnings Growth (%)<input id="maxGrowth" type="number" step="any" placeholder="No maximum"></label>
-      <label class="filter-field">Max Debt/Equity<input id="maxDebt" type="number" min="0" step="any" placeholder="No maximum"></label>
-    </div>
-    <div class="smart-actions">
-      <button type="button" id="applySmartBtn">Apply Filters</button>
-      <button type="button" class="btn-light" id="resetSmartBtn">Reset Filters</button>
-      <button type="button" class="btn-orange" id="exportCsvBtn">Export Filtered CSV</button>
-    </div>
-    <div class="view-note" id="viewNote">Quality, Value and Growth scores are supplementary heuristic scores derived from currently available stored metrics. The existing Health Score methodology is unchanged.</div>
-  </section>
-
   <!-- =========================
        CONTROLS
   ========================== -->
@@ -478,10 +433,6 @@ tr:hover td{
 
         <option value="healthAsc">
           Health Score ↑
-        </option>
-
-        <option value="viewScoreDesc">
-          Selected View Score ↓
         </option>
 
         <option value="roeDesc">
@@ -526,6 +477,35 @@ tr:hover td{
     </div>
 </section>
 
+  <section class="controls" id="strategyPanel">
+    <div style="font-size:18px;font-weight:800;color:#082a63;margin-bottom:8px;">Strategy Scans</div>
+    <div class="control-row" style="margin-bottom:12px;">
+      <button type="button" class="strategy-btn" data-strategy="health">Health Screener</button>
+      <button type="button" class="strategy-btn" data-strategy="quality">Quality</button>
+      <button type="button" class="strategy-btn" data-strategy="value">Value</button>
+      <button type="button" class="strategy-btn" data-strategy="growth">Growth</button>
+      <button type="button" class="strategy-btn" data-strategy="lowDebt">Low Debt</button>
+      <button type="button" class="strategy-btn" data-strategy="coffeeCan">Coffee Can</button>
+      <button type="button" class="strategy-btn" data-strategy="magicFormula">Magic Formula</button>
+      <button type="button" class="strategy-btn" data-strategy="piotroski">Piotroski F-Score &gt; 7</button>
+    </div>
+    <div class="methodology-text" id="strategyDescription">
+      Select a strategy. A stock qualifies only when all required metrics are available and satisfy the selected rules.
+    </div>
+    <div style="height:12px"></div>
+    <div class="control-row">
+      <label>ROIC min % <input id="f_roic_min" type="number" placeholder="25" style="width:100px"></label>
+      <label>Earnings yield min % <input id="f_ey_min" type="number" placeholder="15" style="width:120px"></label>
+      <label>Book value min <input id="f_bv_min" type="number" placeholder="0" style="width:100px"></label>
+      <label>Market cap min (₹ Cr) <input id="f_mcap_min" type="number" placeholder="15" style="width:120px"></label>
+      <label>Sales growth min % <input id="f_sales_min" type="number" placeholder="10" style="width:110px"></label>
+      <label>10Y sales growth min % <input id="f_sales10_min" type="number" placeholder="10" style="width:130px"></label>
+      <label>10Y avg ROCE min % <input id="f_roce10_min" type="number" placeholder="15" style="width:130px"></label>
+      <button type="button" id="applyStrategyFilters" class="btn-orange">Apply thresholds</button>
+      <button type="button" id="exportHealthCsv" class="btn-light">Export filtered CSV</button>
+    </div>
+    <div class="status" id="strategyStatus">Strategy filters use fields already returned by the existing Health Data API. No additional API calls are made.</div>
+  </section>
 
   <!-- =========================
        TABLE
@@ -535,7 +515,7 @@ tr:hover td{
 
     <div class="table-header">
 
-      <div class="table-title">
+      <div class="table-title" id="tableTitle">
         StockGyan Health Stocks
       </div>
 
@@ -559,14 +539,6 @@ tr:hover td{
 
             <th>Health Score</th>
 
-            <th>Quality Score</th>
-
-            <th>Value Score</th>
-
-            <th>Growth Score</th>
-
-            <th>Piotroski F-Score</th>
-
             <th>Business Quality</th>
 
             <th>ROCE</th>
@@ -580,7 +552,14 @@ tr:hover td{
             <th>Financial Strength</th>
 
             <th>Profitability</th>
-
+            <th>ROIC</th>
+            <th>Earnings Yield</th>
+            <th>Book Value</th>
+            <th>Market Cap</th>
+            <th>Sales Growth</th>
+            <th>Sales Growth 10Y</th>
+            <th>Avg ROCE 10Y</th>
+            <th>Piotroski</th>
             <th>Data</th>
 
           </tr>
@@ -591,7 +570,7 @@ tr:hover td{
 
           <tr>
             <td
-              colspan="15"
+              colspan="19"
               class="empty"
             >
               Loading NSE universe...
@@ -654,6 +633,11 @@ tr:hover td{
       and stored in StockGyan D1. This screener only reads stored data;
       it does not make live Upstox requests. Missing fundamental data is not treated as zero.
 
+      <br><br>
+      Strategy scans only work when their required values are present in the existing API response.
+      Optional fields are displayed as unavailable when absent; the page does not infer or fabricate them.
+      Quality, Value and Growth quick scans are simple convenience filters and are not investment recommendations.
+
     </div>
 
   </section>
@@ -675,6 +659,7 @@ const HEALTH_DATA_API = "/api/fundamentals/health-screener-data";
 
 let universe = [];
 let healthData = [];
+let activeStrategy = "health";
 
 /* =========================================================
    HELPERS
@@ -856,15 +841,21 @@ async function loadHealthData(){
 
       earningsGrowth: num(row.earnings_growth),
 
-      // Read only if the existing API payload already contains a Piotroski score.
-      // This does not trigger another request or calculate a score from unrelated metrics.
-      piotroskiScore: num(row.piotroski_score ?? row.piotroskiScore ?? row.piotroski_f_score ?? row.f_score),
-
       financialScore: null,
 
       debtEquity: num(row.debt_equity),
 
       profitability: num(row.profitability),
+
+      // Optional strategy metrics: read only if already supplied by the existing API.
+      roic: num(row.roic ?? row.ROIC ?? row.return_on_invested_capital ?? row.returnOnInvestedCapital),
+      earningsYield: num(row.earnings_yield ?? row.earningsYield ?? row.ey),
+      bookValue: num(row.book_value ?? row.bookValue ?? row.bookvalue),
+      marketCap: num(row.market_cap ?? row.market_capitalization ?? row.marketCap ?? row.marketCapitalization),
+      salesGrowth: num(row.sales_growth ?? row.salesGrowth ?? row.revenue_growth),
+      salesGrowth10Y: num(row.sales_growth_10_years ?? row.sales_growth_10y ?? row.salesGrowth10Years ?? row.sales_growth_10_year),
+      avgRoce10Y: num(row.average_roce_10_years ?? row.avg_roce_10y ?? row.averageROCE10Years ?? row.roce_10y),
+      piotroskiScore: num(row.piotroski_score ?? row.piotroskiScore ?? row.piotroski_f_score ?? row.f_score),
 
       availableMetrics: Number(row.available_metrics || 0),
 
@@ -898,108 +889,173 @@ async function loadHealthData(){
 }
 
 /* =========================================================
+   STRATEGY SCANS — CLIENT-SIDE ONLY, NO EXTRA API/D1 CALLS
+   ========================================================= */
+
+const strategyNames = {
+  health:"Health Screener",
+  quality:"Quality",
+  value:"Value",
+  growth:"Growth",
+  lowDebt:"Low Debt",
+  coffeeCan:"Coffee Can",
+  magicFormula:"Magic Formula",
+  piotroski:"Piotroski F-Score > 7"
+};
+
+function metricAvailable(v){ return Number.isFinite(v); }
+function matchesStrategy(row, strategy){
+  const gt = (v, threshold) => metricAvailable(v) && v > threshold;
+  switch(strategy){
+    case "quality":
+      return gt(row.roce, 20) && gt(row.roe, 15);
+    case "value":
+      return metricAvailable(row.pe) && row.pe > 0 && row.pe <= 15;
+    case "growth":
+      return gt(row.earningsGrowth, 10);
+    case "lowDebt":
+      return metricAvailable(row.debtEquity) && row.debtEquity >= 0 && row.debtEquity < 0.5;
+    case "coffeeCan":
+      return gt(row.salesGrowth, readThreshold("f_sales_min", 10)) &&
+        gt(row.salesGrowth10Y, readThreshold("f_sales10_min", 10)) &&
+        gt(row.roe, 15) &&
+        gt(row.avgRoce10Y, readThreshold("f_roce10_min", 15)) &&
+        gt(row.marketCap, readThreshold("f_mcap_min", 1000));
+    case "magicFormula":
+      return gt(row.roic, readThreshold("f_roic_min", 25)) &&
+        gt(row.earningsYield, readThreshold("f_ey_min", 15)) &&
+        gt(row.bookValue, readThreshold("f_bv_min", 0)) &&
+        gt(row.marketCap, readThreshold("f_mcap_min", 15));
+    case "piotroski":
+      return gt(row.piotroskiScore, 7);
+    default:
+      return true;
+  }
+}
+function readThreshold(id, fallback){
+  const el = document.getElementById(id);
+  if(!el || el.value.trim() === "") return fallback;
+  const value = Number(el.value);
+  return Number.isFinite(value) ? value : fallback;
+}
+function setStrategy(strategy){
+  activeStrategy = strategyNames[strategy] ? strategy : "health";
+  document.querySelectorAll(".strategy-btn").forEach(btn=>{
+    btn.classList.toggle("active", btn.dataset.strategy === activeStrategy);
+  });
+  const descriptions = {
+    health:"Existing Health Score filters and methodology.",
+    quality:"Illustrative Quality scan: ROCE > 20% and ROE > 15%.",
+    value:"Illustrative Value scan: positive P/E up to 15. This is a simple heuristic, not a sector-adjusted valuation.",
+    growth:"Illustrative Growth scan: earnings growth > 10%.",
+    lowDebt:"Low Debt scan: debt-to-equity below 0.5.",
+    coffeeCan:"Coffee Can: Sales Growth > 10%, 10-year Sales Growth > 10%, ROE > 15%, 10-year average ROCE > 15%, and market cap > ₹1,000 Cr. Missing metrics do not qualify.",
+    magicFormula:"Magic Formula: ROIC > 25%, earnings yield > 15%, book value > 0, and market cap > 15 (market-cap units assumed ₹ Cr). Missing metrics do not qualify.",
+    piotroski:"Piotroski scan: F-Score > 7 (scores 8 or 9). Uses an existing score field only; it does not calculate an F-Score."
+  };
+  document.getElementById("strategyDescription").textContent = descriptions[activeStrategy];
+  document.getElementById("strategyStatus").textContent =
+    `Selected: ${strategyNames[activeStrategy]}. Only metrics already returned by the current API are used; no new API or D1 reads are made.`;
+  updateStats();
+  renderTable();
+}
+function exportFilteredHealthCSV(){
+  const rows = getFilteredData();
+  const columns = [
+    ["Symbol","symbol"],["Company","name"],["Health Score","healthScore"],
+    ["Business Quality","businessQuality"],["ROCE","roce"],["ROE","roe"],["P/E","pe"],
+    ["Earnings Growth","earningsGrowth"],["Debt/Equity","debtEquity"],["Profitability","profitability"],
+    ["ROIC","roic"],["Earnings Yield","earningsYield"],["Book Value","bookValue"],
+    ["Market Cap","marketCap"],["Sales Growth","salesGrowth"],["Sales Growth 10Y","salesGrowth10Y"],
+    ["Average ROCE 10Y","avgRoce10Y"],["Piotroski F-Score","piotroskiScore"],["Data Status","dataStatus"]
+  ];
+  const csvCell = v => `"${String(v ?? "").replace(/"/g,'""')}"`;
+  const csv = [columns.map(c=>csvCell(c[0])).join(","), ...rows.map(row=>columns.map(c=>csvCell(row[c[1]] ?? "")).join(","))].join("\r\n");
+  const blob = new Blob(["\ufeff",csv],{type:"text/csv;charset=utf-8;"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `stockgyan-${activeStrategy}-scan.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+document.querySelectorAll(".strategy-btn").forEach(btn=>{
+  btn.addEventListener("click",()=>setStrategy(btn.dataset.strategy));
+});
+document.getElementById("applyStrategyFilters").addEventListener("click",()=>{
+  updateStats(); renderTable();
+});
+document.getElementById("exportHealthCsv").addEventListener("click",exportFilteredHealthCSV);
+
+/* =========================================================
    FILTER / SORT
    ========================================================= */
 
-function readOptionalNumber(id){
-  const el = document.getElementById(id);
-  if(!el || String(el.value).trim()==="") return null;
-  const value = Number(el.value);
-  return Number.isFinite(value) ? value : null;
-}
-
-function withinRange(value, min, max){
-  if(min === null && max === null) return true;
-  if(!Number.isFinite(value)) return false;
-  if(min !== null && value < min) return false;
-  if(max !== null && value > max) return false;
-  return true;
-}
-
-function qualityScore(row){
-  const parts=[];
-  if(Number.isFinite(row.roce)) parts.push(Math.max(0,Math.min(100,row.roce/25*100)));
-  if(Number.isFinite(row.roe)) parts.push(Math.max(0,Math.min(100,row.roe/20*100)));
-  if(Number.isFinite(row.businessQuality)) parts.push(Math.max(0,Math.min(100,row.businessQuality)));
-  if(!parts.length && Number.isFinite(row.healthScore)) return row.healthScore;
-  return parts.length ? parts.reduce((a,b)=>a+b,0)/parts.length : null;
-}
-
-function valueScore(row){
-  // Heuristic based only on stored P/E; not sector-adjusted fair value.
-  if(!Number.isFinite(row.pe) || row.pe <= 0) return null;
-  if(row.pe <= 10) return 100;
-  if(row.pe <= 15) return 85;
-  if(row.pe <= 20) return 70;
-  if(row.pe <= 25) return 55;
-  if(row.pe <= 35) return 35;
-  if(row.pe <= 50) return 20;
-  return 10;
-}
-
-function growthScore(row){
-  if(!Number.isFinite(row.earningsGrowth)) return null;
-  const g=row.earningsGrowth;
-  if(g <= -20) return 0;
-  if(g < 0) return Math.max(0,50+g*2.5);
-  if(g < 20) return 50+g*1.5;
-  if(g < 50) return 80+(g-20)*0.5;
-  return 100;
-}
-
-function viewScore(row){
-  const view=document.getElementById("analysisView")?.value || "all";
-  if(view==="quality") return qualityScore(row);
-  if(view==="value") return valueScore(row);
-  if(view==="growth") return growthScore(row);
-  return row.healthScore;
-}
-
 function getFilteredData(){
-  const search = String(document.getElementById("search").value || "").trim().toLowerCase();
-  const healthFilter = document.getElementById("healthFilter").value;
-  const sort = document.getElementById("sortBy").value;
-  const view = document.getElementById("analysisView").value;
-  const mins={health:readOptionalNumber("minHealth"),roce:readOptionalNumber("minRoce"),roe:readOptionalNumber("minRoe"),pe:readOptionalNumber("minPe"),growth:readOptionalNumber("minGrowth")};
-  const maxs={health:readOptionalNumber("maxHealth"),roce:readOptionalNumber("maxRoce"),roe:readOptionalNumber("maxRoe"),pe:readOptionalNumber("maxPe"),growth:readOptionalNumber("maxGrowth"),debt:readOptionalNumber("maxDebt")};
+  const search =
+    String(
+      document.getElementById("search").value || ""
+    )
+    .trim()
+    .toLowerCase();
 
-  let rows=healthData.filter(row=>{
-    const matchesSearch=!search || String(row.symbol).toLowerCase().includes(search) || String(row.name).toLowerCase().includes(search);
+  const filter =
+    document.getElementById("healthFilter").value;
+
+  const sort =
+    document.getElementById("sortBy").value;
+
+  let rows = healthData.filter(row => {
+
+    const matchesSearch =
+      !search ||
+      String(row.symbol).toLowerCase().includes(search) ||
+      String(row.name).toLowerCase().includes(search);
+
     if(!matchesSearch) return false;
-    if(healthFilter!=="all"){
-      if(!Number.isFinite(row.healthScore)) return false;
-      if(healthFilter==="80" && row.healthScore<80) return false;
-      if(healthFilter==="65" && row.healthScore<65) return false;
-      if(healthFilter==="50" && row.healthScore<50) return false;
-      if(healthFilter==="0" && row.healthScore>=50) return false;
+
+    if(!matchesStrategy(row, activeStrategy)) return false;
+
+    if(filter === "all"){
+      return true;
     }
-    if(!withinRange(row.healthScore,mins.health,maxs.health)) return false;
-    if(!withinRange(row.roce,mins.roce,maxs.roce)) return false;
-    if(!withinRange(row.roe,mins.roe,maxs.roe)) return false;
-    if(!withinRange(row.pe,mins.pe,maxs.pe)) return false;
-    if(!withinRange(row.earningsGrowth,mins.growth,maxs.growth)) return false;
-    if(maxs.debt!==null && (!Number.isFinite(row.debtEquity) || row.debtEquity>maxs.debt)) return false;
 
-    if(activePreset==="piotroski" && (!Number.isFinite(row.piotroskiScore) || row.piotroskiScore <= 7)) return false;
+    const score = row.healthScore;
 
-    if(view==="quality" && !Number.isFinite(qualityScore(row))) return false;
-    if(view==="value" && !Number.isFinite(valueScore(row))) return false;
-    if(view==="growth" && !Number.isFinite(growthScore(row))) return false;
+    if(!Number.isFinite(score)){
+      return false;
+    }
+
+    if(filter === "80") return score >= 80;
+    if(filter === "65") return score >= 65;
+    if(filter === "50") return score >= 50;
+
+    if(filter === "0") return score < 50;
+
     return true;
   });
 
-  rows.sort((a,b)=>{
-    let av, bv;
-    if(sort==="viewScoreDesc"){av=viewScore(a);bv=viewScore(b);}
-    else {av=keyValue(a,sort);bv=keyValue(b,sort);}
-    if(typeof av==="string" || typeof bv==="string") return String(av??"").localeCompare(String(bv??""));
-    const aValid=Number.isFinite(av),bValid=Number.isFinite(bv);
-    if(!aValid&&!bValid)return 0;
-    if(!aValid)return 1;
-    if(!bValid)return -1;
-    if(sort==="healthAsc" || sort==="peAsc") return av-bv;
-    return bv-av;
+  rows.sort((a,b) => {
+
+    const av = keyValue(a, sort);
+    const bv = keyValue(b, sort);
+
+    if(typeof av === "string" || typeof bv === "string"){
+      return String(av).localeCompare(String(bv));
+    }
+
+    const aValid = Number.isFinite(av);
+    const bValid = Number.isFinite(bv);
+
+    if(!aValid && !bValid) return 0;
+    if(!aValid) return 1;
+    if(!bValid) return -1;
+
+    return sort === "healthAsc" ? av - bv : bv - av;
   });
+
   return rows;
 }
 
@@ -1071,6 +1127,8 @@ function renderTable(){
   if(!tbody) return;
 
   const rows = getFilteredData();
+  const title = document.getElementById("tableTitle");
+  if(title) title.textContent = `StockGyan ${strategyNames[activeStrategy] || "Health"} Stocks`;
 
   document.getElementById("displayedCount").textContent =
     rows.length.toLocaleString();
@@ -1081,7 +1139,7 @@ function renderTable(){
   if(!rows.length){
     tbody.innerHTML = `
       <tr>
-        <td colspan="15" class="empty">
+        <td colspan="19" class="empty">
           ${
             healthData.length
               ? "No stocks match the current filters."
@@ -1158,14 +1216,6 @@ function renderTable(){
           </div>
         </td>
 
-        <td><span class="score ${scoreClass(qualityScore(row))}">${formatNumber(qualityScore(row))}</span></td>
-
-        <td><span class="score ${scoreClass(valueScore(row))}">${formatNumber(valueScore(row))}</span></td>
-
-        <td><span class="score ${scoreClass(growthScore(row))}">${formatNumber(growthScore(row))}</span></td>
-
-        <td>${Number.isFinite(row.piotroskiScore) ? '<span class="score '+scoreClass(row.piotroskiScore/9*100)+'">'+formatNumber(row.piotroskiScore,0)+'/9</span>' : "—"}</td>
-
         <td>
           ${businessText}
         </td>
@@ -1207,6 +1257,14 @@ function renderTable(){
         <td>
           ${profitabilityText}
         </td>
+        <td>${formatPercent(row.roic)}</td>
+        <td>${formatPercent(row.earningsYield)}</td>
+        <td>${formatNumber(row.bookValue)}</td>
+        <td>${formatNumber(row.marketCap)}</td>
+        <td>${formatPercent(row.salesGrowth)}</td>
+        <td>${formatPercent(row.salesGrowth10Y)}</td>
+        <td>${formatPercent(row.avgRoce10Y)}</td>
+        <td>${formatNumber(row.piotroskiScore,0)}</td>
 
         <td>
           <span class="status-pill ${dataClass}">
@@ -1220,78 +1278,6 @@ function renderTable(){
 }
 
 /* =========================================================
-   LOCAL PRESETS, ADVANCED FILTERS AND CSV EXPORT
-   No additional API calls or D1 reads are made by these controls.
-   ========================================================= */
-const SMART_FILTER_IDS=["minHealth","maxHealth","minRoce","maxRoce","minRoe","maxRoe","minPe","maxPe","minGrowth","maxGrowth","maxDebt"];
-let activePreset="all";
-function clearSmartInputs(){SMART_FILTER_IDS.forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});}
-function setPreset(name){
-  activePreset=name;
-  clearSmartInputs();
-  document.getElementById("healthFilter").value="all";
-  document.getElementById("analysisView").value="all";
-  document.getElementById("sortBy").value="healthDesc";
-  if(name==="quality"){
-    document.getElementById("analysisView").value="quality";
-    document.getElementById("minRoce").value="15";
-    document.getElementById("minRoe").value="12";
-    document.getElementById("minHealth").value="60";
-    document.getElementById("sortBy").value="viewScoreDesc";
-  }else if(name==="value"){
-    document.getElementById("analysisView").value="value";
-    document.getElementById("minPe").value="0.01";
-    document.getElementById("maxPe").value="20";
-    document.getElementById("sortBy").value="viewScoreDesc";
-  }else if(name==="growth"){
-    document.getElementById("analysisView").value="growth";
-    document.getElementById("minGrowth").value="10";
-    document.getElementById("sortBy").value="viewScoreDesc";
-  }else if(name==="lowDebt"){
-    document.getElementById("maxDebt").value="0.5";
-    document.getElementById("sortBy").value="healthDesc";
-  }else if(name==="qualityGrowth"){
-    document.getElementById("analysisView").value="quality";
-    document.getElementById("minRoce").value="15";
-    document.getElementById("minRoe").value="12";
-    document.getElementById("minGrowth").value="10";
-    document.getElementById("minHealth").value="60";
-    document.getElementById("sortBy").value="viewScoreDesc";
-  }else if(name==="piotroski"){
-    document.getElementById("sortBy").value="healthDesc";
-  }
-  document.querySelectorAll("[data-preset]").forEach(btn=>btn.classList.toggle("active",btn.dataset.preset===name));
-  updateViewNote();updateStats();renderTable();
-  if(name==="piotroski" && !healthData.some(r=>Number.isFinite(r.piotroskiScore))){
-    document.getElementById("status").textContent="Piotroski scan added, but no Piotroski score is present in the existing API payload. No new API calls or D1 reads were added.";
-  }
-}
-function updateViewNote(){
-  const view=document.getElementById("analysisView").value;
-  const notes={all:"All Metrics: sorted by the existing Health Score by default.",quality:"Quality View: supplementary score based on available ROCE, ROE and Business Quality. Missing metrics are excluded from the component average.",value:"Value View: illustrative P/E-only score; it is not sector-adjusted and does not establish fair value.",growth:"Growth View: illustrative score based on stored year-on-year earnings growth; it is not a forecast."};
-  const piotroskiAvailable=healthData.filter(r=>Number.isFinite(r.piotroskiScore)).length;
-  const piotroskiNote=activePreset==="piotroski" ? (piotroskiAvailable ? ` Piotroski scan active: ${piotroskiAvailable.toLocaleString()} records contain a stored score; showing scores greater than 7.` : " Piotroski scan selected, but the existing API response contains no Piotroski score field. No scores are fabricated; the backend/API must expose a stored score before this scan can return results.") : "";
-  document.getElementById("viewNote").textContent=notes[view]+" Existing backend Health Score methodology is unchanged."+piotroskiNote;
-}
-function csvCell(value){
-  let s=String(value??"");
-  if(/^[=+@\-]/.test(s)) s="'"+s;
-  return '"'+s.replace(/"/g,'""')+'"';
-}
-function exportFilteredCSV(){
-  const rows=getFilteredData();
-  if(!rows.length){document.getElementById("status").textContent="No filtered stocks to export.";return;}
-  const headers=["Symbol","Company","Health Score","Quality Score (heuristic)","Value Score (P/E heuristic)","Growth Score (heuristic)","Piotroski F-Score","Business Quality","ROCE (%)","ROE (%)","P/E","Earnings Growth (%)","Debt/Equity","Profitability (%)","Data Status","Available Metrics","Updated At"];
-  const lines=[headers,...rows.map(r=>[r.symbol,r.name,r.healthScore,qualityScore(r),valueScore(r),growthScore(r),r.piotroskiScore,r.businessQuality,r.roce,r.roe,r.pe,r.earningsGrowth,r.debtEquity,r.profitability,r.dataStatus,r.availableMetrics,r.updatedAt])];
-  const csv="\uFEFF"+lines.map(row=>row.map(csvCell).join(",")).join("\r\n");
-  const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});
-  const url=URL.createObjectURL(blob);const a=document.createElement("a");
-  a.href=url;a.download="stockgyan-health-screener.csv";document.body.appendChild(a);a.click();a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url),1000);
-  document.getElementById("status").textContent=`Exported ${rows.length.toLocaleString()} filtered stocks to CSV.`;
-}
-
-/* =========================================================
    FILTER RESET
    ========================================================= */
 
@@ -1299,11 +1285,7 @@ function clearFilters(){
   document.getElementById("search").value = "";
   document.getElementById("healthFilter").value = "all";
   document.getElementById("sortBy").value = "healthDesc";
-  document.getElementById("analysisView").value = "all";
-  clearSmartInputs();
-  activePreset="all";
-  document.querySelectorAll("[data-preset]").forEach(btn=>btn.classList.toggle("active",btn.dataset.preset==="all"));
-  updateViewNote();
+  setStrategy("health");
 
   updateStats();
   renderTable();
@@ -1330,13 +1312,6 @@ document.getElementById("sortBy")
     updateStats();
     renderTable();
 });
-
-document.getElementById("applySmartBtn").addEventListener("click",()=>{activePreset="";document.querySelectorAll("[data-preset]").forEach(btn=>btn.classList.remove("active"));updateStats();renderTable();});
-document.getElementById("resetSmartBtn").addEventListener("click",clearFilters);
-document.getElementById("exportCsvBtn").addEventListener("click",exportFilteredCSV);
-document.getElementById("analysisView").addEventListener("change",()=>{activePreset="";document.querySelectorAll("[data-preset]").forEach(btn=>btn.classList.remove("active"));updateViewNote();updateStats();renderTable();});
-SMART_FILTER_IDS.forEach(id=>document.getElementById(id).addEventListener("keydown",e=>{if(e.key==="Enter"){updateStats();renderTable();}}));
-document.querySelectorAll("[data-preset]").forEach(btn=>btn.addEventListener("click",()=>setPreset(btn.dataset.preset)));
 
 /* =========================================================
    INITIAL LOAD
