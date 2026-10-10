@@ -1,191 +1,787 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="StockGyan — market insights, portfolio tracking, stock screening and investor education in one place.">
-  <meta name="theme-color" content="#082a63">
-  <title>StockGyan — Your Market & Portfolio Companion</title>
-  <link rel="icon" type="image/png" href="/assets/stockgyan-brand-logo.png">
-  <link rel="stylesheet" href="/styles.css?v=3">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>My Portfolio | StockGyan</title>
+
+  <meta
+    name="description"
+    content="Secure StockGyan My Portfolio login"
+  />
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family:
+        Inter,
+        Arial,
+        Helvetica,
+        sans-serif;
+      background:
+        linear-gradient(
+          135deg,
+          #082a63 0%,
+          #0b3d91 50%,
+          #159447 100%
+        );
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: #14213d;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 460px;
+    }
+
+    .brand {
+      text-align: center;
+      color: white;
+      margin-bottom: 22px;
+    }
+
+    .brand-name {
+      font-size: 30px;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+
+    .brand-name span {
+      color: #f28c28;
+    }
+
+    .brand-tagline {
+      margin-top: 5px;
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    .card {
+      background: white;
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow:
+        0 25px 70px rgba(0, 0, 0, 0.25);
+    }
+
+    .portfolio-icon {
+      width: 68px;
+      height: 68px;
+      margin: 0 auto 18px;
+      border-radius: 18px;
+      background: #eaf5ef;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+    }
+
+    h1 {
+      margin: 0;
+      text-align: center;
+      color: #082a63;
+      font-size: 28px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #667085;
+      font-size: 14px;
+      line-height: 1.6;
+      margin: 10px 0 28px;
+    }
+
+    .step {
+      display: none;
+    }
+
+    .step.active {
+      display: block;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #344054;
+    }
+
+    input {
+      width: 100%;
+      height: 52px;
+      border: 1px solid #d0d5dd;
+      border-radius: 12px;
+      padding: 0 15px;
+      font-size: 16px;
+      outline: none;
+      transition: 0.2s;
+    }
+
+    input:focus {
+      border-color: #159447;
+      box-shadow:
+        0 0 0 3px rgba(21, 148, 71, 0.12);
+    }
+
+    .otp-input {
+      text-align: center;
+      letter-spacing: 8px;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    button {
+      width: 100%;
+      height: 52px;
+      border: 0;
+      border-radius: 12px;
+      margin-top: 18px;
+      background: #082a63;
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background: #0b3d91;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .secondary {
+      background: transparent;
+      color: #082a63;
+      border: 1px solid #d0d5dd;
+    }
+
+    .secondary:hover {
+      background: #f8fafc;
+    }
+
+    .message {
+      display: none;
+      margin-top: 16px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .message.show {
+      display: block;
+    }
+
+    .message.error {
+      background: #fff1f0;
+      color: #b42318;
+      border: 1px solid #fecdca;
+    }
+
+    .message.success {
+      background: #ecfdf3;
+      color: #067647;
+      border: 1px solid #abefc6;
+    }
+
+    .email-display {
+      text-align: center;
+      margin: -10px 0 22px;
+      color: #475467;
+      font-size: 14px;
+    }
+
+    .email-display strong {
+      color: #082a63;
+    }
+
+    .security-note {
+      margin-top: 24px;
+      padding-top: 18px;
+      border-top: 1px solid #eaecf0;
+      text-align: center;
+      color: #667085;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .security-note span {
+      color: #159447;
+      font-weight: 700;
+    }
+
+    .dashboard-preview {
+      display: none;
+      text-align: center;
+    }
+
+    .dashboard-preview.active {
+      display: block;
+    }
+
+    .success-icon {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 18px;
+      border-radius: 50%;
+      background: #ecfdf3;
+      color: #159447;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 38px;
+    }
+
+    .dashboard-preview h2 {
+      margin: 0;
+      color: #082a63;
+    }
+
+    .dashboard-preview p {
+      color: #667085;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .back-home {
+      display: block;
+      text-align: center;
+      margin-top: 20px;
+      color: white;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .back-home:hover {
+      text-decoration: underline;
+    }
+
+    .resend {
+      margin-top: 15px;
+      text-align: center;
+      font-size: 13px;
+      color: #667085;
+    }
+
+    .resend button {
+      width: auto;
+      height: auto;
+      margin: 0;
+      padding: 0;
+      background: transparent;
+      color: #159447;
+      font-size: 13px;
+    }
+
+    @media (max-width: 520px) {
+      .card {
+        padding: 25px 20px;
+        border-radius: 20px;
+      }
+
+      h1 {
+        font-size: 25px;
+      }
+    }
+  </style>
 </head>
+
 <body>
-  <div class="announcement">
-    <div class="container announcement-inner">
-      <span><span class="announcement-dot"></span> A clearer way to understand the market</span>
-      <a href="#contact">Talk to StockGyan <span aria-hidden="true">↗</span></a>
+
+  <div class="container">
+
+    <div class="brand">
+      <div class="brand-name">
+        Stock<span>Gyan</span>
+      </div>
+
+      <div class="brand-tagline">
+        Learn • Analyse • Understand • Invest
+      </div>
     </div>
+
+    <div class="card">
+
+      <!-- ========================= -->
+      <!-- EMAIL STEP -->
+      <!-- ========================= -->
+
+      <div id="emailStep" class="step active">
+
+        <div class="portfolio-icon">
+          📊
+        </div>
+
+        <h1>My Portfolio</h1>
+
+        <p class="subtitle">
+          View your portfolio, holdings and market insights
+          securely through StockGyan.
+        </p>
+
+        <label for="email">
+          Email Address
+        </label>
+
+        <input
+          id="email"
+          type="email"
+          placeholder="Enter your registered email"
+          autocomplete="email"
+        />
+
+        <button
+          id="sendOtpButton"
+          type="button"
+          onclick="sendOTP()"
+        >
+          Send OTP
+        </button>
+
+        <div
+          id="emailMessage"
+          class="message"
+        ></div>
+
+        <div class="security-note">
+          🔒 <span>Secure login</span><br />
+          We will send a one-time password to your
+          registered email address.
+        </div>
+
+      </div>
+
+
+      <!-- ========================= -->
+      <!-- OTP STEP -->
+      <!-- ========================= -->
+
+      <div id="otpStep" class="step">
+
+        <div class="portfolio-icon">
+          🔐
+        </div>
+
+        <h1>Enter OTP</h1>
+
+        <p class="subtitle">
+          We've sent a 6-digit OTP to your email.
+        </p>
+
+        <div class="email-display">
+          Email:
+          <strong id="emailDisplay"></strong>
+        </div>
+
+        <label for="otp">
+          6-Digit OTP
+        </label>
+
+        <input
+          id="otp"
+          class="otp-input"
+          type="text"
+          inputmode="numeric"
+          maxlength="6"
+          placeholder="••••••"
+          autocomplete="one-time-code"
+        />
+
+        <button
+          id="verifyOtpButton"
+          type="button"
+          onclick="verifyOTP()"
+        >
+          Verify OTP
+        </button>
+
+        <div
+          id="otpMessage"
+          class="message"
+        ></div>
+
+        <button
+          class="secondary"
+          type="button"
+          onclick="backToEmail()"
+        >
+          Change Email
+        </button>
+
+        <div class="resend">
+          Didn't receive the OTP?
+
+          <button
+            type="button"
+            onclick="sendOTP(true)"
+          >
+            Resend OTP
+          </button>
+        </div>
+
+      </div>
+
+
+      <!-- ========================= -->
+      <!-- SUCCESS STEP -->
+      <!-- ========================= -->
+
+      <div
+        id="successStep"
+        class="dashboard-preview"
+      >
+
+        <div class="success-icon">
+          ✓
+        </div>
+
+        <h2>OTP Verified</h2>
+
+        <p>
+          Your email has been verified successfully.
+        </p>
+
+        <p>
+          Your secure My Portfolio dashboard will
+          open here.
+        </p>
+
+        <button
+          type="button"
+          onclick="window.location.href='/portfolio/dashboard/'"
+        >
+          Continue to My Portfolio
+        </button>
+
+      </div>
+
+    </div>
+
+    <a
+      href="/"
+      class="back-home"
+    >
+      ← Back to StockGyan Home
+    </a>
+
   </div>
 
-  <header class="site-header">
-    <div class="container header-inner">
-      <a class="brand" href="/" aria-label="StockGyan home">
-        <span class="brand-symbol" aria-hidden="true">SG</span>
-        <span class="brand-word"><span>Stock</span><strong>Gyan</strong><small>.in</small></span>
-      </a>
 
-      <button class="menu-btn" type="button" aria-label="Open navigation" aria-expanded="false">☰</button>
+  <script>
 
-      <nav class="nav" aria-label="Main navigation">
-        <a href="/market">Market</a>
-        <a href="/portfolio">Portfolio</a>
-        <a href="/screener">Stock Screener</a>
-        <a href="/screener1">Health Screener</a>
-        <a class="nav-cta" href="/portfolio">Open Portfolio <span aria-hidden="true">↗</span></a>
-      </nav>
-    </div>
-  </header>
+    let registeredEmail = "";
 
-  <main>
-    <section class="hero">
-      <div class="hero-orb orb-one"></div>
-      <div class="hero-orb orb-two"></div>
-      <div class="container hero-grid">
-        <div class="hero-copy">
-          <div class="eyebrow"><span class="eyebrow-line"></span> YOUR MARKET. YOUR PORTFOLIO. ONE PLACE.</div>
-          <h1>Make sense of the market.<br><span>Move with confidence.</span></h1>
-          <p class="hero-lead">Explore market activity, track your investments and discover stocks with tools designed to make investing easier to understand.</p>
-          <div class="hero-actions">
-            <a class="button button-primary" href="/market">Explore Market <span aria-hidden="true">↗</span></a>
-            <a class="button button-secondary" href="/portfolio"><span class="button-play" aria-hidden="true">▸</span> View My Portfolio</a>
-          </div>
-          <div class="hero-trust">
-            <div class="trust-icon" aria-hidden="true">✓</div>
-            <div><strong>Built for informed decisions</strong><span>Market information, analysis and portfolio visibility together.</span></div>
-          </div>
-        </div>
+    // ==========================================
+    // Utility: Show message
+    // ==========================================
 
-        <div class="hero-visual" aria-label="Illustration of the StockGyan investing dashboard">
-          <div class="visual-halo"></div>
-          <div class="dashboard-window">
-            <div class="window-top">
-              <div class="window-brand"><span class="mini-mark">SG</span><b>Stock<span>Gyan</span></b></div>
-              <div class="window-dots"><i></i><i></i><i></i></div>
-            </div>
-            <div class="window-body">
-              <div class="window-greeting"><div><small>YOUR INVESTING WORKSPACE</small><h3>Market overview</h3></div><span class="status-pill"><i></i> Dashboard</span></div>
-              <div class="mini-stats">
-                <div class="mini-stat"><span>Market</span><b>Explore</b><small>Indices & movers</small><div class="sparkline spark-green"><i></i></div></div>
-                <div class="mini-stat"><span>Portfolio</span><b>Track</b><small>Holdings & insights</small><div class="sparkline spark-blue"><i></i></div></div>
-              </div>
-              <div class="chart-panel">
-                <div class="chart-heading"><div><b>Market activity</b><small>Illustrative dashboard preview</small></div><span>↗</span></div>
-                <svg class="chart-art" viewBox="0 0 440 118" role="img" aria-label="Decorative upward market trend illustration">
-                  <defs><linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#159447" stop-opacity=".18"/><stop offset="100%" stop-color="#159447" stop-opacity="0"/></linearGradient></defs>
-                  <path d="M0 92H440 M0 60H440 M0 28H440" stroke="#e8edf4" stroke-width="1" stroke-dasharray="4 5" fill="none"/>
-                  <path d="M0 96 L28 86 L53 91 L80 62 L105 70 L132 51 L157 58 L183 37 L207 45 L236 26 L262 43 L288 31 L314 48 L340 22 L365 32 L393 14 L416 24 L440 8 L440 118 L0 118Z" fill="url(#chartFill)"/>
-                  <path d="M0 96 L28 86 L53 91 L80 62 L105 70 L132 51 L157 58 L183 37 L207 45 L236 26 L262 43 L288 31 L314 48 L340 22 L365 32 L393 14 L416 24 L440 8" fill="none" stroke="#159447" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                  <circle cx="440" cy="8" r="4.5" fill="#159447" stroke="#fff" stroke-width="2"/>
-                </svg>
-                <div class="chart-legend"><span><i class="legend-dot green"></i> Market insights</span><span>Connect to explore live data</span></div>
-              </div>
-              <div class="window-shortcuts"><span><i class="shortcut-icon green">↗</i> Market</span><span><i class="shortcut-icon blue">◈</i> Portfolio</span><span><i class="shortcut-icon orange">⌕</i> Screeners</span></div>
-            </div>
-          </div>
-          <div class="floating-note note-top"><span class="note-icon green">✓</span><div><b>One clear view</b><small>Tools for your next step</small></div></div>
-          <div class="floating-note note-bottom"><span class="note-icon blue">◎</span><div><b>Your portfolio</b><small>Holdings in one place</small></div></div>
-          <div class="visual-caption">A smarter workspace for market learners and investors</div>
-        </div>
-      </div>
-    </section>
+    function showMessage(elementId, message, type) {
 
-    <section class="quick-access">
-      <div class="container quick-access-inner">
-        <div class="quick-label"><span class="live-indicator"></span><div><b>EXPLORE STOCKGYAN</b><small>Choose where you want to start</small></div></div>
-        <a class="quick-link" href="/market"><span class="quick-link-icon icon-navy">↗</span><span><b>Market Dashboard</b><small>Explore market activity</small></span><span class="quick-arrow">→</span></a>
-        <a class="quick-link" href="/portfolio"><span class="quick-link-icon icon-green">◈</span><span><b>Portfolio Tracker</b><small>Review your holdings</small></span><span class="quick-arrow">→</span></a>
-        <a class="quick-link" href="/screener"><span class="quick-link-icon icon-orange">⌕</span><span><b>Stock Screener</b><small>Discover stocks</small></span><span class="quick-arrow">→</span></a>
-      </div>
-    </section>
+      const element =
+        document.getElementById(elementId);
 
-    <section class="section tools-section" id="tools">
-      <div class="container">
-        <div class="section-heading">
-          <div><span class="section-kicker">TOOLS THAT WORK TOGETHER</span><h2>Your investing toolkit,<br><span>all in one place.</span></h2></div>
-          <p>Move from market context to stock discovery to portfolio review — without losing sight of the bigger picture.</p>
-        </div>
-        <div class="tool-grid">
-          <a class="tool-card" href="/market">
-            <div class="tool-card-top"><span class="tool-icon tool-icon-navy">⌁</span><span class="card-arrow">↗</span></div>
-            <span class="tool-number">01 / MARKET</span><h3>Market Dashboard</h3><p>Explore market trends, stock activity and available market insights from one dedicated view.</p><span class="tool-link">Open market <b>→</b></span>
-          </a>
-          <a class="tool-card featured-tool" href="/portfolio">
-            <div class="tool-card-top"><span class="tool-icon tool-icon-green">◈</span><span class="card-arrow">↗</span></div>
-            <span class="tool-number">02 / YOUR INVESTMENTS</span><h3>Portfolio Tracker</h3><p>Bring your holdings together and review portfolio value, performance and available analytics.</p><span class="tool-link">View portfolio <b>→</b></span>
-            <span class="featured-label">YOUR WORKSPACE</span>
-          </a>
-          <a class="tool-card" href="/screener">
-            <div class="tool-card-top"><span class="tool-icon tool-icon-orange">⌕</span><span class="card-arrow">↗</span></div>
-            <span class="tool-number">03 / DISCOVERY</span><h3>Stock Screener</h3><p>Search and filter the stock universe using the data and screening options available.</p><span class="tool-link">Explore stocks <b>→</b></span>
-          </a>
-          <a class="tool-card" href="/screener1">
-            <div class="tool-card-top"><span class="tool-icon tool-icon-blue">◉</span><span class="card-arrow">↗</span></div>
-            <span class="tool-number">04 / FUNDAMENTALS</span><h3>Health Screener</h3><p>Review available company fundamentals to help organise your research process.</p><span class="tool-link">Open health screener <b>→</b></span>
-          </a>
-        </div>
-      </div>
-    </section>
+      element.textContent = message;
 
-    <section class="section analysis-section" id="analysis">
-      <div class="container analysis-layout">
-        <div class="analysis-copy">
-          <span class="section-kicker">LEARN. ANALYSE. UNDERSTAND.</span>
-          <h2>Better investing starts with <span>better questions.</span></h2>
-          <p>StockGyan brings together market tools and educational resources to help you research thoughtfully, understand risk and make your own informed decisions.</p>
-          <ul class="benefit-list">
-            <li><span>✓</span> See the market in context</li>
-            <li><span>✓</span> Explore companies with a research mindset</li>
-            <li><span>✓</span> Keep your portfolio view close at hand</li>
-          </ul>
-          <a class="button button-primary" href="/market">Explore the platform <span aria-hidden="true">↗</span></a>
-        </div>
-        <div class="analysis-preview" id="featured-stock-analysis">
-          <div class="preview-header"><span class="preview-icon">SG</span><div><small>STOCKGYAN INSIGHTS</small><b>Research with a plan</b></div><span class="preview-tag">EDUCATION</span></div>
-          <div class="preview-illustration">
-            <div class="preview-chart-grid"></div><div class="preview-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-            <div class="preview-trend"></div><span class="preview-chart-label">Research • Context • Risk</span>
-          </div>
-          <h3>Make research part of your process.</h3>
-          <p>Explore the market and use StockGyan tools to support your own analysis.</p>
-          <div class="preview-tags"><span>Market context</span><span>Fundamentals</span><span>Risk awareness</span></div>
-          <a href="/screener" class="preview-link">Start exploring <b>→</b></a>
-        </div>
-      </div>
-    </section>
+      element.className =
+        "message show " + type;
+    }
 
-    <section class="closing-cta">
-      <div class="container closing-inner">
-        <div class="closing-mark" aria-hidden="true">SG</div>
-        <div><span class="section-kicker">YOUR NEXT STEP STARTS HERE</span><h2>Know more. See clearly. <span>Invest thoughtfully.</span></h2><p>Open your StockGyan workspace and explore the tools available to you.</p></div>
-        <a class="button button-white" href="/portfolio">Open StockGyan <span aria-hidden="true">↗</span></a>
-      </div>
-    </section>
 
-    <section class="section contact-section" id="contact">
-      <div class="container contact-grid">
-        <div class="contact-copy"><span class="section-kicker">LET'S CONNECT</span><h2>Have a question?</h2><p>Send us an enquiry about StockGyan, market education or the tools available on the platform.</p><div class="contact-assurance"><span>✉</span><div><b>Your enquiry goes to StockGyan</b><small>We will use your details to respond to your request.</small></div></div></div>
-        <form class="contact-form" id="enquiryForm">
-          <label for="enquiryName">Your name</label><input id="enquiryName" name="name" type="text" placeholder="Enter your name" autocomplete="name" required>
-          <label for="enquiryPhone">Mobile number</label><input id="enquiryPhone" name="phone" type="tel" inputmode="tel" placeholder="Enter your mobile number" autocomplete="tel" required>
-          <label for="enquiryType">I'm interested in</label>
-          <select id="enquiryType" name="enquiry_type" required><option value="">Choose a topic</option><option>Stock Market Education</option><option>Stocks</option><option>Mutual Funds / SIP</option><option>IPO / NFO</option><option>StockGyan Tools</option><option>Other</option></select>
-          <button class="button button-primary form-submit" type="submit">Submit enquiry <span aria-hidden="true">→</span></button>
-          <div id="enquiryMsg" class="form-message" aria-live="polite"></div>
-        </form>
-      </div>
-    </section>
-  </main>
+    function hideMessage(elementId) {
 
-  <footer class="site-footer">
-    <div class="container footer-main">
-      <div class="footer-brand"><a class="brand brand-footer" href="/"><span class="brand-symbol" aria-hidden="true">SG</span><span class="brand-word"><span>Stock</span><strong>Gyan</strong><small>.in</small></span></a><p>Learn. Analyse. Understand. Invest.</p></div>
-      <div class="footer-column"><b>Explore</b><a href="/market">Market Dashboard</a><a href="/portfolio">Portfolio Tracker</a><a href="/screener">Stock Screener</a><a href="/screener1">Health Screener</a></div>
-      <div class="footer-column"><b>Connect</b><a href="#contact">Contact StockGyan</a><a href="/admin">Admin</a></div>
-    </div>
-    <div class="container footer-bottom"><p>Educational and informational purposes only. Market data may be delayed or unavailable at times. Investments are subject to market risks; this website does not guarantee returns.</p><span>© 2026 StockGyan.in. All rights reserved.</span></div>
-  </footer>
+      const element =
+        document.getElementById(elementId);
 
-  <script src="/script.js?v=3"></script>
+      element.className =
+        "message";
+    }
+
+
+    // ==========================================
+    // Send OTP
+    // ==========================================
+
+    async function sendOTP(isResend = false) {
+
+      const emailInput =
+        document.getElementById("email");
+
+      const button =
+        document.getElementById("sendOtpButton");
+
+      const email =
+        emailInput.value.trim().toLowerCase();
+
+      hideMessage("emailMessage");
+
+      if (!email) {
+
+        showMessage(
+          "emailMessage",
+          "Please enter your email address.",
+          "error"
+        );
+
+        return;
+      }
+
+      const emailPattern =
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if (!emailPattern.test(email)) {
+
+        showMessage(
+          "emailMessage",
+          "Please enter a valid email address.",
+          "error"
+        );
+
+        return;
+      }
+
+      registeredEmail = email;
+
+      button.disabled = true;
+      button.textContent = "Sending OTP...";
+
+      try {
+
+        const response =
+          await fetch("/api/auth/send-otp", {
+
+            method: "POST",
+
+            headers: {
+              "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+              email: email
+            })
+
+          });
+
+        const data =
+          await response.json();
+
+        if (!response.ok ||
+            data.status !== "success") {
+
+          throw new Error(
+            data.message ||
+            "Unable to send OTP."
+          );
+        }
+
+        document.getElementById(
+          "emailDisplay"
+        ).textContent = email;
+
+        document.getElementById(
+          "emailStep"
+        ).classList.remove("active");
+
+        document.getElementById(
+          "otpStep"
+        ).classList.add("active");
+
+        document.getElementById(
+          "otp"
+        ).focus();
+
+        showMessage(
+          "otpMessage",
+          "OTP sent successfully. Please check your email.",
+          "success"
+        );
+
+      } catch (error) {
+
+        showMessage(
+          "emailMessage",
+          error.message ||
+          "Unable to send OTP. Please try again.",
+          "error"
+        );
+
+      } finally {
+
+        button.disabled = false;
+        button.textContent = "Send OTP";
+
+      }
+    }
+
+
+    // ==========================================
+    // Verify OTP
+    // ==========================================
+
+    async function verifyOTP() {
+
+      const otpInput =
+        document.getElementById("otp");
+
+      const button =
+        document.getElementById("verifyOtpButton");
+
+      const otp =
+        otpInput.value.trim();
+
+      hideMessage("otpMessage");
+
+      if (!/^\d{6}$/.test(otp)) {
+
+        showMessage(
+          "otpMessage",
+          "Please enter the 6-digit OTP.",
+          "error"
+        );
+
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = "Verifying...";
+
+      try {
+
+        const response =
+          await fetch("/api/auth/verify-otp", {
+
+            method: "POST",
+
+            headers: {
+              "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+
+              email: registeredEmail,
+              otp: otp
+
+            })
+
+          });
+
+        const data =
+          await response.json();
+
+        if (!response.ok ||
+            data.status !== "success") {
+
+          throw new Error(
+            data.message ||
+            "OTP verification failed."
+          );
+        }
+
+        document.getElementById(
+          "otpStep"
+        ).classList.remove("active");
+
+        document.getElementById(
+          "successStep"
+        ).classList.add("active");
+
+      } catch (error) {
+
+        showMessage(
+          "otpMessage",
+          error.message ||
+          "Unable to verify OTP.",
+          "error"
+        );
+
+      } finally {
+
+        button.disabled = false;
+        button.textContent = "Verify OTP";
+
+      }
+    }
+
+
+    // ==========================================
+    // Change Email
+    // ==========================================
+
+    function backToEmail() {
+
+      document.getElementById(
+        "otpStep"
+      ).classList.remove("active");
+
+      document.getElementById(
+        "emailStep"
+      ).classList.add("active");
+
+      hideMessage("emailMessage");
+      hideMessage("otpMessage");
+
+      document.getElementById(
+        "otp"
+      ).value = "";
+
+    }
+
+
+    // ==========================================
+    // OTP input: numbers only
+    // ==========================================
+
+    document
+      .getElementById("otp")
+      .addEventListener("input", function () {
+
+        this.value =
+          this.value
+            .replace(/\D/g, "")
+            .slice(0, 6);
+
+      });
+
+
+    // ==========================================
+    // Press Enter
+    // ==========================================
+
+    document
+      .getElementById("email")
+      .addEventListener("keydown", function(event) {
+
+        if (event.key === "Enter") {
+          sendOTP();
+        }
+
+      });
+
+
+    document
+      .getElementById("otp")
+      .addEventListener("keydown", function(event) {
+
+        if (event.key === "Enter") {
+          verifyOTP();
+        }
+
+      });
+
+  </script>
 
 </body>
 </html>
