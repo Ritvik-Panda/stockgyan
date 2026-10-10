@@ -8,3 +8,78 @@
 @media(max-width:1120px){.hero-grid{grid-template-columns:1fr 1fr}.signup-card{grid-column:1/-1;max-width:none;display:grid;grid-template-columns:1fr 1fr;column-gap:20px;align-items:center}.signup-card h2{grid-column:1}.signup-tabs{grid-column:2;grid-row:1}.signup-card p{grid-column:1}.signup-button{grid-column:2;grid-row:2}.signup-card>small{grid-column:2;grid-row:3}.market-today-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.quick-access-inner{grid-template-columns:repeat(2,minmax(0,1fr))}.tool-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.nav a{padding:9px 8px;font-size:12px}.brand-word{font-size:23px}}
 @media(max-width:700px){.container{width:92%}.announcement-inner{min-height:30px;font-size:10px}.header-inner{min-height:62px}.brand-symbol{width:36px;height:36px}.brand-word{font-size:21px}.menu-btn{display:block}.nav{display:none;position:absolute;top:62px;left:0;right:0;padding:12px 4%;background:#fff;border-bottom:1px solid var(--line);box-shadow:0 14px 24px #082a6312;flex-direction:column;align-items:stretch}.nav.open{display:flex}.nav a{font-size:14px;padding:12px}.nav .nav-login,.nav .nav-cta{margin:3px 0;text-align:center}.hero{padding:20px 0}.hero-grid{grid-template-columns:1fr;gap:5px}.hero-copy{padding:8px 0}.hero h1{font-size:38px;letter-spacing:-1.2px}.hero-lead{font-size:15px}.hero-visual{max-width:560px;width:100%;margin:auto;padding:10px 0 20px}.dashboard-window{transform:none}.signup-card{display:block;grid-column:auto;padding:18px}.signup-card h2{font-size:22px}.market-today{width:96%;margin:0 auto;padding:13px 0;border-radius:14px}.market-today-head{align-items:flex-start}.market-today-head>div{gap:5px}.market-time{width:100%;font-size:10px}.market-today-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.market-tile{padding:9px;min-height:82px}.market-tile strong{font-size:13px}.market-spark{opacity:.4}.quick-access-inner{grid-template-columns:1fr;gap:8px}.quick-label{padding:12px}.quick-link{padding:12px}.section{padding:38px 0}.section-heading{display:block}.section-heading>p{margin-top:12px}.tool-grid{grid-template-columns:1fr;gap:11px}.tool-card{min-height:195px}.analysis-layout,.contact-grid{grid-template-columns:1fr;gap:25px}.analysis-preview{padding:17px}.closing-inner{grid-template-columns:54px 1fr;gap:14px;padding:22px}.closing-mark{width:48px;height:48px;border-radius:12px;font-size:16px}.closing-inner h2{font-size:22px}.closing-inner .button{grid-column:1/-1}.footer-main{grid-template-columns:1fr 1fr;gap:22px}.footer-brand{grid-column:1/-1}.footer-bottom{display:block}.footer-bottom span{display:block;margin-top:8px;white-space:normal}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important}}
+
+
+/* =========================================================
+   STOCKGYAN HOMEPAGE HERO IMAGE — FULL-WIDTH DISPLAY
+   Added without removing existing styles or responsive rules.
+   ========================================================= */
+.hero-image-section {
+  display: block;
+  position: relative;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  line-height: 0;
+  background: #f1f9fc;
+}
+
+.hero-image-section .hero-banner-image {
+  display: block;
+  width: 100%;
+  max-width: none;
+  height: auto;
+  margin: 0;
+  object-fit: contain;
+}
+
+/* Transparent clickable areas positioned over the buttons in image.PNG */
+.hero-image-section .hero-image-link {
+  position: absolute;
+  display: block;
+  z-index: 5;
+  border-radius: 10px;
+  cursor: pointer;
+  line-height: normal;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hero-image-section .hero-image-link:focus-visible {
+  outline: 3px solid #082a63;
+  outline-offset: 3px;
+}
+
+.hero-image-section .hero-market-link {
+  left: 4.25%;
+  top: 64.5%;
+  width: 14.2%;
+  height: 10.5%;
+}
+
+.hero-image-section .hero-portfolio-link {
+  left: 19.4%;
+  top: 64.5%;
+  width: 13.3%;
+  height: 10.5%;
+}
+
+/* Prevent a stray horizontal scrollbar on narrow screens */
+html,
+body {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+@media (max-width: 700px) {
+  .hero-image-section {
+    width: 100%;
+  }
+
+  .hero-image-section .hero-image-link {
+    border-radius: 5px;
+  }
+}
+
