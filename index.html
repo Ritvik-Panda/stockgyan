@@ -1,58 +1,191 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="StockGyan — market insights, portfolio tracking, stock screening and company fundamentals in one place.">
-<meta name="theme-color" content="#082a63">
-<title>StockGyan | Your Market Dashboard</title>
-<link rel="stylesheet" href="styles.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="StockGyan — market insights, portfolio tracking, stock screening and investor education in one place.">
+  <meta name="theme-color" content="#082a63">
+  <title>StockGyan — Your Market & Portfolio Companion</title>
+  <link rel="icon" type="image/png" href="/assets/stockgyan-brand-logo.png">
+  <link rel="stylesheet" href="/styles.css?v=3">
 </head>
 <body>
-<header class="site-header">
-  <div class="header-inner">
-    <a class="brand" href="/" aria-label="StockGyan home"><span class="brand-mark">SG</span><span class="brand-name">Stock<span class="brand-green">Gyan</span></span></a>
-    <button class="menu-toggle" id="menu-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
-    <nav class="main-nav" id="main-nav" aria-label="Main navigation">
-      <a href="/market">Market</a><a href="/portfolio">Portfolio</a><a href="/screener">Screener</a><a href="/screener1">Health Screener</a>
-    </nav>
-  </div>
-</header>
-<main class="page">
-  <section class="welcome">
-    <p class="eyebrow">YOUR INVESTING WORKSPACE</p>
-    <h1>Welcome to StockGyan</h1>
-    <p class="welcome-copy">Market insights, portfolio tracking and stock research — all in one place.</p>
-  </section>
-  <section class="platform-section" aria-labelledby="platform-heading">
-    <div class="section-heading"><div><h2 id="platform-heading">Your StockGyan tools</h2><p>Choose where you want to start.</p></div></div>
-    <div class="tool-grid">
-      <a class="tool-card" href="/market"><span class="tool-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18M7 14l4-4 3 3 6-7M15 6h5v5"/></svg></span><span class="tool-title">Market</span><span class="tool-description">Follow market activity and explore market information.</span><span class="tool-link">Open Market →</span></a>
-      <a class="tool-card" href="/portfolio"><span class="tool-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18M10 12v2h4v-2"/></svg></span><span class="tool-title">My Portfolio</span><span class="tool-description">Review your holdings, performance and portfolio health.</span><span class="tool-link">View Portfolio →</span></a>
-      <a class="tool-card" href="/screener"><span class="tool-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5M7.5 10.5h6M10.5 7.5v6"/></svg></span><span class="tool-title">Stock Screener</span><span class="tool-description">Filter and discover stocks using screening conditions.</span><span class="tool-link">Find Stocks →</span></a>
-      <a class="tool-card" href="/screener1"><span class="tool-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m8.5 12 2.2 2.2 4.8-5"/></svg></span><span class="tool-title">Health Screener</span><span class="tool-description">Explore company fundamentals and business-quality metrics.</span><span class="tool-link">Analyse Quality →</span></a>
+  <div class="announcement">
+    <div class="container announcement-inner">
+      <span><span class="announcement-dot"></span> A clearer way to understand the market</span>
+      <a href="#contact">Talk to StockGyan <span aria-hidden="true">↗</span></a>
     </div>
-  </section>
-  <section class="about-panel" aria-labelledby="about-heading">
-    <div class="about-symbol" aria-hidden="true">SG</div>
-    <div><p class="eyebrow">LEARN. ANALYSE. UNDERSTAND. INVEST.</p><h2 id="about-heading">A clearer way to explore the market.</h2><p>StockGyan brings your market tools and investment research together in one convenient workspace. Use the information to support your own research and understand investment risks.</p></div>
-  </section>
-  <!-- Add future homepage sections here as independent sections. -->
-</main>
-<footer class="site-footer"><div class="footer-inner">
-  <a class="brand footer-brand" href="/" aria-label="StockGyan home"><span class="brand-mark">SG</span><span class="brand-name">Stock<span class="brand-green">Gyan</span></span></a>
-  <p>Learn. Analyse. Understand. Invest.</p>
-  <p class="disclaimer">Educational and informational content only. Investments are subject to market risks. This website does not guarantee returns.</p>
-  <small>© <span id="year"></span> StockGyan.in. All rights reserved.</small>
-</div></footer>
-<script>
-const menuToggle = document.getElementById("menu-toggle");
-const nav = document.getElementById("main-nav");
-menuToggle.addEventListener("click", () => {
-  const isOpen = nav.classList.toggle("is-open");
-  menuToggle.setAttribute("aria-expanded", String(isOpen));
-});
-document.getElementById("year").textContent = new Date().getFullYear();
-</script>
+  </div>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="/" aria-label="StockGyan home">
+        <span class="brand-symbol" aria-hidden="true">SG</span>
+        <span class="brand-word"><span>Stock</span><strong>Gyan</strong><small>.in</small></span>
+      </a>
+
+      <button class="menu-btn" type="button" aria-label="Open navigation" aria-expanded="false">☰</button>
+
+      <nav class="nav" aria-label="Main navigation">
+        <a href="/market">Market</a>
+        <a href="/portfolio">Portfolio</a>
+        <a href="/screener">Stock Screener</a>
+        <a href="/screener1">Health Screener</a>
+        <a class="nav-cta" href="/portfolio">Open Portfolio <span aria-hidden="true">↗</span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-orb orb-one"></div>
+      <div class="hero-orb orb-two"></div>
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="eyebrow-line"></span> YOUR MARKET. YOUR PORTFOLIO. ONE PLACE.</div>
+          <h1>Make sense of the market.<br><span>Move with confidence.</span></h1>
+          <p class="hero-lead">Explore market activity, track your investments and discover stocks with tools designed to make investing easier to understand.</p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="/market">Explore Market <span aria-hidden="true">↗</span></a>
+            <a class="button button-secondary" href="/portfolio"><span class="button-play" aria-hidden="true">▸</span> View My Portfolio</a>
+          </div>
+          <div class="hero-trust">
+            <div class="trust-icon" aria-hidden="true">✓</div>
+            <div><strong>Built for informed decisions</strong><span>Market information, analysis and portfolio visibility together.</span></div>
+          </div>
+        </div>
+
+        <div class="hero-visual" aria-label="Illustration of the StockGyan investing dashboard">
+          <div class="visual-halo"></div>
+          <div class="dashboard-window">
+            <div class="window-top">
+              <div class="window-brand"><span class="mini-mark">SG</span><b>Stock<span>Gyan</span></b></div>
+              <div class="window-dots"><i></i><i></i><i></i></div>
+            </div>
+            <div class="window-body">
+              <div class="window-greeting"><div><small>YOUR INVESTING WORKSPACE</small><h3>Market overview</h3></div><span class="status-pill"><i></i> Dashboard</span></div>
+              <div class="mini-stats">
+                <div class="mini-stat"><span>Market</span><b>Explore</b><small>Indices & movers</small><div class="sparkline spark-green"><i></i></div></div>
+                <div class="mini-stat"><span>Portfolio</span><b>Track</b><small>Holdings & insights</small><div class="sparkline spark-blue"><i></i></div></div>
+              </div>
+              <div class="chart-panel">
+                <div class="chart-heading"><div><b>Market activity</b><small>Illustrative dashboard preview</small></div><span>↗</span></div>
+                <svg class="chart-art" viewBox="0 0 440 118" role="img" aria-label="Decorative upward market trend illustration">
+                  <defs><linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#159447" stop-opacity=".18"/><stop offset="100%" stop-color="#159447" stop-opacity="0"/></linearGradient></defs>
+                  <path d="M0 92H440 M0 60H440 M0 28H440" stroke="#e8edf4" stroke-width="1" stroke-dasharray="4 5" fill="none"/>
+                  <path d="M0 96 L28 86 L53 91 L80 62 L105 70 L132 51 L157 58 L183 37 L207 45 L236 26 L262 43 L288 31 L314 48 L340 22 L365 32 L393 14 L416 24 L440 8 L440 118 L0 118Z" fill="url(#chartFill)"/>
+                  <path d="M0 96 L28 86 L53 91 L80 62 L105 70 L132 51 L157 58 L183 37 L207 45 L236 26 L262 43 L288 31 L314 48 L340 22 L365 32 L393 14 L416 24 L440 8" fill="none" stroke="#159447" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                  <circle cx="440" cy="8" r="4.5" fill="#159447" stroke="#fff" stroke-width="2"/>
+                </svg>
+                <div class="chart-legend"><span><i class="legend-dot green"></i> Market insights</span><span>Connect to explore live data</span></div>
+              </div>
+              <div class="window-shortcuts"><span><i class="shortcut-icon green">↗</i> Market</span><span><i class="shortcut-icon blue">◈</i> Portfolio</span><span><i class="shortcut-icon orange">⌕</i> Screeners</span></div>
+            </div>
+          </div>
+          <div class="floating-note note-top"><span class="note-icon green">✓</span><div><b>One clear view</b><small>Tools for your next step</small></div></div>
+          <div class="floating-note note-bottom"><span class="note-icon blue">◎</span><div><b>Your portfolio</b><small>Holdings in one place</small></div></div>
+          <div class="visual-caption">A smarter workspace for market learners and investors</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="quick-access">
+      <div class="container quick-access-inner">
+        <div class="quick-label"><span class="live-indicator"></span><div><b>EXPLORE STOCKGYAN</b><small>Choose where you want to start</small></div></div>
+        <a class="quick-link" href="/market"><span class="quick-link-icon icon-navy">↗</span><span><b>Market Dashboard</b><small>Explore market activity</small></span><span class="quick-arrow">→</span></a>
+        <a class="quick-link" href="/portfolio"><span class="quick-link-icon icon-green">◈</span><span><b>Portfolio Tracker</b><small>Review your holdings</small></span><span class="quick-arrow">→</span></a>
+        <a class="quick-link" href="/screener"><span class="quick-link-icon icon-orange">⌕</span><span><b>Stock Screener</b><small>Discover stocks</small></span><span class="quick-arrow">→</span></a>
+      </div>
+    </section>
+
+    <section class="section tools-section" id="tools">
+      <div class="container">
+        <div class="section-heading">
+          <div><span class="section-kicker">TOOLS THAT WORK TOGETHER</span><h2>Your investing toolkit,<br><span>all in one place.</span></h2></div>
+          <p>Move from market context to stock discovery to portfolio review — without losing sight of the bigger picture.</p>
+        </div>
+        <div class="tool-grid">
+          <a class="tool-card" href="/market">
+            <div class="tool-card-top"><span class="tool-icon tool-icon-navy">⌁</span><span class="card-arrow">↗</span></div>
+            <span class="tool-number">01 / MARKET</span><h3>Market Dashboard</h3><p>Explore market trends, stock activity and available market insights from one dedicated view.</p><span class="tool-link">Open market <b>→</b></span>
+          </a>
+          <a class="tool-card featured-tool" href="/portfolio">
+            <div class="tool-card-top"><span class="tool-icon tool-icon-green">◈</span><span class="card-arrow">↗</span></div>
+            <span class="tool-number">02 / YOUR INVESTMENTS</span><h3>Portfolio Tracker</h3><p>Bring your holdings together and review portfolio value, performance and available analytics.</p><span class="tool-link">View portfolio <b>→</b></span>
+            <span class="featured-label">YOUR WORKSPACE</span>
+          </a>
+          <a class="tool-card" href="/screener">
+            <div class="tool-card-top"><span class="tool-icon tool-icon-orange">⌕</span><span class="card-arrow">↗</span></div>
+            <span class="tool-number">03 / DISCOVERY</span><h3>Stock Screener</h3><p>Search and filter the stock universe using the data and screening options available.</p><span class="tool-link">Explore stocks <b>→</b></span>
+          </a>
+          <a class="tool-card" href="/screener1">
+            <div class="tool-card-top"><span class="tool-icon tool-icon-blue">◉</span><span class="card-arrow">↗</span></div>
+            <span class="tool-number">04 / FUNDAMENTALS</span><h3>Health Screener</h3><p>Review available company fundamentals to help organise your research process.</p><span class="tool-link">Open health screener <b>→</b></span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section analysis-section" id="analysis">
+      <div class="container analysis-layout">
+        <div class="analysis-copy">
+          <span class="section-kicker">LEARN. ANALYSE. UNDERSTAND.</span>
+          <h2>Better investing starts with <span>better questions.</span></h2>
+          <p>StockGyan brings together market tools and educational resources to help you research thoughtfully, understand risk and make your own informed decisions.</p>
+          <ul class="benefit-list">
+            <li><span>✓</span> See the market in context</li>
+            <li><span>✓</span> Explore companies with a research mindset</li>
+            <li><span>✓</span> Keep your portfolio view close at hand</li>
+          </ul>
+          <a class="button button-primary" href="/market">Explore the platform <span aria-hidden="true">↗</span></a>
+        </div>
+        <div class="analysis-preview" id="featured-stock-analysis">
+          <div class="preview-header"><span class="preview-icon">SG</span><div><small>STOCKGYAN INSIGHTS</small><b>Research with a plan</b></div><span class="preview-tag">EDUCATION</span></div>
+          <div class="preview-illustration">
+            <div class="preview-chart-grid"></div><div class="preview-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            <div class="preview-trend"></div><span class="preview-chart-label">Research • Context • Risk</span>
+          </div>
+          <h3>Make research part of your process.</h3>
+          <p>Explore the market and use StockGyan tools to support your own analysis.</p>
+          <div class="preview-tags"><span>Market context</span><span>Fundamentals</span><span>Risk awareness</span></div>
+          <a href="/screener" class="preview-link">Start exploring <b>→</b></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="closing-cta">
+      <div class="container closing-inner">
+        <div class="closing-mark" aria-hidden="true">SG</div>
+        <div><span class="section-kicker">YOUR NEXT STEP STARTS HERE</span><h2>Know more. See clearly. <span>Invest thoughtfully.</span></h2><p>Open your StockGyan workspace and explore the tools available to you.</p></div>
+        <a class="button button-white" href="/portfolio">Open StockGyan <span aria-hidden="true">↗</span></a>
+      </div>
+    </section>
+
+    <section class="section contact-section" id="contact">
+      <div class="container contact-grid">
+        <div class="contact-copy"><span class="section-kicker">LET'S CONNECT</span><h2>Have a question?</h2><p>Send us an enquiry about StockGyan, market education or the tools available on the platform.</p><div class="contact-assurance"><span>✉</span><div><b>Your enquiry goes to StockGyan</b><small>We will use your details to respond to your request.</small></div></div></div>
+        <form class="contact-form" id="enquiryForm">
+          <label for="enquiryName">Your name</label><input id="enquiryName" name="name" type="text" placeholder="Enter your name" autocomplete="name" required>
+          <label for="enquiryPhone">Mobile number</label><input id="enquiryPhone" name="phone" type="tel" inputmode="tel" placeholder="Enter your mobile number" autocomplete="tel" required>
+          <label for="enquiryType">I'm interested in</label>
+          <select id="enquiryType" name="enquiry_type" required><option value="">Choose a topic</option><option>Stock Market Education</option><option>Stocks</option><option>Mutual Funds / SIP</option><option>IPO / NFO</option><option>StockGyan Tools</option><option>Other</option></select>
+          <button class="button button-primary form-submit" type="submit">Submit enquiry <span aria-hidden="true">→</span></button>
+          <div id="enquiryMsg" class="form-message" aria-live="polite"></div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-main">
+      <div class="footer-brand"><a class="brand brand-footer" href="/"><span class="brand-symbol" aria-hidden="true">SG</span><span class="brand-word"><span>Stock</span><strong>Gyan</strong><small>.in</small></span></a><p>Learn. Analyse. Understand. Invest.</p></div>
+      <div class="footer-column"><b>Explore</b><a href="/market">Market Dashboard</a><a href="/portfolio">Portfolio Tracker</a><a href="/screener">Stock Screener</a><a href="/screener1">Health Screener</a></div>
+      <div class="footer-column"><b>Connect</b><a href="#contact">Contact StockGyan</a><a href="/admin">Admin</a></div>
+    </div>
+    <div class="container footer-bottom"><p>Educational and informational purposes only. Market data may be delayed or unavailable at times. Investments are subject to market risks; this website does not guarantee returns.</p><span>© 2026 StockGyan.in. All rights reserved.</span></div>
+  </footer>
+
+  <script src="/script.js?v=3"></script>
+
 </body>
 </html>
