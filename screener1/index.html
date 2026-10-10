@@ -422,6 +422,7 @@ tr:hover td{
       <button type="button" class="preset-btn" data-preset="growth">Growth</button>
       <button type="button" class="preset-btn" data-preset="lowDebt">Low Debt</button>
       <button type="button" class="preset-btn" data-preset="qualityGrowth">Quality + Growth</button>
+      <button type="button" class="preset-btn" data-preset="piotroski">Piotroski F-Score &gt; 7</button>
     </div>
     <div class="filter-grid">
       <label class="filter-field">Analysis View
@@ -564,6 +565,8 @@ tr:hover td{
 
             <th>Growth Score</th>
 
+            <th>Piotroski F-Score</th>
+
             <th>Business Quality</th>
 
             <th>ROCE</th>
@@ -588,7 +591,7 @@ tr:hover td{
 
           <tr>
             <td
-              colspan="14"
+              colspan="15"
               class="empty"
             >
               Loading NSE universe...
@@ -853,6 +856,10 @@ async function loadHealthData(){
 
       earningsGrowth: num(row.earnings_growth),
 
+      // Read only if the existing API payload already contains a Piotroski score.
+      // This does not trigger another request or calculate a score from unrelated metrics.
+      piotroskiScore: num(row.piotroski_score ?? row.piotroskiScore ?? row.piotroski_f_score ?? row.f_score),
+
       financialScore: null,
 
       debtEquity: num(row.debt_equity),
@@ -973,6 +980,8 @@ function getFilteredData(){
     if(!withinRange(row.earningsGrowth,mins.growth,maxs.growth)) return false;
     if(maxs.debt!==null && (!Number.isFinite(row.debtEquity) || row.debtEquity>maxs.debt)) return false;
 
+    if(activePreset==="piotroski" && (!Number.isFinite(row.piotroskiScore) || row.piotroskiScore <= 7)) return false;
+
     if(view==="quality" && !Number.isFinite(qualityScore(row))) return false;
     if(view==="value" && !Number.isFinite(valueScore(row))) return false;
     if(view==="growth" && !Number.isFinite(growthScore(row))) return false;
@@ -1072,7 +1081,7 @@ function renderTable(){
   if(!rows.length){
     tbody.innerHTML = `
       <tr>
-        <td colspan="14" class="empty">
+        <td colspan="15" class="empty">
           ${
             healthData.length
               ? "No stocks match the current filters."
@@ -1154,6 +1163,8 @@ function renderTable(){
         <td><span class="score ${scoreClass(valueScore(row))}">${formatNumber(valueScore(row))}</span></td>
 
         <td><span class="score ${scoreClass(growthScore(row))}">${formatNumber(growthScore(row))}</span></td>
+
+        <td>${Number.isFinite(row.piotroskiScore) ? '<span class="score '+scoreClass(row.piotroskiScore/9*100)+'">'+formatNumber(row.piotroskiScore,0)+'/9</span>' : "—"}</td>
 
         <td>
           ${businessText}
@@ -1246,14 +1257,21 @@ function setPreset(name){
     document.getElementById("minGrowth").value="10";
     document.getElementById("minHealth").value="60";
     document.getElementById("sortBy").value="viewScoreDesc";
+  }else if(name==="piotroski"){
+    document.getElementById("sortBy").value="healthDesc";
   }
   document.querySelectorAll("[data-preset]").forEach(btn=>btn.classList.toggle("active",btn.dataset.preset===name));
   updateViewNote();updateStats();renderTable();
+  if(name==="piotroski" && !healthData.some(r=>Number.isFinite(r.piotroskiScore))){
+    document.getElementById("status").textContent="Piotroski scan added, but no Piotroski score is present in the existing API payload. No new API calls or D1 reads were added.";
+  }
 }
 function updateViewNote(){
   const view=document.getElementById("analysisView").value;
   const notes={all:"All Metrics: sorted by the existing Health Score by default.",quality:"Quality View: supplementary score based on available ROCE, ROE and Business Quality. Missing metrics are excluded from the component average.",value:"Value View: illustrative P/E-only score; it is not sector-adjusted and does not establish fair value.",growth:"Growth View: illustrative score based on stored year-on-year earnings growth; it is not a forecast."};
-  document.getElementById("viewNote").textContent=notes[view]+" Existing backend Health Score methodology is unchanged.";
+  const piotroskiAvailable=healthData.filter(r=>Number.isFinite(r.piotroskiScore)).length;
+  const piotroskiNote=activePreset==="piotroski" ? (piotroskiAvailable ? ` Piotroski scan active: ${piotroskiAvailable.toLocaleString()} records contain a stored score; showing scores greater than 7.` : " Piotroski scan selected, but the existing API response contains no Piotroski score field. No scores are fabricated; the backend/API must expose a stored score before this scan can return results.") : "";
+  document.getElementById("viewNote").textContent=notes[view]+" Existing backend Health Score methodology is unchanged."+piotroskiNote;
 }
 function csvCell(value){
   let s=String(value??"");
@@ -1263,8 +1281,8 @@ function csvCell(value){
 function exportFilteredCSV(){
   const rows=getFilteredData();
   if(!rows.length){document.getElementById("status").textContent="No filtered stocks to export.";return;}
-  const headers=["Symbol","Company","Health Score","Quality Score (heuristic)","Value Score (P/E heuristic)","Growth Score (heuristic)","Business Quality","ROCE (%)","ROE (%)","P/E","Earnings Growth (%)","Debt/Equity","Profitability (%)","Data Status","Available Metrics","Updated At"];
-  const lines=[headers,...rows.map(r=>[r.symbol,r.name,r.healthScore,qualityScore(r),valueScore(r),growthScore(r),r.businessQuality,r.roce,r.roe,r.pe,r.earningsGrowth,r.debtEquity,r.profitability,r.dataStatus,r.availableMetrics,r.updatedAt])];
+  const headers=["Symbol","Company","Health Score","Quality Score (heuristic)","Value Score (P/E heuristic)","Growth Score (heuristic)","Piotroski F-Score","Business Quality","ROCE (%)","ROE (%)","P/E","Earnings Growth (%)","Debt/Equity","Profitability (%)","Data Status","Available Metrics","Updated At"];
+  const lines=[headers,...rows.map(r=>[r.symbol,r.name,r.healthScore,qualityScore(r),valueScore(r),growthScore(r),r.piotroskiScore,r.businessQuality,r.roce,r.roe,r.pe,r.earningsGrowth,r.debtEquity,r.profitability,r.dataStatus,r.availableMetrics,r.updatedAt])];
   const csv="\uFEFF"+lines.map(row=>row.map(csvCell).join(",")).join("\r\n");
   const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});
   const url=URL.createObjectURL(blob);const a=document.createElement("a");
