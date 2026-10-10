@@ -40,63 +40,26 @@
   </header>
 
   <main>
-    <section class="hero">
-      <div class="hero-orb orb-one"></div>
-      <div class="hero-orb orb-two"></div>
-      <div class="container hero-grid">
-        <div class="hero-copy">
-          <div class="eyebrow"><span class="eyebrow-line"></span> YOUR MARKET. YOUR PORTFOLIO. ONE PLACE.</div>
-          <h1>Make sense of the market.<br><span>Move with confidence.</span></h1>
-          <p class="hero-lead">Explore market activity, track your investments and discover stocks with tools designed to make investing easier to understand.</p>
-          <div class="hero-actions">
-            <a class="button button-primary" href="/market">Explore Market <span aria-hidden="true">↗</span></a>
-            <a class="button button-secondary" href="/portfolio"><span class="button-play" aria-hidden="true">▸</span> View My Portfolio</a>
-          </div>
-          <div class="hero-trust">
-            <div class="trust-icon" aria-hidden="true">✓</div>
-            <div><strong>Built for informed decisions</strong><span>Market information, analysis and portfolio visibility together.</span></div>
-          </div>
-        </div>
-
-        <div class="hero-visual" aria-label="Illustration of the StockGyan investing dashboard">
-          <div class="visual-halo"></div>
-          <div class="dashboard-window">
-            <div class="window-top">
-              <div class="window-brand"><span class="mini-mark">SG</span><b>Stock<span>Gyan</span></b></div>
-              <div class="window-dots"><i></i><i></i><i></i></div>
-            </div>
-            <div class="window-body">
-              <div class="window-greeting"><div><small>YOUR INVESTING WORKSPACE</small><h3>Market overview</h3></div><span class="status-pill"><i></i> Dashboard</span></div>
-              <div class="mini-stats">
-                <div class="mini-stat"><span>Market</span><b>Explore</b><small>Indices & movers</small><div class="sparkline spark-green"><i></i></div></div>
-                <div class="mini-stat"><span>Portfolio</span><b>Track</b><small>Holdings & insights</small><div class="sparkline spark-blue"><i></i></div></div>
-              </div>
-              <div class="chart-panel">
-                <div class="chart-heading"><div><b>Market activity</b><small>Illustrative dashboard preview</small></div><span>↗</span></div>
-                <svg class="chart-art" viewBox="0 0 440 118" role="img" aria-label="Decorative upward market trend illustration">
-                  <defs><linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#159447" stop-opacity=".18"/><stop offset="100%" stop-color="#159447" stop-opacity="0"/></linearGradient></defs>
-                  <path d="M0 92H440 M0 60H440 M0 28H440" stroke="#e8edf4" stroke-width="1" stroke-dasharray="4 5" fill="none"/>
-                  <path d="M0 96 L28 86 L53 91 L80 62 L105 70 L132 51 L157 58 L183 37 L207 45 L236 26 L262 43 L288 31 L314 48 L340 22 L365 32 L393 14 L416 24 L440 8 L440 118 L0 118Z" fill="url(#chartFill)"/>
-                  <path d="M0 96 L28 86 L53 91 L80 62 L105 70 L132 51 L157 58 L183 37 L207 45 L236 26 L262 43 L288 31 L314 48 L340 22 L365 32 L393 14 L416 24 L440 8" fill="none" stroke="#159447" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                  <circle cx="440" cy="8" r="4.5" fill="#159447" stroke="#fff" stroke-width="2"/>
-                </svg>
-                <div class="chart-legend"><span><i class="legend-dot green"></i> Market insights</span><span>Connect to explore live data</span></div>
-              </div>
-              <div class="window-shortcuts"><span><i class="shortcut-icon green">↗</i> Market</span><span><i class="shortcut-icon blue">◈</i> Portfolio</span><span><i class="shortcut-icon orange">⌕</i> Screeners</span></div>
-            </div>
-          </div>
-          <div class="floating-note note-top"><span class="note-icon green">✓</span><div><b>One clear view</b><small>Tools for your next step</small></div></div>
-          <div class="floating-note note-bottom"><span class="note-icon blue">◎</span><div><b>Your portfolio</b><small>Holdings in one place</small></div></div>
-          <div class="visual-caption">A smarter workspace for market learners and investors</div>
-        </div>
-        <aside class="signup-card" aria-label="Start your StockGyan journey">
-          <h2>Start Your Journey<br>with StockGyan</h2>
-          <div class="signup-tabs"><span class="selected">Sign Up</span><a href="/portfolio">Login</a></div>
-          <p>Explore market tools and bring your investing workspace together.</p>
-          <a class="button button-primary signup-button" href="/portfolio">Create Account <span aria-hidden="true">→</span></a>
-          <small>Already have an account? <a href="/portfolio">Login</a></small>
-        </aside>
-      </div>
+    <section class="hero-image-section" aria-label="StockGyan market and portfolio companion">
+      <img
+        src="/assets/image.PNG"
+        alt="Your Personal Stock Market Companion — StockGyan"
+        class="hero-banner-image"
+        fetchpriority="high"
+        decoding="async"
+      />
+      <a
+        class="hero-image-link hero-market-link"
+        href="/market"
+        aria-label="Explore Market"
+        title="Explore Market"
+      ></a>
+      <a
+        class="hero-image-link hero-portfolio-link"
+        href="/portfolio"
+        aria-label="View My Portfolio"
+        title="View My Portfolio"
+      ></a>
     </section>
 
     <section class="market-today">
