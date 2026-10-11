@@ -61,6 +61,91 @@
     @media (max-width:900px) {
       .hero-signup-layout .hero-left-column .market-today .market-today-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
     }
+
+    /* Portfolio Intelligence panel replacing Featured Stock Analysis */
+    .portfolio-intelligence-panel {
+      padding: 26px;
+      border: 1px solid #dbe7f5;
+      border-radius: 22px;
+      background: linear-gradient(145deg, #ffffff 0%, #f1f8ff 100%);
+      box-shadow: 0 16px 38px rgba(8, 42, 99, 0.08);
+    }
+    .portfolio-intelligence-panel h3 {
+      margin: 22px 0 8px;
+      color: #082a63;
+      font-size: clamp(21px, 2vw, 28px);
+      line-height: 1.2;
+    }
+    .portfolio-intelligence-panel > p {
+      margin: 0 0 18px;
+      color: #64748b;
+      line-height: 1.55;
+    }
+    .portfolio-intelligence-features {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 18px 0 22px;
+    }
+    .portfolio-intelligence-feature {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      min-width: 0;
+      padding: 12px;
+      border: 1px solid #e2edf8;
+      border-radius: 13px;
+      background: rgba(255,255,255,.88);
+    }
+    .portfolio-intelligence-feature:last-child {
+      grid-column: 1 / -1;
+    }
+    .pi-feature-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 34px;
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      color: #159447;
+      background: #e7f8ef;
+      font-size: 22px;
+      font-weight: 700;
+    }
+    .portfolio-intelligence-feature b,
+    .portfolio-intelligence-feature small {
+      display: block;
+    }
+    .portfolio-intelligence-feature b {
+      color: #082a63;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+    .portfolio-intelligence-feature small {
+      margin-top: 3px;
+      color: #64748b;
+      font-size: 11px;
+      line-height: 1.4;
+    }
+    .portfolio-intelligence-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    @media (max-width: 640px) {
+      .portfolio-intelligence-panel {
+        padding: 18px;
+      }
+      .portfolio-intelligence-features {
+        grid-template-columns: 1fr;
+      }
+      .portfolio-intelligence-feature:last-child {
+        grid-column: auto;
+      }
+    }
+
   </style>
 </head>
 
@@ -424,40 +509,47 @@
           </a>
         </div>
 
-        <div class="analysis-preview" id="featured-stock-analysis">
+        <div class="analysis-preview portfolio-intelligence-panel" id="portfolio-intelligence">
           <div class="preview-header">
             <span class="preview-icon">SG</span>
             <div>
-              <small>STOCKGYAN INSIGHTS</small>
-              <b>Research with a plan</b>
+              <small>YOUR PORTFOLIO, IN FOCUS</small>
+              <b>Portfolio Intelligence</b>
             </div>
-            <span class="preview-tag">EDUCATION</span>
+            <span class="preview-tag">STOCKGYAN</span>
           </div>
 
-          <div class="preview-illustration">
-            <div class="preview-chart-grid"></div>
-            <div class="preview-bars">
-              <i></i><i></i><i></i><i></i><i></i>
-              <i></i><i></i><i></i><i></i>
-            </div>
-            <div class="preview-trend"></div>
-            <span class="preview-chart-label">Research • Context • Risk</span>
-          </div>
-
-          <h3>Make research part of your process.</h3>
+          <h3>Understand every holding. See the bigger picture.</h3>
           <p>
-            Explore the market and use StockGyan tools to support
-            your own analysis.
+            Bring your portfolios, stock trends, analytics, fundamentals and
+            company news together in one clear view.
           </p>
 
-          <div class="preview-tags">
-            <span>Market context</span>
-            <span>Fundamentals</span>
-            <span>Risk awareness</span>
+          <div class="portfolio-intelligence-features">
+            <div class="portfolio-intelligence-feature">
+              <span class="pi-feature-icon">▱</span>
+              <span><b>Multiple portfolios</b><small>Keep different portfolios organised</small></span>
+            </div>
+            <div class="portfolio-intelligence-feature">
+              <span class="pi-feature-icon">↗</span>
+              <span><b>Stock trend tracking</b><small>Review trends and technical signals</small></span>
+            </div>
+            <div class="portfolio-intelligence-feature">
+              <span class="pi-feature-icon">◔</span>
+              <span><b>Portfolio analytics</b><small>Understand returns and allocation</small></span>
+            </div>
+            <div class="portfolio-intelligence-feature">
+              <span class="pi-feature-icon">✓</span>
+              <span><b>Fundamental quality</b><small>Explore valuation and business metrics</small></span>
+            </div>
+            <div class="portfolio-intelligence-feature">
+              <span class="pi-feature-icon">▤</span>
+              <span><b>News on your holdings</b><small>Follow news related to your stocks</small></span>
+            </div>
           </div>
 
-          <a href="/screener" class="preview-link">
-            Start exploring <b>→</b>
+          <a href="/portfolio" class="button button-primary portfolio-intelligence-cta">
+            Explore Your Portfolio <span aria-hidden="true">↗</span>
           </a>
         </div>
 
