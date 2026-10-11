@@ -344,3 +344,13 @@ async function loadHomepageMarketToday() {
 
 loadPublishedStockAnalysis();
 loadHomepageMarketToday();
+
+/* Market Today: force correct positive/negative colors */
+.market-today .market-tile span.up {
+  color: #159447 !important;
+}
+
+.market-today .market-tile span.down {
+  color: #d64545 !important;
+}
+
