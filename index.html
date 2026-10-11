@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#082a63">
   <title>StockGyan — Your Market & Portfolio Companion</title>
   <link rel="icon" type="image/png" href="/assets/stockgyan-brand-logo.png">
-  <link rel="stylesheet" href="/styles.css?v=3">
+  <link rel="stylesheet" href="/styles.css?v=4">
 </head>
 <body>
   <div class="announcement">
@@ -40,26 +40,36 @@
   </header>
 
   <main>
-    <section class="hero-image-section" aria-label="StockGyan market and portfolio companion">
-      <img
-        src="/assets/image.PNG.png"
-        alt="Your Personal Stock Market Companion — StockGyan"
-        class="hero-banner-image"
-        fetchpriority="high"
-        decoding="async"
-      />
-      <a
-        class="hero-image-link hero-market-link"
-        href="/market"
-        aria-label="Explore Market"
-        title="Explore Market"
-      ></a>
-      <a
-        class="hero-image-link hero-portfolio-link"
-        href="/portfolio"
-        aria-label="View My Portfolio"
-        title="View My Portfolio"
-      ></a>
+    <section class="hero-image-section hero-signup-layout" aria-label="StockGyan market and portfolio companion">
+      <div class="hero-banner-wrap">
+        <img
+          src="/assets/image.PNG.png"
+          alt="Your Personal Stock Market Companion — StockGyan"
+          class="hero-banner-image"
+          fetchpriority="high"
+          decoding="async"
+        />
+        <a class="hero-image-link hero-market-link" href="/market" aria-label="Explore Market" title="Explore Market"></a>
+        <a class="hero-image-link hero-portfolio-link" href="/portfolio" aria-label="View My Portfolio" title="View My Portfolio"></a>
+      </div>
+
+      <aside class="hero-signup-card" aria-labelledby="heroSignupTitle">
+        <h2 id="heroSignupTitle">Start Your Journey<br>with StockGyan</h2>
+        <div class="hero-signup-tabs" aria-label="Account options">
+          <span class="is-active" aria-current="page">Sign Up</span>
+          <a href="/portfolio">Login</a>
+        </div>
+        <form class="hero-signup-form" onsubmit="event.preventDefault(); window.location.href='/portfolio';">
+          <label class="visually-hidden" for="heroFullName">Full Name</label>
+          <input id="heroFullName" name="name" type="text" placeholder="♙  Full Name" autocomplete="name" required>
+          <label class="visually-hidden" for="heroMobile">Mobile Number</label>
+          <input id="heroMobile" name="mobile" type="tel" inputmode="tel" placeholder="♧  Mobile Number" autocomplete="tel" required>
+          <label class="visually-hidden" for="heroEmail">Email Address</label>
+          <input id="heroEmail" name="email" type="email" placeholder="✉  Email Address" autocomplete="email" required>
+          <button type="submit" class="hero-signup-submit">Create Account</button>
+        </form>
+        <small>Already have an account? <a href="/portfolio">Login</a></small>
+      </aside>
     </section>
 
     <section class="market-today">
