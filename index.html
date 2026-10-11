@@ -1,5 +1,7 @@
 
-<!doctype html>
+<!doctype 
+
+      </div><!-- /.hero-left-column -->html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -47,6 +49,17 @@
         width: 100%;
         height: auto;
       }
+    }
+
+    /* Market Today cards sit above the banner in the hero's left column */
+    .hero-signup-layout .hero-left-column { min-width:0; display:flex; flex-direction:column; gap:12px; }
+    .hero-signup-layout .hero-left-column .market-today { width:100%; margin:0; padding:0; background:transparent; border:0; }
+    .hero-signup-layout .hero-left-column .market-today .container { width:100%; max-width:none; padding-left:0; padding-right:0; }
+    .hero-signup-layout .hero-left-column .market-today .market-today-head { margin-bottom:10px; }
+    .hero-signup-layout .hero-left-column .market-today .market-today-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; }
+    .hero-signup-layout .hero-left-column .market-today .market-tile { min-width:0; }
+    @media (max-width:900px) {
+      .hero-signup-layout .hero-left-column .market-today .market-today-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
     }
   </style>
 </head>
@@ -100,6 +113,14 @@
 
   <main>
 
+    <!-- Hero banner and registration -->
+    <section
+      class="hero-image-section hero-signup-layout"
+      aria-label="StockGyan market and portfolio companion"
+    >
+
+      <div class="hero-left-column">
+
     <!-- Market today -->
     <section class="market-today">
       <div class="container">
@@ -148,13 +169,6 @@
         </div>
       </div>
     </section>
-
-
-    <!-- Hero banner and registration -->
-    <section
-      class="hero-image-section hero-signup-layout"
-      aria-label="StockGyan market and portfolio companion"
-    >
 
       <div class="hero-banner-wrap">
 
