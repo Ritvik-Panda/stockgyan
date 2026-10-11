@@ -209,20 +209,36 @@ main > .hero-image-section.hero-signup-layout > .hero-signup-card {
 }
 
 
-/* StockGyan homepage refinement: use the learning section's full width after removing the preview card. */
-.analysis-layout-single {
-  grid-template-columns: minmax(0, 1fr) !important;
-  gap: 0 !important;
-}
-.analysis-layout-single .analysis-copy {
-  max-width: 820px;
-}
-.analysis-layout-single .analysis-copy h2,
-.analysis-layout-single .analysis-copy > p {
-  max-width: 760px;
-}
-@media (min-width: 701px) {
-  .analysis-layout-single .analysis-copy {
-    padding-block: 8px;
-  }
-}
+/* Public homepage: registration is opened in a right-side drawer, not embedded in the hero. */
+.hero-grid{grid-template-columns:minmax(0,1fr) minmax(330px,1fr)}
+.hero-signup-layout{display:block!important;grid-template-columns:none!important}
+.hero-signup-layout .hero-banner-wrap{width:100%;max-width:none}
+.nav .nav-cta{font:inherit;border:0;border-radius:9px;cursor:pointer}
+.register-backdrop{position:fixed;inset:0;z-index:100;background:rgba(5,20,45,.52);backdrop-filter:blur(2px)}
+.register-backdrop[hidden]{display:none}
+.register-drawer{position:fixed;z-index:101;top:0;right:0;width:min(460px,100%);height:100dvh;overflow-y:auto;background:#fff;padding:30px;box-shadow:-18px 0 55px rgba(8,42,99,.2);transform:translateX(105%);visibility:hidden;transition:transform .25s ease,visibility .25s;display:flex;flex-direction:column}
+.register-drawer.is-open{transform:translateX(0);visibility:visible}
+.register-drawer-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding-bottom:22px;border-bottom:1px solid var(--line);margin-bottom:24px}
+.register-drawer-head h2{margin:6px 0;color:var(--navy);font-size:28px;line-height:1.15;letter-spacing:-.7px}
+.register-drawer-head p{margin:8px 0 0;color:var(--muted);font-size:13px}
+.register-close{width:38px;height:38px;flex:0 0 38px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--navy);font-size:25px;line-height:1;cursor:pointer}
+.register-form{display:flex;flex-direction:column;gap:8px}
+.register-form label{margin-top:7px;color:var(--navy);font-size:12px;font-weight:750}
+.register-form input{width:100%;height:48px;padding:0 13px;border:1px solid #d8e2ee;border-radius:10px;outline:none;background:#fff;color:var(--ink)}
+.register-form input:focus{border-color:var(--green);box-shadow:0 0 0 3px #15944718}
+.register-submit{width:100%;border:0;cursor:pointer;margin-top:12px}
+.register-submit:disabled{opacity:.65;cursor:wait}
+.register-privacy{font-size:11px;color:var(--muted);line-height:1.5;margin:8px 0 0}
+.register-message{display:none;margin-top:8px;padding:11px 12px;border-radius:9px;font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+.register-message.is-visible{display:block}
+.register-message.error{background:#fff1f0;color:#b42318;border:1px solid #fecdca}
+.register-message.success{background:#ecfdf3;color:#067647;border:1px solid #abefc6}
+.register-otp-intro{font-size:13px;color:var(--muted);line-height:1.6;margin:0 0 15px}
+.register-otp-intro strong{color:var(--navy);overflow-wrap:anywhere}
+.register-text-button{margin-top:10px;border:0;background:transparent;color:var(--navy);font-size:12px;font-weight:750;cursor:pointer;padding:10px}
+.register-drawer-foot{margin-top:auto;padding-top:25px;color:var(--muted);font-size:12px}
+.register-drawer-foot a{color:var(--green);font-weight:800}
+body.register-panel-open{overflow:hidden}
+@media(max-width:1120px){.hero-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.signup-card{display:none!important}}
+@media(max-width:700px){.hero-grid{grid-template-columns:1fr}.register-drawer{padding:23px 20px}.register-drawer-head h2{font-size:25px}}
+@media(prefers-reduced-motion:reduce){.register-drawer{transition:none}}
