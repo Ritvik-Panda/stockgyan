@@ -242,3 +242,134 @@ body.register-panel-open{overflow:hidden}
 @media(max-width:1120px){.hero-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.signup-card{display:none!important}}
 @media(max-width:700px){.hero-grid{grid-template-columns:1fr}.register-drawer{padding:23px 20px}.register-drawer-head h2{font-size:25px}}
 @media(prefers-reduced-motion:reduce){.register-drawer{transition:none}}
+
+/* StockGyan homepage: show the real, working registration form beside the hero image */
+main > .hero-image-section.hero-signup-layout {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(330px, 380px) !important;
+  align-items: center;
+  gap: clamp(18px, 2.2vw, 32px);
+  width: 100% !important;
+  max-width: 1500px;
+  margin-inline: auto !important;
+  padding: 10px clamp(18px, 3.2vw, 48px) !important;
+  background: linear-gradient(110deg, #f5f9ff 0%, #eefaf7 100%);
+  line-height: normal;
+  overflow: visible;
+}
+main > .hero-image-section.hero-signup-layout > .hero-banner-wrap {
+  min-width: 0;
+  width: 100%;
+  align-self: center;
+}
+main > .hero-image-section.hero-signup-layout .hero-banner-image {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  max-width: 100% !important;
+  object-fit: contain;
+}
+main > .hero-image-section.hero-signup-layout > .hero-signup-card {
+  position: relative;
+  inset: auto;
+  transform: none;
+  visibility: visible;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  max-width: 380px;
+  max-height: none;
+  align-self: center;
+  justify-self: end;
+  overflow: visible;
+  padding: clamp(20px, 2vw, 30px);
+  border: 1px solid #e0e8f2;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 12px 34px rgba(8,42,99,.10);
+}
+.hero-register-head {
+  display: block;
+  padding: 0 0 18px;
+  margin: 0 0 18px;
+  border-bottom: 1px solid var(--line);
+}
+.hero-register-head h2 {
+  margin: 6px 0 0;
+  color: var(--navy);
+  font-size: clamp(23px, 2vw, 28px);
+  line-height: 1.15;
+  letter-spacing: -.7px;
+}
+.hero-register-head p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+.hero-signup-card .register-form { gap: 7px; }
+.hero-signup-card .register-form label {
+  margin-top: 7px;
+  color: var(--navy);
+  font-size: 12px;
+  font-weight: 750;
+}
+.hero-signup-card .register-form input {
+  width: 100%;
+  height: 46px;
+  padding: 0 13px;
+  border: 1px solid #d8e2ee;
+  border-radius: 10px;
+  outline: none;
+  background: #fff;
+  color: var(--ink);
+  font-size: 14px;
+}
+.hero-signup-card .register-form input:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px #15944718;
+}
+.hero-signup-card .register-submit {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 10px;
+  border: 0;
+  cursor: pointer;
+}
+.hero-signup-card .register-privacy {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
+.hero-signup-card .register-drawer-foot {
+  margin-top: 22px;
+  padding-top: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+@media (max-width: 900px) and (min-width: 701px) {
+  main > .hero-image-section.hero-signup-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(290px, 330px) !important;
+    gap: 14px;
+    padding-inline: 2% !important;
+  }
+  main > .hero-image-section.hero-signup-layout > .hero-signup-card {
+    padding: 18px;
+  }
+  .hero-signup-card .register-form input { height: 42px; }
+}
+@media (max-width: 700px) {
+  main > .hero-image-section.hero-signup-layout {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 12px;
+    padding: 10px 4% 18px !important;
+  }
+  main > .hero-image-section.hero-signup-layout > .hero-signup-card {
+    width: 100%;
+    max-width: 460px;
+    justify-self: center;
+    padding: 22px 18px;
+  }
+  .hero-signup-card .register-form input { height: 44px; }
+}
