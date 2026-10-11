@@ -62,6 +62,7 @@ main{flex:1;padding:24px;min-width:0}.page-title{display:flex;justify-content:sp
 <aside>
   <button class="navbtn active" data-page="dashboard">📊 Dashboard</button>
   <button class="navbtn" data-page="enquiries">📩 Enquiries</button>
+  <button class="navbtn" data-page="customers">👥 Customers</button>
   <button class="navbtn" data-page="content">📝 Content</button>
   <button class="navbtn" data-page="add">➕ Add Content</button>
 </aside>
@@ -181,6 +182,96 @@ async function loadEnquiries(){
  }catch(e){
    body.innerHTML='<tr><td colspan="7"><div class="error">'+escapeHtml(e.message)+'</div></td></tr>';
  }
+}
+
+
+async function customersPage(){
+  main.innerHTML=`
+  <div class="page-title"><h1>👥 Customers</h1><div class="actions">
+    <button class="btn light" id="exportCustomers">Export CSV</button>
+    <button class="btn green" id="refreshCustomers">↻ Refresh</button>
+  </div></div>
+  <div id="customerMsg" class="muted" style="margin-bottom:12px"></div>
+  <div class="cards">
+    <div class="stat"><div class="muted">Total Customers</div><div class="num" id="customerTotal">—</div></div>
+    <div class="stat"><div class="muted">Registered Today</div><div class="num" id="customerToday">—</div></div>
+    <div class="stat"><div class="muted">Registered This Month</div><div class="num" id="customerMonth">—</div></div>
+  </div>
+  <div class="panel" style="margin-top:18px">
+    <div class="field"><label for="customerSearch">Search customers</label><input id="customerSearch" placeholder="Search name, mobile or email"></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Name</th><th>Mobile</th><th>Email</th><th>Mobile Verified</th><th>Registered</th></tr></thead>
+      <tbody id="customerBody"><tr><td colspan="5">Loading customers…</td></tr></tbody>
+    </table></div>
+  </div>`;
+  $('refreshCustomers').onclick=loadCustomers;
+  $('exportCustomers').onclick=exportCustomersCsv;
+  $('customerSearch').oninput=renderCustomers;
+  await loadCustomers();
+}
+
+let cachedCustomers=[];
+async function loadCustomers(){
+  const body=$('customerBody');
+  if(!body)return;
+  body.innerHTML='<tr><td colspan="5">Loading customers…</td></tr>';
+  $('customerMsg').textContent='';
+  try{
+    const data=await api('/api/admin/customers?ts='+Date.now());
+    cachedCustomers=Array.isArray(data.customers)?data.customers:[];
+    $('customerTotal').textContent=data.stats?.total ?? cachedCustomers.length;
+    $('customerToday').textContent=data.stats?.today ?? '—';
+    $('customerMonth').textContent=data.stats?.this_month ?? '—';
+    $('customerMsg').textContent=`Showing ${cachedCustomers.length} registered customer(s).`;
+    renderCustomers();
+  }catch(e){
+    cachedCustomers=[];
+    body.innerHTML='<tr><td colspan="5"><div class="error">'+escapeHtml(e.message)+'</div></td></tr>';
+    $('customerMsg').textContent='Could not load customers. Confirm that /api/admin/customers is deployed.';
+  }
+}
+
+function renderCustomers(){
+  const body=$('customerBody');
+  if(!body)return;
+  const q=($('customerSearch')?.value||'').trim().toLowerCase();
+  const rows=cachedCustomers.filter(x=>
+    [x.full_name,x.mobile,x.email].some(v=>String(v||'').toLowerCase().includes(q))
+  );
+  if(!rows.length){
+    body.innerHTML='<tr><td colspan="5">No matching customers found.</td></tr>';
+    return;
+  }
+  body.innerHTML=rows.map(x=>{
+    const stamp=Number(x.created_at);
+    const registered=stamp ? new Date(stamp).toLocaleString() : (x.created_at||'—');
+    const verified=Number(x.mobile_verified)===1?'Yes':'No';
+    return `<tr>
+      <td><b>${escapeHtml(x.full_name||'—')}</b></td>
+      <td>${escapeHtml(x.mobile||'—')}</td>
+      <td>${escapeHtml(x.email||'—')}</td>
+      <td><span class="badge" style="${verified==='Yes'?'':'background:#fff0e8;color:#9a3412'}">${verified}</span></td>
+      <td>${escapeHtml(registered)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function exportCustomersCsv(){
+  const q=($('customerSearch')?.value||'').trim().toLowerCase();
+  const rows=cachedCustomers.filter(x=>
+    [x.full_name,x.mobile,x.email].some(v=>String(v||'').toLowerCase().includes(q))
+  );
+  if(!rows.length){$('customerMsg').textContent='No customers to export.';return;}
+  const fields=['full_name','mobile','email','mobile_verified','created_at'];
+  const csv=[fields.join(','),...rows.map(x=>fields.map(k=>{
+    let v=x[k]??'';
+    if(k==='created_at'&&Number(v))v=new Date(Number(v)).toLocaleString();
+    return '"'+String(v).replace(/"/g,'""')+'"';
+  }).join(','))].join('\r\n');
+  const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='stockgyan-customers.csv';
+  document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
 }
 
 async function contentPage(){
