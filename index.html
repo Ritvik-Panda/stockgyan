@@ -147,7 +147,11 @@
     }
 
 
-    /* Portfolio Intelligence visual */
+    /* Portfolio Intelligence image — full width */
+    .portfolio-intelligence-full {
+      padding: 24px 0 36px;
+      background: #f5f9ff;
+    }
     .portfolio-intelligence-image-wrap {
       width: 100%;
       min-width: 0;
@@ -164,12 +168,22 @@
       object-fit: contain;
       border-radius: 20px;
     }
+    .portfolio-intelligence-image-full {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      object-fit: contain;
+      border-radius: 18px;
+      box-shadow: 0 16px 40px rgba(8, 42, 99, 0.08);
+    }
     @media (max-width: 768px) {
+      .portfolio-intelligence-full {
+        padding: 16px 0 24px;
+      }
       .portfolio-intelligence-image-wrap {
         margin-top: 22px;
       }
     }
-
   </style>
 </head>
 
@@ -509,40 +523,16 @@
       </div>
     </section>
 
-    <!-- Education -->
-    <section class="section analysis-section" id="analysis">
-      <div class="container analysis-layout">
-
-        <div class="analysis-copy">
-          <span class="section-kicker">LEARN. ANALYSE. UNDERSTAND.</span>
-          <h2>Better investing starts with <span>better questions.</span></h2>
-          <p>
-            StockGyan brings together market tools and educational resources
-            to help you research thoughtfully, understand risk and make your
-            own informed decisions.
-          </p>
-
-          <ul class="benefit-list">
-            <li><span>✓</span> See the market in context</li>
-            <li><span>✓</span> Explore companies with a research mindset</li>
-            <li><span>✓</span> Keep your portfolio view close at hand</li>
-          </ul>
-
-          <a class="button button-primary" href="/market">
-            Explore the platform <span aria-hidden="true">↗</span>
-          </a>
-        </div>
-
-        <div class="portfolio-intelligence-image-wrap">
-          <img
-            src="/assets/portfolio-intelligence.png"
-            alt="StockGyan Portfolio Intelligence: multiple portfolios, stock trends, portfolio analytics, fundamental quality and news about your holdings"
-            class="portfolio-intelligence-image"
-            loading="lazy"
-            decoding="async"
-          >
-        </div>
-
+    <!-- Portfolio Intelligence full-width image -->
+    <section class="portfolio-intelligence-full">
+      <div class="container">
+        <img
+          src="/assets/portfolio-intelligence.png"
+          alt="StockGyan Portfolio Intelligence: multiple portfolios, stock trends, portfolio analytics, fundamental quality and news about your holdings"
+          class="portfolio-intelligence-image portfolio-intelligence-image-full"
+          loading="lazy"
+          decoding="async"
+        >
       </div>
     </section>
 
