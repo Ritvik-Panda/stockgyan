@@ -77,7 +77,6 @@ async function loadPublishedStockAnalysis() {
         Read full analysis →
       </a>`;
   } catch (error) {
-    // Preserve the designed fallback if the API is unavailable.
     console.warn('Stock analysis could not be loaded:', error);
   }
 }
@@ -176,6 +175,7 @@ async function loadHomepageMarketToday() {
   const tiles = [...section.querySelectorAll('.market-tile')];
   if (!tiles.length) return;
 
+  // Only these four indices are loaded.
   const instruments = [
     { name: 'NIFTY 50', key: 'NSE_INDEX|Nifty 50' },
     { name: 'BANK NIFTY', key: 'NSE_INDEX|Nifty Bank' },
@@ -213,6 +213,23 @@ async function loadHomepageMarketToday() {
       null;
   }
 
+  function setChangeColour(element, change) {
+    if (!element) return;
+
+    // Remove previous classes and inline styling.
+    element.classList.remove('up', 'down', 'positive', 'negative');
+
+    if (change > 0) {
+      element.classList.add('up', 'positive');
+      element.style.setProperty('color', '#159447', 'important');
+    } else if (change < 0) {
+      element.classList.add('down', 'negative');
+      element.style.setProperty('color', '#dc2626', 'important');
+    } else {
+      element.style.setProperty('color', '#64748b', 'important');
+    }
+  }
+
   async function loadInstrument(instrument) {
     const tile = findTile(instrument.name);
     if (!tile) return;
@@ -220,11 +237,14 @@ async function loadHomepageMarketToday() {
     const priceElement = tile.querySelector('strong');
     const detailElement = tile.querySelector('span');
 
-    if (priceElement) priceElement.textContent = 'Loading…';
+    if (priceElement) {
+      priceElement.textContent = 'Loading…';
+    }
 
     if (detailElement) {
       detailElement.textContent = 'Fetching market quote…';
-      detailElement.classList.remove('up', 'down');
+      detailElement.classList.remove('up', 'down', 'positive', 'negative');
+      detailElement.style.removeProperty('color');
     }
 
     try {
@@ -293,17 +313,15 @@ async function loadHomepageMarketToday() {
 
           detailElement.textContent = pointText + percentText;
 
-          // Explicitly remove both classes before applying the correct one.
-          detailElement.classList.remove('up', 'down');
+          // Force the colour to match the sign of the change.
+          setChangeColour(detailElement, change);
 
-          if (change > 0) {
-            detailElement.classList.add('up');
-          } else if (change < 0) {
-            detailElement.classList.add('down');
-          }
         } else {
           detailElement.textContent = 'Change unavailable';
-          detailElement.classList.remove('up', 'down');
+          detailElement.classList.remove(
+            'up', 'down', 'positive', 'negative'
+          );
+          detailElement.style.removeProperty('color');
         }
       }
 
@@ -317,11 +335,16 @@ async function loadHomepageMarketToday() {
         error
       );
 
-      if (priceElement) priceElement.textContent = 'Unavailable';
+      if (priceElement) {
+        priceElement.textContent = 'Unavailable';
+      }
 
       if (detailElement) {
         detailElement.textContent = 'Quote currently unavailable';
-        detailElement.classList.remove('up', 'down');
+        detailElement.classList.remove(
+          'up', 'down', 'positive', 'negative'
+        );
+        detailElement.style.removeProperty('color');
       }
 
       tile.dataset.marketStatus = 'unavailable';
