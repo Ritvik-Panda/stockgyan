@@ -207,3 +207,22 @@ main > .hero-image-section.hero-signup-layout > .hero-signup-card {
     grid-template-columns: minmax(0, 1fr) 205px !important; padding-inline: 2% !important; gap: 8px;
   }
 }
+
+
+/* StockGyan homepage refinement: use the learning section's full width after removing the preview card. */
+.analysis-layout-single {
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 0 !important;
+}
+.analysis-layout-single .analysis-copy {
+  max-width: 820px;
+}
+.analysis-layout-single .analysis-copy h2,
+.analysis-layout-single .analysis-copy > p {
+  max-width: 760px;
+}
+@media (min-width: 701px) {
+  .analysis-layout-single .analysis-copy {
+    padding-block: 8px;
+  }
+}
