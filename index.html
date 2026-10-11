@@ -52,6 +52,32 @@
         <a class="hero-image-link hero-market-link" href="/market" aria-label="Explore Market" title="Explore Market"></a>
         <a class="hero-image-link hero-portfolio-link" href="/portfolio" aria-label="View My Portfolio" title="View My Portfolio"></a>
       </div>
+  <aside class="hero-signup-card" id="registerDrawer" aria-labelledby="registerTitle" aria-hidden="false">
+    <div class="hero-register-head">
+      <div><span class="section-kicker">JOIN STOCKGYAN</span><h2 id="registerTitle">Create your account</h2><p>Register to access your personal portfolio workspace.</p></div>
+      
+    </div>
+    <div id="registerFormStep">
+      <form id="homepageRegisterForm" class="register-form">
+        <label for="registerName">Full name</label><input id="registerName" name="name" type="text" autocomplete="name" maxlength="100" placeholder="Enter your full name" required>
+        <label for="registerMobile">Mobile number</label><input id="registerMobile" name="mobile" type="tel" inputmode="numeric" autocomplete="tel-national" maxlength="10" placeholder="10-digit Indian mobile number" required>
+        <label for="registerEmail">Email address</label><input id="registerEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+        <button class="button button-primary register-submit" id="registerSendOtp" type="submit">Continue with email OTP →</button>
+        <p class="register-privacy">Your email will be verified by OTP. Your mobile number is not verified unless SMS verification is added.</p>
+        <div class="register-message" id="registerMessage" aria-live="polite"></div>
+      </form>
+    </div>
+    <div id="registerOtpStep" hidden>
+      <p class="register-otp-intro">Enter the six-digit code sent to <strong id="registerOtpEmail"></strong>.</p>
+      <form id="homepageVerifyForm" class="register-form">
+        <label for="registerOtp">Email OTP</label><input id="registerOtp" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6-digit OTP" required>
+        <button class="button button-primary register-submit" id="registerVerifyOtp" type="submit">Verify and continue →</button>
+        <button class="register-text-button" id="registerBackButton" type="button">Use a different email</button>
+        <div class="register-message" id="registerOtpMessage" aria-live="polite"></div>
+      </form>
+    </div>
+    <div class="register-drawer-foot">Already have an account? <a href="/portfolio">Log in instead</a></div>
+  </aside>
     </section>
 
     <section class="market-today">
@@ -155,35 +181,6 @@
   </main>
 
 
-  <!-- Registration side panel: public homepage remains visible behind it. -->
-  <div class="register-backdrop" id="registerBackdrop" hidden></div>
-  <aside class="register-drawer" id="registerDrawer" aria-labelledby="registerTitle" aria-hidden="true" role="dialog" aria-modal="true">
-    <div class="register-drawer-head">
-      <div><span class="section-kicker">JOIN STOCKGYAN</span><h2 id="registerTitle">Create your account</h2><p>Register to access your personal portfolio workspace.</p></div>
-      <button class="register-close" type="button" aria-label="Close registration" data-close-register>×</button>
-    </div>
-    <div id="registerFormStep">
-      <form id="homepageRegisterForm" class="register-form">
-        <label for="registerName">Full name</label><input id="registerName" name="name" type="text" autocomplete="name" maxlength="100" placeholder="Enter your full name" required>
-        <label for="registerMobile">Mobile number</label><input id="registerMobile" name="mobile" type="tel" inputmode="numeric" autocomplete="tel-national" maxlength="10" placeholder="10-digit Indian mobile number" required>
-        <label for="registerEmail">Email address</label><input id="registerEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
-        <button class="button button-primary register-submit" id="registerSendOtp" type="submit">Continue with email OTP →</button>
-        <p class="register-privacy">Your email will be verified by OTP. Your mobile number is not verified unless SMS verification is added.</p>
-        <div class="register-message" id="registerMessage" aria-live="polite"></div>
-      </form>
-    </div>
-    <div id="registerOtpStep" hidden>
-      <p class="register-otp-intro">Enter the six-digit code sent to <strong id="registerOtpEmail"></strong>.</p>
-      <form id="homepageVerifyForm" class="register-form">
-        <label for="registerOtp">Email OTP</label><input id="registerOtp" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6-digit OTP" required>
-        <button class="button button-primary register-submit" id="registerVerifyOtp" type="submit">Verify and continue →</button>
-        <button class="register-text-button" id="registerBackButton" type="button">Use a different email</button>
-        <div class="register-message" id="registerOtpMessage" aria-live="polite"></div>
-      </form>
-    </div>
-    <div class="register-drawer-foot">Already have an account? <a href="/portfolio">Log in instead</a></div>
-  </aside>
-
   <footer class="site-footer">
     <div class="container footer-main">
       <div class="footer-brand"><a class="brand brand-footer" href="/"><span class="brand-symbol" aria-hidden="true">SG</span><span class="brand-word"><span>Stock</span><strong>Gyan</strong><small>.in</small></span></a><p>Learn. Analyse. Understand. Invest.</p></div>
@@ -214,17 +211,13 @@
       const openers = document.querySelectorAll('[data-open-register]');
       const closeButtons = document.querySelectorAll('[data-close-register]');
       function openDrawer() {
-        backdrop.hidden = false; drawer.classList.add('is-open'); drawer.setAttribute('aria-hidden', 'false');
-        document.body.classList.add('register-panel-open'); setTimeout(() => document.getElementById('registerName').focus(), 50);
+        if (drawer) {
+          drawer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setTimeout(() => document.getElementById('registerName').focus(), 350);
+        }
       }
-      function closeDrawer() {
-        drawer.classList.remove('is-open'); drawer.setAttribute('aria-hidden', 'true'); backdrop.hidden = true;
-        document.body.classList.remove('register-panel-open');
-      }
+      function closeDrawer() {}
       openers.forEach(button => button.addEventListener('click', openDrawer));
-      closeButtons.forEach(button => button.addEventListener('click', closeDrawer));
-      backdrop.addEventListener('click', closeDrawer);
-      document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
 
       const regForm = document.getElementById('homepageRegisterForm');
       const otpStep = document.getElementById('registerOtpStep');
