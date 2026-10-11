@@ -176,6 +176,34 @@
       border-radius: 18px;
       box-shadow: 0 16px 40px rgba(8, 42, 99, 0.08);
     }
+    .portfolio-intelligence-click-wrap {
+      position: relative;
+    }
+    .portfolio-image-button-link {
+      position: absolute;
+      left: 5.3%;
+      top: 45.5%;
+      width: 21%;
+      height: 14%;
+      display: block;
+      z-index: 2;
+      border-radius: 14px;
+      cursor: pointer;
+    }
+    .portfolio-image-button-link:focus-visible {
+      outline: 3px solid #159447;
+      outline-offset: 3px;
+    }
+    @media (max-width: 768px) {
+      .portfolio-image-button-link {
+        left: 5%;
+        top: 45%;
+        width: 37%;
+        height: 14%;
+      }
+    }
+    html { scroll-behavior: smooth; }
+    #registerDrawer { scroll-margin-top: 110px; }
     @media (max-width: 768px) {
       .portfolio-intelligence-full {
         padding: 16px 0 24px;
@@ -183,24 +211,6 @@
       .portfolio-intelligence-image-wrap {
         margin-top: 22px;
       }
-    }
-
-    .portfolio-register-cta-wrap {
-      display: flex;
-      justify-content: center;
-      padding: 0 0 30px;
-    }
-    .portfolio-register-cta {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      text-decoration: none;
-    }
-    #registerDrawer {
-      scroll-margin-top: 110px;
-    }
-    html {
-      scroll-behavior: smooth;
     }
   </style>
 </head>
@@ -543,7 +553,7 @@
 
     <!-- Portfolio Intelligence full-width image -->
     <section class="portfolio-intelligence-full">
-      <div class="container">
+      <div class="container portfolio-intelligence-click-wrap">
         <img
           src="/assets/portfolio-intelligence.png"
           alt="StockGyan Portfolio Intelligence: multiple portfolios, stock trends, portfolio analytics, fundamental quality and news about your holdings"
@@ -551,18 +561,11 @@
           loading="lazy"
           decoding="async"
         >
+        <!-- Transparent clickable area positioned over the Explore Your Portfolio button in the image -->
+        <a class="portfolio-image-button-link" href="#registerDrawer" aria-label="Explore your portfolio and register for StockGyan"></a>
       </div>
     </section>
-
-    <!-- Portfolio CTA: scroll to the existing registration form -->
-    <div class="container portfolio-register-cta-wrap">
-      <a class="button button-primary portfolio-register-cta" href="#registerDrawer">
-        Explore Your Portfolio <span aria-hidden="true">↗</span>
-      </a>
-    </div>
-
-
-    <!-- Closing call to action -->
+<!-- Closing call to action -->
     <section class="closing-cta">
       <div class="container closing-inner">
 
