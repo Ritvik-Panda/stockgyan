@@ -1,5 +1,5 @@
 
-import { validSession } from "../auth.js";
+import { validSession } from "./auth.js";
 
 export async function onRequestGet(context) {
   try {
