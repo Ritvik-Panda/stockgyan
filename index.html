@@ -184,6 +184,24 @@
         margin-top: 22px;
       }
     }
+
+    .portfolio-register-cta-wrap {
+      display: flex;
+      justify-content: center;
+      padding: 0 0 30px;
+    }
+    .portfolio-register-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    #registerDrawer {
+      scroll-margin-top: 110px;
+    }
+    html {
+      scroll-behavior: smooth;
+    }
   </style>
 </head>
 
@@ -535,6 +553,14 @@
         >
       </div>
     </section>
+
+    <!-- Portfolio CTA: scroll to the existing registration form -->
+    <div class="container portfolio-register-cta-wrap">
+      <a class="button button-primary portfolio-register-cta" href="#registerDrawer">
+        Explore Your Portfolio <span aria-hidden="true">↗</span>
+      </a>
+    </div>
+
 
     <!-- Closing call to action -->
     <section class="closing-cta">
