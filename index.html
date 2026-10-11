@@ -146,6 +146,30 @@
       }
     }
 
+
+    /* Portfolio Intelligence visual */
+    .portfolio-intelligence-image-wrap {
+      width: 100%;
+      min-width: 0;
+      align-self: center;
+      overflow: hidden;
+      border-radius: 20px;
+      background: #f1f8ff;
+    }
+    .portfolio-intelligence-image {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-width: 100%;
+      object-fit: contain;
+      border-radius: 20px;
+    }
+    @media (max-width: 768px) {
+      .portfolio-intelligence-image-wrap {
+        margin-top: 22px;
+      }
+    }
+
   </style>
 </head>
 
@@ -509,48 +533,14 @@
           </a>
         </div>
 
-        <div class="analysis-preview portfolio-intelligence-panel" id="portfolio-intelligence">
-          <div class="preview-header">
-            <span class="preview-icon">SG</span>
-            <div>
-              <small>YOUR PORTFOLIO, IN FOCUS</small>
-              <b>Portfolio Intelligence</b>
-            </div>
-            <span class="preview-tag">STOCKGYAN</span>
-          </div>
-
-          <h3>Understand every holding. See the bigger picture.</h3>
-          <p>
-            Bring your portfolios, stock trends, analytics, fundamentals and
-            company news together in one clear view.
-          </p>
-
-          <div class="portfolio-intelligence-features">
-            <div class="portfolio-intelligence-feature">
-              <span class="pi-feature-icon">▱</span>
-              <span><b>Multiple portfolios</b><small>Keep different portfolios organised</small></span>
-            </div>
-            <div class="portfolio-intelligence-feature">
-              <span class="pi-feature-icon">↗</span>
-              <span><b>Stock trend tracking</b><small>Review trends and technical signals</small></span>
-            </div>
-            <div class="portfolio-intelligence-feature">
-              <span class="pi-feature-icon">◔</span>
-              <span><b>Portfolio analytics</b><small>Understand returns and allocation</small></span>
-            </div>
-            <div class="portfolio-intelligence-feature">
-              <span class="pi-feature-icon">✓</span>
-              <span><b>Fundamental quality</b><small>Explore valuation and business metrics</small></span>
-            </div>
-            <div class="portfolio-intelligence-feature">
-              <span class="pi-feature-icon">▤</span>
-              <span><b>News on your holdings</b><small>Follow news related to your stocks</small></span>
-            </div>
-          </div>
-
-          <a href="/portfolio" class="button button-primary portfolio-intelligence-cta">
-            Explore Your Portfolio <span aria-hidden="true">↗</span>
-          </a>
+        <div class="portfolio-intelligence-image-wrap">
+          <img
+            src="/assets/portfolio-intelligence.png"
+            alt="StockGyan Portfolio Intelligence: multiple portfolios, stock trends, portfolio analytics, fundamental quality and news about your holdings"
+            class="portfolio-intelligence-image"
+            loading="lazy"
+            decoding="async"
+          >
         </div>
 
       </div>
