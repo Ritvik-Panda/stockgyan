@@ -107,3 +107,65 @@ main > .hero-image-section > .hero-banner-image {
   object-fit: contain;
 }
 
+
+
+/* Hero banner with the separate StockGyan signup panel */
+.hero-signup-layout {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 218px;
+  align-items: stretch;
+  gap: 10px;
+  padding: 8px max(2%, calc((100% - 1400px) / 2));
+  background: linear-gradient(110deg, #f5f9ff 0%, #eefaf7 100%);
+  line-height: normal;
+  overflow: hidden;
+}
+.hero-banner-wrap { position: relative; min-width: 0; align-self: center; overflow: hidden; }
+.hero-signup-layout .hero-banner-image { width: 100% !important; height: auto !important; object-fit: contain; }
+.hero-signup-card {
+  min-width: 0;
+  align-self: center;
+  padding: 13px 12px 11px;
+  border: 1px solid rgba(255,255,255,.95);
+  border-radius: 12px;
+  background: rgba(255,255,255,.97);
+  box-shadow: 0 8px 24px rgba(8,42,99,.10);
+  color: var(--ink);
+}
+.hero-signup-card h2 { margin: 0 0 7px; color: var(--navy); font-size: 15px; line-height: 1.2; letter-spacing: -.3px; }
+.hero-signup-tabs { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid #e5edf5; margin-bottom: 8px; }
+.hero-signup-tabs a, .hero-signup-tabs span { padding: 6px 2px; text-align: center; font-size: 10px; font-weight: 750; color: #64748b; }
+.hero-signup-tabs .is-active { color: var(--navy); border-bottom: 2px solid var(--green); }
+.hero-signup-form { display: grid; gap: 5px; }
+.hero-signup-form input { display: block; width: 100%; min-width: 0; height: 29px; padding: 0 8px; border: 1px solid #dce5ef; border-radius: 6px; background: #fff; color: var(--ink); font-size: 10px; outline: none; }
+.hero-signup-form input:focus { border-color: #73c99a; box-shadow: 0 0 0 2px #15944716; }
+.hero-signup-submit { width: 100%; min-height: 30px; margin-top: 1px; border: 0; border-radius: 6px; background: var(--green); color: #fff; font-size: 10px; font-weight: 800; cursor: pointer; }
+.hero-signup-card > small { display: block; margin-top: 7px; text-align: center; color: #64748b; font-size: 8px; line-height: 1.4; }
+.hero-signup-card > small a { color: #1263c8; font-weight: 750; }
+.visually-hidden { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important; overflow: hidden !important; clip: rect(0,0,0,0) !important; white-space: nowrap !important; border: 0 !important; }
+@media (min-width: 1200px) {
+  .hero-signup-layout { grid-template-columns: minmax(0, 1fr) 245px; gap: 14px; }
+  .hero-signup-card { padding: 16px 15px 13px; }
+  .hero-signup-card h2 { font-size: 17px; }
+  .hero-signup-tabs a, .hero-signup-tabs span { font-size: 11px; }
+  .hero-signup-form input { height: 33px; font-size: 11px; }
+  .hero-signup-submit { min-height: 33px; font-size: 11px; }
+  .hero-signup-card > small { font-size: 9px; }
+}
+@media (max-width: 700px) {
+  .hero-signup-layout { grid-template-columns: minmax(0,1fr); gap: 12px; padding: 8px 4% 16px; }
+  .hero-banner-wrap { width: 100%; }
+  .hero-signup-card { width: 100%; max-width: 420px; justify-self: center; padding: 18px 16px 15px; }
+  .hero-signup-card h2 { font-size: 21px; margin-bottom: 9px; }
+  .hero-signup-tabs { margin-bottom: 12px; }
+  .hero-signup-tabs a, .hero-signup-tabs span { padding: 8px 4px; font-size: 13px; }
+  .hero-signup-form { gap: 8px; }
+  .hero-signup-form input { height: 42px; padding: 0 12px; font-size: 13px; border-radius: 8px; }
+  .hero-signup-submit { min-height: 42px; font-size: 13px; border-radius: 8px; }
+  .hero-signup-card > small { margin-top: 10px; font-size: 11px; }
+}
+@media (min-width: 701px) and (max-width: 900px) {
+  .hero-signup-layout { grid-template-columns: minmax(0,1fr) 205px; gap: 8px; }
+  .hero-signup-card { padding: 11px 9px; }
+  .hero-signup-card h2 { font-size: 14px; }
+}
