@@ -76,9 +76,9 @@ async function loadPublishedStockAnalysis() {
          href="/analysis/${encodeURIComponent(item.slug)}">
         Read full analysis →
       </a>`;
-  } catch (e) {
-    // Keep the designed fallback content if the API is unavailable.
-    console.warn('Stock analysis could not be loaded:', e);
+  } catch (error) {
+    // Preserve the designed fallback if the API is unavailable.
+    console.warn('Stock analysis could not be loaded:', error);
   }
 }
 
@@ -166,7 +166,7 @@ if (enquiryForm) {
 
 /* -----------------------------------------
    5. MARKET TODAY
-   Existing quote API: /api/market/quote
+   Existing API: /api/market/quote
    ----------------------------------------- */
 
 async function loadHomepageMarketToday() {
@@ -200,12 +200,17 @@ async function loadHomepageMarketToday() {
     });
   }
 
-  function extractQuote(responseData) {
+  function extractQuote(responseData, instrumentKey) {
     const data = responseData?.data;
 
     if (!data || typeof data !== 'object') return null;
 
-    return Object.values(data)[0] || null;
+    const normalizedKey = instrumentKey.replace('|', ':');
+
+    return data[normalizedKey] ||
+      data[instrumentKey] ||
+      Object.values(data)[0] ||
+      null;
   }
 
   async function loadInstrument(instrument) {
@@ -223,14 +228,14 @@ async function loadHomepageMarketToday() {
     }
 
     try {
-      const url =
+      const response = await fetch(
         '/api/market/quote?instrument_key=' +
-        encodeURIComponent(instrument.key);
-
-      const response = await fetch(url, {
-        headers: { Accept: 'application/json' },
-        cache: 'no-store'
-      });
+          encodeURIComponent(instrument.key),
+        {
+          headers: { Accept: 'application/json' },
+          cache: 'no-store'
+        }
+      );
 
       const result = await response.json();
 
@@ -238,8 +243,7 @@ async function loadHomepageMarketToday() {
         throw new Error(result?.message || 'Quote request failed');
       }
 
-      const quote = extractQuote(result);
-
+      const quote = extractQuote(result, instrument.key);
       if (!quote) throw new Error('No quote returned');
 
       const price = Number(quote.last_price);
@@ -257,9 +261,11 @@ async function loadHomepageMarketToday() {
 
       const change = Number.isFinite(suppliedChange)
         ? suppliedChange
-        : Number.isFinite(price) && Number.isFinite(previousClose)
-          ? price - previousClose
-          : NaN;
+        : Number.isFinite(price) &&
+          Number.isFinite(previousClose) &&
+          previousClose > 0
+            ? price - previousClose
+            : NaN;
 
       const percentage =
         Number.isFinite(previousClose) &&
@@ -279,15 +285,22 @@ async function loadHomepageMarketToday() {
       if (detailElement) {
         if (Number.isFinite(change)) {
           const pointText =
-            `${change >= 0 ? '+' : ''}${formatNumber(change)}`;
+            `${change > 0 ? '+' : ''}${formatNumber(change)}`;
 
           const percentText = Number.isFinite(percentage)
-            ? ` (${percentage >= 0 ? '+' : ''}${percentage.toFixed(2)}%)`
+            ? ` (${percentage > 0 ? '+' : ''}${percentage.toFixed(2)}%)`
             : '';
 
           detailElement.textContent = pointText + percentText;
-          detailElement.classList.toggle('up', change > 0);
-          detailElement.classList.toggle('down', change < 0);
+
+          // Explicitly remove both classes before applying the correct one.
+          detailElement.classList.remove('up', 'down');
+
+          if (change > 0) {
+            detailElement.classList.add('up');
+          } else if (change < 0) {
+            detailElement.classList.add('down');
+          }
         } else {
           detailElement.textContent = 'Change unavailable';
           detailElement.classList.remove('up', 'down');
