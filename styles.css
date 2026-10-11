@@ -85,7 +85,7 @@ body {
 
 /* Final StockGyan hero width correction */
 main > .hero-image-section {
-  display: block !important;
+  display: grid !important;
   width: 100% !important;
   max-width: 100% !important;
   margin: 0 !important;
@@ -168,4 +168,42 @@ main > .hero-image-section > .hero-banner-image {
   .hero-signup-layout { grid-template-columns: minmax(0,1fr) 205px; gap: 8px; }
   .hero-signup-card { padding: 11px 9px; }
   .hero-signup-card h2 { font-size: 14px; }
+}
+
+
+/* FIX: signup panel beside banner on desktop; stack cleanly on mobile */
+main > .hero-image-section.hero-signup-layout {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 245px !important;
+  align-items: center;
+  gap: 14px;
+  width: 100% !important;
+  padding: 10px 3.5% !important;
+  line-height: normal;
+  overflow: hidden;
+}
+main > .hero-image-section.hero-signup-layout > .hero-banner-wrap {
+  min-width: 0; width: 100%;
+}
+main > .hero-image-section.hero-signup-layout .hero-banner-image {
+  display: block !important; width: 100% !important; height: auto !important;
+  max-width: 100% !important; object-fit: contain;
+}
+main > .hero-image-section.hero-signup-layout > .hero-signup-card {
+  display: block; width: 100%; min-width: 0; max-width: 300px;
+  justify-self: end; align-self: center;
+}
+@media (max-width: 700px) {
+  main > .hero-image-section.hero-signup-layout {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 12px; padding: 10px 4% 18px !important;
+  }
+  main > .hero-image-section.hero-signup-layout > .hero-signup-card {
+    width: 100%; max-width: 420px; justify-self: center;
+  }
+}
+@media (min-width: 701px) and (max-width: 900px) {
+  main > .hero-image-section.hero-signup-layout {
+    grid-template-columns: minmax(0, 1fr) 205px !important; padding-inline: 2% !important; gap: 8px;
+  }
 }
