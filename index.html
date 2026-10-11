@@ -1,30 +1,86 @@
+
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <meta name="description" content="StockGyan — market insights, portfolio tracking, stock screening and investor education in one place.">
   <meta name="theme-color" content="#082a63">
+
   <title>StockGyan — Your Market & Portfolio Companion</title>
+
   <link rel="icon" type="image/png" href="/assets/stockgyan-brand-logo.png">
-  <link rel="stylesheet" href="/styles.css?v=4">
+  <link rel="preload" as="image" href="/assets/image.PNG.png">
+  <link rel="stylesheet" href="/styles.css?v=5">
+
+  <!-- Crisp, responsive hero image -->
+  <style>
+    .hero-banner-wrap {
+      position: relative;
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      overflow: hidden;
+      line-height: 0;
+    }
+
+    .hero-banner-image {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-width: 100%;
+      object-fit: contain;
+      object-position: center;
+      image-rendering: auto;
+    }
+
+    .hero-image-link {
+      position: absolute;
+      display: block;
+      z-index: 2;
+      line-height: normal;
+    }
+
+    @media (max-width: 768px) {
+      .hero-banner-image {
+        width: 100%;
+        height: auto;
+      }
+    }
+  </style>
 </head>
+
 <body>
+
+  <!-- Announcement -->
   <div class="announcement">
     <div class="container announcement-inner">
-      <span><span class="announcement-dot"></span> A clearer way to understand the market</span>
+      <span>
+        <span class="announcement-dot"></span>
+        A clearer way to understand the market
+      </span>
       <a href="#contact">Talk to StockGyan <span aria-hidden="true">↗</span></a>
     </div>
   </div>
 
+  <!-- Header -->
   <header class="site-header">
     <div class="container header-inner">
+
       <a class="brand" href="/" aria-label="StockGyan home">
         <span class="brand-symbol" aria-hidden="true">SG</span>
-        <span class="brand-word"><span>Stock</span><strong>Gyan</strong><small>.in</small></span>
+        <span class="brand-word">
+          <span>Stock</span><strong>Gyan</strong><small>.in</small>
+        </span>
       </a>
 
-      <button class="menu-btn" type="button" aria-label="Open navigation" aria-expanded="false">☰</button>
+      <button
+        class="menu-btn"
+        type="button"
+        aria-label="Open navigation"
+        aria-expanded="false"
+      >☰</button>
 
       <nav class="nav" aria-label="Main navigation">
         <a class="active" href="/">Home</a>
@@ -34,190 +90,593 @@
         <a href="/screener1">Health Screener</a>
         <a href="#analysis">Learn</a>
         <a class="nav-login" href="/portfolio">Login</a>
-        <button class="nav-cta" type="button" data-open-register>Register <span aria-hidden="true">↗</span></button>
+        <button class="nav-cta" type="button" data-open-register>
+          Register <span aria-hidden="true">↗</span>
+        </button>
       </nav>
+
     </div>
   </header>
 
   <main>
-    <section class="hero-image-section hero-signup-layout" aria-label="StockGyan market and portfolio companion">
+
+    <!-- Hero banner and registration -->
+    <section
+      class="hero-image-section hero-signup-layout"
+      aria-label="StockGyan market and portfolio companion"
+    >
+
       <div class="hero-banner-wrap">
+
         <img
           src="/assets/image.PNG.png"
           alt="Your Personal Stock Market Companion — StockGyan"
           class="hero-banner-image"
           fetchpriority="high"
           decoding="async"
-        />
-        <a class="hero-image-link hero-market-link" href="/market" aria-label="Explore Market" title="Explore Market"></a>
-        <a class="hero-image-link hero-portfolio-link" href="/portfolio" aria-label="View My Portfolio" title="View My Portfolio"></a>
+        >
+
+        <!-- Preserve clickable areas on your existing banner -->
+        <a
+          class="hero-image-link hero-market-link"
+          href="/market"
+          aria-label="Explore Market"
+          title="Explore Market"
+        ></a>
+
+        <a
+          class="hero-image-link hero-portfolio-link"
+          href="/portfolio"
+          aria-label="View My Portfolio"
+          title="View My Portfolio"
+        ></a>
+
       </div>
-  <aside class="hero-signup-card" id="registerDrawer" aria-labelledby="registerTitle" aria-hidden="false">
-    <div class="hero-register-head">
-      <div><span class="section-kicker">JOIN STOCKGYAN</span><h2 id="registerTitle">Create your account</h2><p>Register to access your personal portfolio workspace.</p></div>
-      
-    </div>
-    <div id="registerFormStep">
-      <form id="homepageRegisterForm" class="register-form">
-        <label for="registerName">Full name</label><input id="registerName" name="name" type="text" autocomplete="name" maxlength="100" placeholder="Enter your full name" required>
-        <label for="registerMobile">Mobile number</label><input id="registerMobile" name="mobile" type="tel" inputmode="numeric" autocomplete="tel-national" maxlength="10" placeholder="10-digit Indian mobile number" required>
-        <label for="registerEmail">Email address</label><input id="registerEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
-        <button class="button button-primary register-submit" id="registerSendOtp" type="submit">Continue with email OTP →</button>
-        <p class="register-privacy">Your email will be verified by OTP. Your mobile number is not verified unless SMS verification is added.</p>
-        <div class="register-message" id="registerMessage" aria-live="polite"></div>
-      </form>
-    </div>
-    <div id="registerOtpStep" hidden>
-      <p class="register-otp-intro">Enter the six-digit code sent to <strong id="registerOtpEmail"></strong>.</p>
-      <form id="homepageVerifyForm" class="register-form">
-        <label for="registerOtp">Email OTP</label><input id="registerOtp" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="6-digit OTP" required>
-        <button class="button button-primary register-submit" id="registerVerifyOtp" type="submit">Verify and continue →</button>
-        <button class="register-text-button" id="registerBackButton" type="button">Use a different email</button>
-        <div class="register-message" id="registerOtpMessage" aria-live="polite"></div>
-      </form>
-    </div>
-    <div class="register-drawer-foot">Already have an account? <a href="/portfolio">Log in instead</a></div>
-  </aside>
+
+      <!-- Registration card -->
+      <aside
+        class="hero-signup-card"
+        id="registerDrawer"
+        aria-labelledby="registerTitle"
+        aria-hidden="false"
+      >
+
+        <div class="hero-register-head">
+          <div>
+            <span class="section-kicker">JOIN STOCKGYAN</span>
+            <h2 id="registerTitle">Create your account</h2>
+            <p>Register to access your personal portfolio workspace.</p>
+          </div>
+        </div>
+
+        <!-- Registration form -->
+        <div id="registerFormStep">
+          <form id="homepageRegisterForm" class="register-form">
+
+            <label for="registerName">Full name</label>
+            <input
+              id="registerName"
+              name="name"
+              type="text"
+              autocomplete="name"
+              maxlength="100"
+              placeholder="Enter your full name"
+              required
+            >
+
+            <label for="registerMobile">Mobile number</label>
+            <input
+              id="registerMobile"
+              name="mobile"
+              type="tel"
+              inputmode="numeric"
+              autocomplete="tel-national"
+              maxlength="10"
+              placeholder="10-digit Indian mobile number"
+              required
+            >
+
+            <label for="registerEmail">Email address</label>
+            <input
+              id="registerEmail"
+              name="email"
+              type="email"
+              autocomplete="email"
+              placeholder="you@example.com"
+              required
+            >
+
+            <button
+              class="button button-primary register-submit"
+              id="registerSendOtp"
+              type="submit"
+            >Continue with email OTP →</button>
+
+            <p class="register-privacy">
+              Your email will be verified by OTP. Your mobile number is
+              not verified unless SMS verification is added.
+            </p>
+
+            <div
+              class="register-message"
+              id="registerMessage"
+              aria-live="polite"
+            ></div>
+
+          </form>
+        </div>
+
+        <!-- Email OTP verification -->
+        <div id="registerOtpStep" hidden>
+
+          <p class="register-otp-intro">
+            Enter the six-digit code sent to
+            <strong id="registerOtpEmail"></strong>.
+          </p>
+
+          <form id="homepageVerifyForm" class="register-form">
+
+            <label for="registerOtp">Email OTP</label>
+            <input
+              id="registerOtp"
+              type="text"
+              inputmode="numeric"
+              autocomplete="one-time-code"
+              maxlength="6"
+              placeholder="6-digit OTP"
+              required
+            >
+
+            <button
+              class="button button-primary register-submit"
+              id="registerVerifyOtp"
+              type="submit"
+            >Verify and continue →</button>
+
+            <button
+              class="register-text-button"
+              id="registerBackButton"
+              type="button"
+            >Use a different email</button>
+
+            <div
+              class="register-message"
+              id="registerOtpMessage"
+              aria-live="polite"
+            ></div>
+
+          </form>
+        </div>
+
+        <div class="register-drawer-foot">
+          Already have an account?
+          <a href="/portfolio">Log in instead</a>
+        </div>
+
+      </aside>
     </section>
 
+    <!-- Market today -->
     <section class="market-today">
       <div class="container">
-        <div class="market-today-head"><div><span class="live-indicator"></span><strong>Market Today</strong><span class="market-time">Illustrative preview · Connect live market data for current values</span></div><a href="/market">View Detailed Market →</a></div>
-        <div class="market-today-grid">
-          <a class="market-tile" href="/market"><small>NIFTY 50</small><strong>Explore market</strong><span>Indices & movers ↗</span><i class="market-spark green"></i></a>
-          <a class="market-tile" href="/market"><small>BANK NIFTY</small><strong>Banking index</strong><span>View current data ↗</span><i class="market-spark green"></i></a>
-          <a class="market-tile" href="/market"><small>SENSEX</small><strong>Market index</strong><span>View current data ↗</span><i class="market-spark green"></i></a>
-          <a class="market-tile" href="/market"><small>INDIA VIX</small><strong>Market volatility</strong><span>View current data ↗</span><i class="market-spark red"></i></a>
+
+        <div class="market-today-head">
+          <div>
+            <span class="live-indicator"></span>
+            <strong>Market Today</strong>
+            <span class="market-time">
+              Illustrative preview · Connect live market data for current values
+            </span>
           </div>
+          <a href="/market">View Detailed Market →</a>
+        </div>
+
+        <div class="market-today-grid">
+
+          <a class="market-tile" href="/market">
+            <small>NIFTY 50</small>
+            <strong>Explore market</strong>
+            <span>Indices &amp; movers ↗</span>
+            <i class="market-spark green"></i>
+          </a>
+
+          <a class="market-tile" href="/market">
+            <small>BANK NIFTY</small>
+            <strong>Banking index</strong>
+            <span>View current data ↗</span>
+            <i class="market-spark green"></i>
+          </a>
+
+          <a class="market-tile" href="/market">
+            <small>SENSEX</small>
+            <strong>Market index</strong>
+            <span>View current data ↗</span>
+            <i class="market-spark green"></i>
+          </a>
+
+          <a class="market-tile" href="/market">
+            <small>INDIA VIX</small>
+            <strong>Market volatility</strong>
+            <span>View current data ↗</span>
+            <i class="market-spark red"></i>
+          </a>
+
+        </div>
       </div>
     </section>
 
+    <!-- Quick access -->
     <section class="quick-access">
       <div class="container quick-access-inner">
-        <div class="quick-label"><span class="live-indicator"></span><div><b>EXPLORE STOCKGYAN</b><small>Choose where you want to start</small></div></div>
-        <a class="quick-link" href="/market"><span class="quick-link-icon icon-navy">↗</span><span><b>Market Dashboard</b><small>Explore market activity</small></span><span class="quick-arrow">→</span></a>
-        <a class="quick-link" href="/portfolio"><span class="quick-link-icon icon-green">◈</span><span><b>Portfolio Tracker</b><small>Review your holdings</small></span><span class="quick-arrow">→</span></a>
-        <a class="quick-link" href="/screener"><span class="quick-link-icon icon-orange">⌕</span><span><b>Stock Screener</b><small>Discover stocks</small></span><span class="quick-arrow">→</span></a>
+
+        <div class="quick-label">
+          <span class="live-indicator"></span>
+          <div>
+            <b>EXPLORE STOCKGYAN</b>
+            <small>Choose where you want to start</small>
+          </div>
+        </div>
+
+        <a class="quick-link" href="/market">
+          <span class="quick-link-icon icon-navy">↗</span>
+          <span>
+            <b>Market Dashboard</b>
+            <small>Explore market activity</small>
+          </span>
+          <span class="quick-arrow">→</span>
+        </a>
+
+        <a class="quick-link" href="/portfolio">
+          <span class="quick-link-icon icon-green">◈</span>
+          <span>
+            <b>Portfolio Tracker</b>
+            <small>Review your holdings</small>
+          </span>
+          <span class="quick-arrow">→</span>
+        </a>
+
+        <a class="quick-link" href="/screener">
+          <span class="quick-link-icon icon-orange">⌕</span>
+          <span>
+            <b>Stock Screener</b>
+            <small>Discover stocks</small>
+          </span>
+          <span class="quick-arrow">→</span>
+        </a>
+
       </div>
     </section>
 
+    <!-- Tools -->
     <section class="section tools-section" id="tools">
       <div class="container">
+
         <div class="section-heading">
-          <div><span class="section-kicker">TOOLS THAT WORK TOGETHER</span><h2>Your investing toolkit,<br><span>all in one place.</span></h2></div>
-          <p>Move from market context to stock discovery to portfolio review — without losing sight of the bigger picture.</p>
+          <div>
+            <span class="section-kicker">TOOLS THAT WORK TOGETHER</span>
+            <h2>Your investing toolkit,<br><span>all in one place.</span></h2>
+          </div>
+          <p>
+            Move from market context to stock discovery to portfolio review
+            — without losing sight of the bigger picture.
+          </p>
         </div>
+
         <div class="tool-grid">
+
           <a class="tool-card" href="/market">
-            <div class="tool-card-top"><span class="tool-icon tool-icon-navy">⌁</span><span class="card-arrow">↗</span></div>
-            <span class="tool-number">01 / MARKET</span><h3>Market Dashboard</h3><p>Explore market trends, stock activity and available market insights from one dedicated view.</p><span class="tool-link">Open market <b>→</b></span>
+            <div class="tool-card-top">
+              <span class="tool-icon tool-icon-navy">⌁</span>
+              <span class="card-arrow">↗</span>
+            </div>
+            <span class="tool-number">01 / MARKET</span>
+            <h3>Market Dashboard</h3>
+            <p>
+              Explore market trends, stock activity and available market
+              insights from one dedicated view.
+            </p>
+            <span class="tool-link">Open market <b>→</b></span>
           </a>
+
           <a class="tool-card featured-tool" href="/portfolio">
-            <div class="tool-card-top"><span class="tool-icon tool-icon-green">◈</span><span class="card-arrow">↗</span></div>
-            <span class="tool-number">02 / YOUR INVESTMENTS</span><h3>Portfolio Tracker</h3><p>Bring your holdings together and review portfolio value, performance and available analytics.</p><span class="tool-link">View portfolio <b>→</b></span>
+            <div class="tool-card-top">
+              <span class="tool-icon tool-icon-green">◈</span>
+              <span class="card-arrow">↗</span>
+            </div>
+            <span class="tool-number">02 / YOUR INVESTMENTS</span>
+            <h3>Portfolio Tracker</h3>
+            <p>
+              Bring your holdings together and review portfolio value,
+              performance and available analytics.
+            </p>
+            <span class="tool-link">View portfolio <b>→</b></span>
             <span class="featured-label">YOUR WORKSPACE</span>
           </a>
+
           <a class="tool-card" href="/screener">
-            <div class="tool-card-top"><span class="tool-icon tool-icon-orange">⌕</span><span class="card-arrow">↗</span></div>
-            <span class="tool-number">03 / DISCOVERY</span><h3>Stock Screener</h3><p>Search and filter the stock universe using the data and screening options available.</p><span class="tool-link">Explore stocks <b>→</b></span>
+            <div class="tool-card-top">
+              <span class="tool-icon tool-icon-orange">⌕</span>
+              <span class="card-arrow">↗</span>
+            </div>
+            <span class="tool-number">03 / DISCOVERY</span>
+            <h3>Stock Screener</h3>
+            <p>
+              Search and filter the stock universe using the data
+              and screening options available.
+            </p>
+            <span class="tool-link">Explore stocks <b>→</b></span>
           </a>
+
           <a class="tool-card" href="/screener1">
-            <div class="tool-card-top"><span class="tool-icon tool-icon-blue">◉</span><span class="card-arrow">↗</span></div>
-            <span class="tool-number">04 / FUNDAMENTALS</span><h3>Health Screener</h3><p>Review available company fundamentals to help organise your research process.</p><span class="tool-link">Open health screener <b>→</b></span>
+            <div class="tool-card-top">
+              <span class="tool-icon tool-icon-blue">◉</span>
+              <span class="card-arrow">↗</span>
+            </div>
+            <span class="tool-number">04 / FUNDAMENTALS</span>
+            <h3>Health Screener</h3>
+            <p>
+              Review available company fundamentals to help organise
+              your research process.
+            </p>
+            <span class="tool-link">Open health screener <b>→</b></span>
           </a>
+
         </div>
       </div>
     </section>
 
+    <!-- Education -->
     <section class="section analysis-section" id="analysis">
       <div class="container analysis-layout">
+
         <div class="analysis-copy">
           <span class="section-kicker">LEARN. ANALYSE. UNDERSTAND.</span>
           <h2>Better investing starts with <span>better questions.</span></h2>
-          <p>StockGyan brings together market tools and educational resources to help you research thoughtfully, understand risk and make your own informed decisions.</p>
+          <p>
+            StockGyan brings together market tools and educational resources
+            to help you research thoughtfully, understand risk and make your
+            own informed decisions.
+          </p>
+
           <ul class="benefit-list">
             <li><span>✓</span> See the market in context</li>
             <li><span>✓</span> Explore companies with a research mindset</li>
             <li><span>✓</span> Keep your portfolio view close at hand</li>
           </ul>
-          <a class="button button-primary" href="/market">Explore the platform <span aria-hidden="true">↗</span></a>
+
+          <a class="button button-primary" href="/market">
+            Explore the platform <span aria-hidden="true">↗</span>
+          </a>
         </div>
+
         <div class="analysis-preview" id="featured-stock-analysis">
-          <div class="preview-header"><span class="preview-icon">SG</span><div><small>STOCKGYAN INSIGHTS</small><b>Research with a plan</b></div><span class="preview-tag">EDUCATION</span></div>
-          <div class="preview-illustration">
-            <div class="preview-chart-grid"></div><div class="preview-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-            <div class="preview-trend"></div><span class="preview-chart-label">Research • Context • Risk</span>
+          <div class="preview-header">
+            <span class="preview-icon">SG</span>
+            <div>
+              <small>STOCKGYAN INSIGHTS</small>
+              <b>Research with a plan</b>
+            </div>
+            <span class="preview-tag">EDUCATION</span>
           </div>
+
+          <div class="preview-illustration">
+            <div class="preview-chart-grid"></div>
+            <div class="preview-bars">
+              <i></i><i></i><i></i><i></i><i></i>
+              <i></i><i></i><i></i><i></i>
+            </div>
+            <div class="preview-trend"></div>
+            <span class="preview-chart-label">Research • Context • Risk</span>
+          </div>
+
           <h3>Make research part of your process.</h3>
-          <p>Explore the market and use StockGyan tools to support your own analysis.</p>
-          <div class="preview-tags"><span>Market context</span><span>Fundamentals</span><span>Risk awareness</span></div>
-          <a href="/screener" class="preview-link">Start exploring <b>→</b></a>
+          <p>
+            Explore the market and use StockGyan tools to support
+            your own analysis.
+          </p>
+
+          <div class="preview-tags">
+            <span>Market context</span>
+            <span>Fundamentals</span>
+            <span>Risk awareness</span>
+          </div>
+
+          <a href="/screener" class="preview-link">
+            Start exploring <b>→</b>
+          </a>
         </div>
+
       </div>
     </section>
 
+    <!-- Closing call to action -->
     <section class="closing-cta">
       <div class="container closing-inner">
+
         <div class="closing-mark" aria-hidden="true">SG</div>
-        <div><span class="section-kicker">YOUR NEXT STEP STARTS HERE</span><h2>Know more. See clearly. <span>Invest thoughtfully.</span></h2><p>Open your StockGyan workspace and explore the tools available to you.</p></div>
-        <a class="button button-white" href="/portfolio">Open StockGyan <span aria-hidden="true">↗</span></a>
+
+        <div>
+          <span class="section-kicker">YOUR NEXT STEP STARTS HERE</span>
+          <h2>Know more. See clearly. <span>Invest thoughtfully.</span></h2>
+          <p>
+            Open your StockGyan workspace and explore the tools
+            available to you.
+          </p>
+        </div>
+
+        <a class="button button-white" href="/portfolio">
+          Open StockGyan <span aria-hidden="true">↗</span>
+        </a>
+
       </div>
     </section>
 
+    <!-- Contact -->
     <section class="section contact-section" id="contact">
       <div class="container contact-grid">
-        <div class="contact-copy"><span class="section-kicker">LET'S CONNECT</span><h2>Have a question?</h2><p>Send us an enquiry about StockGyan, market education or the tools available on the platform.</p><div class="contact-assurance"><span>✉</span><div><b>Your enquiry goes to StockGyan</b><small>We will use your details to respond to your request.</small></div></div></div>
+
+        <div class="contact-copy">
+          <span class="section-kicker">LET'S CONNECT</span>
+          <h2>Have a question?</h2>
+          <p>
+            Send us an enquiry about StockGyan, market education or
+            the tools available on the platform.
+          </p>
+
+          <div class="contact-assurance">
+            <span>✉</span>
+            <div>
+              <b>Your enquiry goes to StockGyan</b>
+              <small>
+                We will use your details to respond to your request.
+              </small>
+            </div>
+          </div>
+        </div>
+
         <form class="contact-form" id="enquiryForm">
-          <label for="enquiryName">Your name</label><input id="enquiryName" name="name" type="text" placeholder="Enter your name" autocomplete="name" required>
-          <label for="enquiryPhone">Mobile number</label><input id="enquiryPhone" name="phone" type="tel" inputmode="tel" placeholder="Enter your mobile number" autocomplete="tel" required>
+
+          <label for="enquiryName">Your name</label>
+          <input
+            id="enquiryName"
+            name="name"
+            type="text"
+            placeholder="Enter your name"
+            autocomplete="name"
+            required
+          >
+
+          <label for="enquiryPhone">Mobile number</label>
+          <input
+            id="enquiryPhone"
+            name="phone"
+            type="tel"
+            inputmode="tel"
+            placeholder="Enter your mobile number"
+            autocomplete="tel"
+            required
+          >
+
           <label for="enquiryType">I'm interested in</label>
-          <select id="enquiryType" name="enquiry_type" required><option value="">Choose a topic</option><option>Stock Market Education</option><option>Stocks</option><option>Mutual Funds / SIP</option><option>IPO / NFO</option><option>StockGyan Tools</option><option>Other</option></select>
-          <button class="button button-primary form-submit" type="submit">Submit enquiry <span aria-hidden="true">→</span></button>
-          <div id="enquiryMsg" class="form-message" aria-live="polite"></div>
+          <select id="enquiryType" name="enquiry_type" required>
+            <option value="">Choose a topic</option>
+            <option>Stock Market Education</option>
+            <option>Stocks</option>
+            <option>Mutual Funds / SIP</option>
+            <option>IPO / NFO</option>
+            <option>StockGyan Tools</option>
+            <option>Other</option>
+          </select>
+
+          <button class="button button-primary form-submit" type="submit">
+            Submit enquiry <span aria-hidden="true">→</span>
+          </button>
+
+          <div
+            id="enquiryMsg"
+            class="form-message"
+            aria-live="polite"
+          ></div>
+
         </form>
       </div>
     </section>
+
   </main>
 
-
+  <!-- Footer -->
   <footer class="site-footer">
     <div class="container footer-main">
-      <div class="footer-brand"><a class="brand brand-footer" href="/"><span class="brand-symbol" aria-hidden="true">SG</span><span class="brand-word"><span>Stock</span><strong>Gyan</strong><small>.in</small></span></a><p>Learn. Analyse. Understand. Invest.</p></div>
-      <div class="footer-column"><b>Explore</b><a href="/market">Market Dashboard</a><a href="/portfolio">Portfolio Tracker</a><a href="/screener">Stock Screener</a><a href="/screener1">Health Screener</a></div>
-      <div class="footer-column"><b>Connect</b><a href="#contact">Contact StockGyan</a><a href="/admin">Admin</a></div>
+
+      <div class="footer-brand">
+        <a class="brand brand-footer" href="/">
+          <span class="brand-symbol" aria-hidden="true">SG</span>
+          <span class="brand-word">
+            <span>Stock</span><strong>Gyan</strong><small>.in</small>
+          </span>
+        </a>
+        <p>Learn. Analyse. Understand. Invest.</p>
+      </div>
+
+      <div class="footer-column">
+        <b>Explore</b>
+        <a href="/market">Market Dashboard</a>
+        <a href="/portfolio">Portfolio Tracker</a>
+        <a href="/screener">Stock Screener</a>
+        <a href="/screener1">Health Screener</a>
+      </div>
+
+      <div class="footer-column">
+        <b>Connect</b>
+        <a href="#contact">Contact StockGyan</a>
+        <a href="/admin">Admin</a>
+      </div>
+
     </div>
-    <div class="container footer-bottom"><p>Educational and informational purposes only. Market data may be delayed or unavailable at times. Investments are subject to market risks; this website does not guarantee returns.</p><span>© 2026 StockGyan.in. All rights reserved.</span></div>
+
+    <div class="container footer-bottom">
+      <p>
+        Educational and informational purposes only. Market data may be
+        delayed or unavailable at times. Investments are subject to market
+        risks; this website does not guarantee returns.
+      </p>
+      <span>© 2026 StockGyan.in. All rights reserved.</span>
+    </div>
   </footer>
 
+  <!-- Keep the existing site JavaScript -->
   <script src="/script.js?v=3"></script>
+
   <script>
-    // Mobile navigation and homepage registration drawer.
+    // Mobile navigation and homepage registration.
     (function () {
       const menuButton = document.querySelector('.menu-btn');
       const nav = document.querySelector('.nav');
+
       if (menuButton && nav) {
         menuButton.addEventListener('click', function () {
           const open = nav.classList.toggle('open');
+
           menuButton.setAttribute('aria-expanded', String(open));
-          menuButton.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+          menuButton.setAttribute(
+            'aria-label',
+            open ? 'Close navigation' : 'Open navigation'
+          );
         });
-        nav.querySelectorAll('a').forEach(link => link.addEventListener('click', () => {
-          nav.classList.remove('open'); menuButton.setAttribute('aria-expanded', 'false');
-        }));
+
+        nav.querySelectorAll('a').forEach(function (link) {
+          link.addEventListener('click', function () {
+            nav.classList.remove('open');
+            menuButton.setAttribute('aria-expanded', 'false');
+          });
+        });
       }
+
       const drawer = document.getElementById('registerDrawer');
-      const backdrop = document.getElementById('registerBackdrop');
       const openers = document.querySelectorAll('[data-open-register]');
-      const closeButtons = document.querySelectorAll('[data-close-register]');
+
       function openDrawer() {
-        if (drawer) {
-          drawer.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          setTimeout(() => document.getElementById('registerName').focus(), 350);
+        if (!drawer) return;
+
+        drawer.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+        });
+
+        const nameInput = document.getElementById('registerName');
+
+        if (nameInput) {
+          setTimeout(function () {
+            nameInput.focus();
+          }, 350);
         }
       }
-      function closeDrawer() {}
-      openers.forEach(button => button.addEventListener('click', openDrawer));
 
+      openers.forEach(function (button) {
+        button.addEventListener('click', openDrawer);
+      });
+
+      // Registration elements.
       const regForm = document.getElementById('homepageRegisterForm');
       const otpStep = document.getElementById('registerOtpStep');
       const formStep = document.getElementById('registerFormStep');
@@ -225,45 +684,201 @@
       const otpMessage = document.getElementById('registerOtpMessage');
       const sendButton = document.getElementById('registerSendOtp');
       const verifyButton = document.getElementById('registerVerifyOtp');
+
       let emailForOtp = '';
-      const message = (el, text, kind='error') => { el.textContent = text; el.className = 'register-message is-visible ' + kind; };
-      regForm.addEventListener('submit', async event => {
-        event.preventDefault(); regMessage.className = 'register-message';
-        const name = document.getElementById('registerName').value.trim();
-        const mobile = document.getElementById('registerMobile').value.replace(/\D/g, '');
-        const email = document.getElementById('registerEmail').value.trim().toLowerCase();
-        if (name.length < 2) return message(regMessage, 'Please enter your full name.');
-        if (!/^[6-9]\d{9}$/.test(mobile)) return message(regMessage, 'Enter a valid 10-digit Indian mobile number.');
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return message(regMessage, 'Enter a valid email address.');
-        sendButton.disabled = true; sendButton.textContent = 'Sending OTP…';
-        try {
-          const response = await fetch('/api/auth/send-otp', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email, name, mobile}) });
-          const data = await response.json();
-          if (!response.ok || data.status !== 'success') throw new Error(data.message || 'Unable to send OTP.');
-          emailForOtp = email; document.getElementById('registerOtpEmail').textContent = email;
-          formStep.hidden = true; otpStep.hidden = false; document.getElementById('registerOtp').focus();
-          message(otpMessage, 'OTP sent. Check your email.', 'success');
-        } catch (error) { message(regMessage, error.message || 'Unable to send OTP. Please try again.'); }
-        finally { sendButton.disabled = false; sendButton.textContent = 'Continue with email OTP →'; }
-      });
-      document.getElementById('registerMobile').addEventListener('input', function () { this.value = this.value.replace(/\D/g, '').slice(0,10); });
-      document.getElementById('registerOtp').addEventListener('input', function () { this.value = this.value.replace(/\D/g, '').slice(0,6); });
-      document.getElementById('homepageVerifyForm').addEventListener('submit', async event => {
-        event.preventDefault(); otpMessage.className = 'register-message';
-        const otp = document.getElementById('registerOtp').value.trim();
-        if (!/^\d{6}$/.test(otp)) return message(otpMessage, 'Enter the 6-digit OTP.');
-        verifyButton.disabled = true; verifyButton.textContent = 'Verifying…';
-        try {
-          const response = await fetch('/api/auth/verify-otp', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email:emailForOtp, otp}) });
-          const data = await response.json();
-          if (!response.ok || data.status !== 'success') throw new Error(data.message || 'OTP verification failed.');
-          message(otpMessage, 'Email verified. Opening your portfolio…', 'success');
-          window.location.href = '/portfolio/dashboard/';
-        } catch (error) { message(otpMessage, error.message || 'Unable to verify OTP.'); }
-        finally { verifyButton.disabled = false; verifyButton.textContent = 'Verify and continue →'; }
-      });
-      document.getElementById('registerBackButton').addEventListener('click', () => { otpStep.hidden = true; formStep.hidden = false; document.getElementById('registerOtp').value = ''; otpMessage.className = 'register-message'; });
+
+      function showMessage(element, text, kind = 'error') {
+        if (!element) return;
+
+        element.textContent = text;
+        element.className = 'register-message is-visible ' + kind;
+      }
+
+      // Send email OTP.
+      if (regForm) {
+        regForm.addEventListener('submit', async function (event) {
+          event.preventDefault();
+
+          regMessage.className = 'register-message';
+
+          const name = document
+            .getElementById('registerName').value.trim();
+
+          const mobile = document
+            .getElementById('registerMobile').value
+            .replace(/\D/g, '');
+
+          const email = document
+            .getElementById('registerEmail').value
+            .trim()
+            .toLowerCase();
+
+          if (name.length < 2) {
+            return showMessage(
+              regMessage,
+              'Please enter your full name.'
+            );
+          }
+
+          if (!/^[6-9]\d{9}$/.test(mobile)) {
+            return showMessage(
+              regMessage,
+              'Enter a valid 10-digit Indian mobile number.'
+            );
+          }
+
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            return showMessage(
+              regMessage,
+              'Enter a valid email address.'
+            );
+          }
+
+          sendButton.disabled = true;
+          sendButton.textContent = 'Sending OTP…';
+
+          try {
+            const response = await fetch('/api/auth/send-otp', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                email: email,
+                name: name,
+                mobile: mobile
+              })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || data.status !== 'success') {
+              throw new Error(
+                data.message || 'Unable to send OTP.'
+              );
+            }
+
+            emailForOtp = email;
+
+            document.getElementById('registerOtpEmail')
+              .textContent = email;
+
+            formStep.hidden = true;
+            otpStep.hidden = false;
+
+            document.getElementById('registerOtp').focus();
+
+            showMessage(
+              otpMessage,
+              'OTP sent. Check your email.',
+              'success'
+            );
+
+          } catch (error) {
+            showMessage(
+              regMessage,
+              error.message || 'Unable to send OTP. Please try again.'
+            );
+
+          } finally {
+            sendButton.disabled = false;
+            sendButton.textContent = 'Continue with email OTP →';
+          }
+        });
+      }
+
+      // Accept only digits in mobile and OTP fields.
+      const mobileInput = document.getElementById('registerMobile');
+      const otpInput = document.getElementById('registerOtp');
+
+      if (mobileInput) {
+        mobileInput.addEventListener('input', function () {
+          this.value = this.value.replace(/\D/g, '').slice(0, 10);
+        });
+      }
+
+      if (otpInput) {
+        otpInput.addEventListener('input', function () {
+          this.value = this.value.replace(/\D/g, '').slice(0, 6);
+        });
+      }
+
+      // Verify email OTP.
+      const verifyForm = document.getElementById('homepageVerifyForm');
+
+      if (verifyForm) {
+        verifyForm.addEventListener('submit', async function (event) {
+          event.preventDefault();
+
+          otpMessage.className = 'register-message';
+
+          const otp = otpInput.value.trim();
+
+          if (!/^\d{6}$/.test(otp)) {
+            return showMessage(
+              otpMessage,
+              'Enter the 6-digit OTP.'
+            );
+          }
+
+          verifyButton.disabled = true;
+          verifyButton.textContent = 'Verifying…';
+
+          try {
+            const response = await fetch('/api/auth/verify-otp', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                email: emailForOtp,
+                otp: otp
+              })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || data.status !== 'success') {
+              throw new Error(
+                data.message || 'OTP verification failed.'
+              );
+            }
+
+            showMessage(
+              otpMessage,
+              'Email verified. Opening your portfolio…',
+              'success'
+            );
+
+            window.location.href = '/portfolio/dashboard/';
+
+          } catch (error) {
+            showMessage(
+              otpMessage,
+              error.message || 'Unable to verify OTP.'
+            );
+
+          } finally {
+            verifyButton.disabled = false;
+            verifyButton.textContent = 'Verify and continue →';
+          }
+        });
+      }
+
+      // Return to registration with a different email.
+      const backButton = document.getElementById('registerBackButton');
+
+      if (backButton) {
+        backButton.addEventListener('click', function () {
+          otpStep.hidden = true;
+          formStep.hidden = false;
+          otpInput.value = '';
+          otpMessage.className = 'register-message';
+        });
+      }
+
     })();
   </script>
+
 </body>
 </html>
