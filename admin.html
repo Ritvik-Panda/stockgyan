@@ -131,13 +131,64 @@ async function loadPage(page){
 }
 
 async function dashboardPage(){
- main.innerHTML='<div class="page-title"><h1>Dashboard</h1></div><div class="cards"><div class="stat"><div class="muted">New Enquiries</div><div class="num" id="newCount">—</div></div><div class="stat"><div class="muted">Total Enquiries</div><div class="num" id="totalCount">—</div></div><div class="stat"><div class="muted">Status</div><div class="num">Online</div></div></div><div class="panel"><h3>StockGyan Admin</h3><p class="muted">Manage enquiries and educational content from this dashboard.</p></div>';
+ main.innerHTML=`
+ <div class="page-title"><h1>📊 Dashboard</h1><button class="btn green" id="refreshDashboard">↻ Refresh</button></div>
+ <div class="cards">
+   <div class="stat"><div class="muted">Total Customers</div><div class="num" id="dashCustomers">—</div></div>
+   <div class="stat"><div class="muted">Registered Today</div><div class="num" id="dashToday">—</div></div>
+   <div class="stat"><div class="muted">Registered This Month</div><div class="num" id="dashMonth">—</div></div>
+   <div class="stat"><div class="muted">Total Enquiries</div><div class="num" id="totalCount">—</div></div>
+   <div class="stat"><div class="muted">New Enquiries</div><div class="num" id="newCount">—</div></div>
+   <div class="stat"><div class="muted">System Status</div><div class="num">Online</div></div>
+ </div>
+ <div class="panel" style="margin-top:18px">
+   <div class="page-title"><h2 style="margin:0;color:var(--navy)">Recent Registrations</h2><button class="btn light" id="viewAllCustomers">View All Customers</button></div>
+   <div id="recentCustomerMsg" class="muted">Loading recent registrations…</div>
+   <div class="table-wrap"><table style="min-width:650px">
+     <thead><tr><th>Name</th><th>Mobile</th><th>Email</th><th>Registered</th></tr></thead>
+     <tbody id="recentCustomerBody"><tr><td colspan="4">Loading…</td></tr></tbody>
+   </table></div>
+ </div>
+ <div class="panel"><h3>StockGyan Admin</h3><p class="muted">Monitor registrations and enquiries, then open the relevant section to manage records.</p></div>`;
+ $('refreshDashboard').onclick=dashboardPage;
+ $('viewAllCustomers').onclick=()=>loadPage('customers');
+
  try{
-   const d=await api('/api/admin/enquires');
+   const d=await api('/api/admin/enquires?ts='+Date.now());
    const rows=Array.isArray(d.enquiries)?d.enquiries:[];
    $('totalCount').textContent=rows.length;
    $('newCount').textContent=rows.filter(x=>(x.status||'new').toLowerCase()==='new').length;
- }catch(e){$('newCount').textContent='!';$('totalCount').textContent='!'}
+ }catch(e){
+   $('newCount').textContent='!';
+   $('totalCount').textContent='!';
+ }
+
+ try{
+   const d=await api('/api/admin/customers?ts='+Date.now());
+   const rows=Array.isArray(d.customers)?d.customers:[];
+   $('dashCustomers').textContent=d.stats?.total ?? rows.length;
+   $('dashToday').textContent=d.stats?.today ?? '—';
+   $('dashMonth').textContent=d.stats?.this_month ?? '—';
+   const recent=rows.slice().sort((a,b)=>Number(b.created_at||0)-Number(a.created_at||0)).slice(0,5);
+   const body=$('recentCustomerBody');
+   if(!recent.length){
+     body.innerHTML='<tr><td colspan="4">No customer registrations found.</td></tr>';
+     $('recentCustomerMsg').textContent='No registrations to display yet.';
+   }else{
+     body.innerHTML=recent.map(x=>{
+       const stamp=Number(x.created_at);
+       const registered=stamp?new Date(stamp).toLocaleString():(x.created_at||'—');
+       return `<tr><td><b>${escapeHtml(x.full_name||'—')}</b></td><td>${escapeHtml(x.mobile||'—')}</td><td>${escapeHtml(x.email||'—')}</td><td>${escapeHtml(registered)}</td></tr>`;
+     }).join('');
+     $('recentCustomerMsg').textContent=`Showing the latest ${recent.length} registration(s).`;
+   }
+ }catch(e){
+   $('dashCustomers').textContent='!';
+   $('dashToday').textContent='!';
+   $('dashMonth').textContent='!';
+   $('recentCustomerBody').innerHTML='<tr><td colspan="4"><div class="error">'+escapeHtml(e.message)+'</div></td></tr>';
+   $('recentCustomerMsg').textContent='Could not load customer statistics.';
+ }
 }
 
 async function enquiriesPage(){
