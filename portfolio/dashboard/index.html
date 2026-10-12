@@ -2617,7 +2617,7 @@
               portfolios[0]?.id || "default";
           }
 
-          renderHoldings();
+              // Initial dashboard rendering     renderHoldings();     updateSummary();     renderMovingAverageMonitor();     updateMarketDataStatus();      // Load the logged-in user's saved portfolio first.     // The server-load function already triggers the initial refreshes.     loadPortfolioFromServer().then(function(loaded) {       if (!loaded) {         console.warn(           "Portfolio could not be loaded from the server. " +           "Automatic refresh may use the currently available local data."         );       }        // Start periodic updates after the initial load attempt.       startQuoteRefresh();       startMovingAverageRefresh();     });
           updateSummary();
           renderMovingAverageMonitor();
           fetchPortfolioQuotes();
