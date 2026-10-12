@@ -5443,35 +5443,45 @@
       "change",
       async function() {
         const refreshId = ++portfolioSwitchRefreshId;
+        const selectedPortfolioId = portfolioSelect.value;
 
+        // Remove values from the previous portfolio before painting the new one.
         quoteCache = {};
         quoteSource = "";
         movingAverageCache = {};
         performanceCache = {};
 
-        // Immediately replace the visible holdings/summary with the selected
-        // portfolio, then fetch all related data for that portfolio.
         renderHoldings();
         updateSummary();
         renderMovingAverageMonitor();
         updateMarketDataStatus();
 
+        // First load the selected portfolio's market data. Analytics relies on
+        // these prices, so calculate it again only after quotes have returned.
         await Promise.allSettled([
           fetchPortfolioQuotes(),
           refreshMovingAverages(),
-          refreshPortfolioPerformance(),
+          refreshPortfolioPerformance()
+        ]);
+
+        if (refreshId !== portfolioSwitchRefreshId || portfolioSelect.value !== selectedPortfolioId) return;
+
+        renderHoldings();
+        updateSummary();
+        renderMovingAverageMonitor();
+        updateMarketDataStatus();
+
+        // Recompute the two panels from the newly selected portfolio after its
+        // holdings and quote cache have been updated. Do not use stale panels.
+        await Promise.allSettled([
           refreshPortfolioAnalytics(),
           refreshPortfolioHealth()
         ]);
 
-        // Ignore an older portfolio-switch completion if the user switched
-        // again while the requests were running.
-        if (refreshId !== portfolioSwitchRefreshId) return;
+        if (refreshId !== portfolioSwitchRefreshId || portfolioSelect.value !== selectedPortfolioId) return;
 
-        updateSummary();
-        renderHoldings();
-        renderMovingAverageMonitor();
-        updateMarketDataStatus();
+        // Re-run analytics once more after all current values are available.
+        refreshPortfolioAnalytics();
       }
     );
 
@@ -6897,16 +6907,21 @@
       await Promise.allSettled([
         fetchPortfolioQuotes(),
         refreshMovingAverages(),
-        refreshPortfolioPerformance(),
+        refreshPortfolioPerformance()
+      ]);
+
+      // Quotes may have changed current values; compute dependent panels after
+      // the selected portfolio's market data is ready.
+      await Promise.allSettled([
         refreshPortfolioAnalytics(),
         refreshPortfolioHealth()
       ]);
 
-      // Repaint dependent UI after quotes/analytics finish.
       updateSummary();
       renderHoldings();
       renderMovingAverageMonitor();
       updateMarketDataStatus();
+      refreshPortfolioAnalytics();
     }
 
     loadPortfolioFromServer().then(async function(loaded) {
