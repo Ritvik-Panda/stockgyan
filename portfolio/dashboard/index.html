@@ -5480,8 +5480,23 @@
 
         if (refreshId !== portfolioSwitchRefreshId || portfolioSelect.value !== selectedPortfolioId) return;
 
-        // Re-run analytics once more after all current values are available.
+        // Re-run both dependent panels after the selected portfolio has settled.
         refreshPortfolioAnalytics();
+        refreshPortfolioHealth();
+
+        // Portfolio selection and holdings rendering can settle in separate
+        // tasks. Retry the dependent panels, but only for this selection.
+        window.setTimeout(function() {
+          if (refreshId !== portfolioSwitchRefreshId || portfolioSelect.value !== selectedPortfolioId) return;
+          refreshPortfolioAnalytics();
+          refreshPortfolioHealth();
+        }, 250);
+
+        window.setTimeout(function() {
+          if (refreshId !== portfolioSwitchRefreshId || portfolioSelect.value !== selectedPortfolioId) return;
+          refreshPortfolioAnalytics();
+          refreshPortfolioHealth();
+        }, 900);
       }
     );
 
@@ -6820,6 +6835,14 @@
       } finally {
 
         portfolioHealthRequestInProgress = false;
+
+        // If a different portfolio was selected during the request, refresh
+        // health for the currently selected portfolio as soon as the lock clears.
+        if (portfolioSelect.value !== requestedPortfolioId) {
+          window.setTimeout(function() {
+            refreshPortfolioHealth();
+          }, 0);
+        }
 
       }
 
