@@ -4433,6 +4433,7 @@
     -------------------------------- */
 
     let performanceRequestInProgress = false;
+    let performanceRefreshQueued = false;
     let performanceCache = {};
 
     function getPerformanceDays(period) {
@@ -4469,31 +4470,37 @@
       return n.toFixed(0);
     }
 
-    async function fetchPerformanceCandles(item) {
-      const response = await fetch(
-        "/api/market/ohlc?instrument_key=" +
-        encodeURIComponent(item.instrument_key) +
-        "&interval=1d",
-        {
-          method:"GET",
-          cache:"no-store",
-          headers:{ "Accept":"application/json" }
-        }
-      );
 
-      const data = await response.json();
+    // Shared daily-candle cache prevents Moving Averages and Performance from
+    // requesting the same instrument repeatedly at the same time.
+    const dailyCandleCache = new Map();
+    const dailyCandleInFlight = new Map();
+    const DAILY_CANDLE_CACHE_TTL = 5 * 60 * 1000;
 
-      if (!response.ok) {
-        throw new Error(
-          data && data.message
-            ? data.message
-            : "Historical data unavailable"
+    async function getDailyCandlesCached(item) {
+      if (!item || !item.instrument_key) return [];
+      const key = String(item.instrument_key);
+      const cached = dailyCandleCache.get(key);
+      if (cached && Date.now() - cached.time < DAILY_CANDLE_CACHE_TTL) return cached.candles;
+      if (dailyCandleInFlight.has(key)) return dailyCandleInFlight.get(key);
+      const request = (async function() {
+        const response = await fetch(
+          "/api/market/ohlc?instrument_key=" + encodeURIComponent(key) + "&interval=1d",
+          { method: "GET", cache: "no-store", headers: { "Accept": "application/json" } }
         );
-      }
+        const data = await response.json();
+        if (!response.ok) throw new Error(data && data.message ? data.message : "Historical data unavailable");
+        const candles = parseDailyCandles(data && data.data ? data.data.candles : []);
+        dailyCandleCache.set(key, { time: Date.now(), candles: candles });
+        return candles;
+      })();
+      dailyCandleInFlight.set(key, request);
+      try { return await request; }
+      finally { if (dailyCandleInFlight.get(key) === request) dailyCandleInFlight.delete(key); }
+    }
 
-      return parseDailyCandles(
-        data && data.data ? data.data.candles : []
-      );
+    async function fetchPerformanceCandles(item) {
+      return getDailyCandlesCached(item);
     }
 
     function getLivePortfolioValue(list) {
@@ -4796,7 +4803,10 @@
         return;
       }
 
-      if (performanceRequestInProgress) return;
+      if (performanceRequestInProgress) {
+        performanceRefreshQueued = true;
+        return;
+      }
       performanceRequestInProgress = true;
 
       const loading = document.getElementById("performanceLoading");
@@ -4855,6 +4865,12 @@
         );
       } finally {
         performanceRequestInProgress = false;
+        const loadingBox = document.getElementById("performanceLoading");
+        if (loadingBox) loadingBox.style.display = "none";
+        if (performanceRefreshQueued) {
+          performanceRefreshQueued = false;
+          window.setTimeout(function() { refreshPortfolioPerformance(); }, 0);
+        }
       }
     }
 
@@ -4960,57 +4976,18 @@
     }
 
     async function fetchMovingAverageForHolding(item) {
-      if (!item || !item.instrument_key) {
-        return null;
-      }
-
-      const key = item.instrument_key;
-
+      if (!item || !item.instrument_key) return null;
       try {
-        const response = await fetch(
-          "/api/market/ohlc?instrument_key=" +
-          encodeURIComponent(key) +
-          "&interval=1d",
-          {
-            method: "GET",
-            cache: "no-store",
-            headers: {
-              "Accept": "application/json"
-            }
-          }
-        );
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(
-            data && data.message
-              ? data.message
-              : "Historical data unavailable"
-          );
-        }
-
-        const candles = parseDailyCandles(
-          data && data.data ? data.data.candles : []
-        );
-
+        const candles = await getDailyCandlesCached(item);
         return {
           dma20: calculateMovingAverage(candles, 20),
           dma50: calculateMovingAverage(candles, 50),
           dma200: calculateMovingAverage(candles, 200),
           candleCount: candles.length,
-          latestDate: candles.length
-            ? candles[candles.length - 1].date
-            : null
+          latestDate: candles.length ? candles[candles.length - 1].date : null
         };
-
       } catch (error) {
-        console.warn(
-          "StockGyan: moving average fetch failed",
-          key,
-          error
-        );
-
+        console.warn("StockGyan: moving average fetch failed", item.instrument_key, error);
         return null;
       }
     }
