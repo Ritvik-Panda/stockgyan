@@ -1,38 +1,27 @@
+
 /*
  * StockGyan Common Fundamental Data Refresh
  *
- * Purpose:
- * Upstox → StockGyan backend → D1
+ * Upstox -> StockGyan backend -> D1
  *
- * IMPORTANT:
- * This endpoint is protected by HEALTH_REFRESH_SECRET.
- * It is NOT intended to be called by normal website users.
- *
- * Initial version:
- * - Accepts a controlled list of ISINs
- * - Fetches fundamentals from Upstox
- * - Calculates StockGyan Health Score
- * - Stores the result in D1
- *
- * Later:
- * - Scheduled 6:00 AM refresh
- * - Full NSE universe refresh
- * - Common fundamental engine for all StockGyan pages
+ * Features:
+ * - Protected by HEALTH_REFRESH_SECRET
+ * - Maximum 5 stocks per request
+ * - Skips successfully refreshed fundamentals for 30 days
+ * - Preserves existing data when Upstox fails
+ * - Calculates and stores the StockGyan Health Score
+ * - Reports refreshed, skipped and failed stocks separately
  */
 
 export async function onRequestPost(context) {
-
   try {
+    // =====================================================
+    // SECURITY
+    // =====================================================
 
-    /* =====================================================
-       SECURITY
-       ===================================================== */
-
-    const refreshSecret =
-      context.env.HEALTH_REFRESH_SECRET;
+    const refreshSecret = context.env.HEALTH_REFRESH_SECRET;
 
     if (!refreshSecret) {
-
       return Response.json(
         {
           status: "error",
@@ -40,21 +29,12 @@ export async function onRequestPost(context) {
         },
         { status: 500 }
       );
-
     }
 
-
     const suppliedSecret =
-      context.request.headers.get(
-        "X-Refresh-Secret"
-      );
+      context.request.headers.get("X-Refresh-Secret");
 
-
-    if (
-      !suppliedSecret ||
-      suppliedSecret !== refreshSecret
-    ) {
-
+    if (!suppliedSecret || suppliedSecret !== refreshSecret) {
       return Response.json(
         {
           status: "error",
@@ -62,23 +42,16 @@ export async function onRequestPost(context) {
         },
         { status: 401 }
       );
-
     }
 
+    // =====================================================
+    // ENVIRONMENT
+    // =====================================================
 
-    /* =====================================================
-       ENVIRONMENT CHECK
-       ===================================================== */
-
-    const token =
-      context.env.UPSTOX_ANALYTICS_TOKEN;
-
-    const db =
-      context.env.DB;
-
+    const token = context.env.UPSTOX_ANALYTICS_TOKEN;
+    const db = context.env.DB;
 
     if (!token) {
-
       return Response.json(
         {
           status: "error",
@@ -86,12 +59,9 @@ export async function onRequestPost(context) {
         },
         { status: 500 }
       );
-
     }
 
-
     if (!db) {
-
       return Response.json(
         {
           status: "error",
@@ -99,26 +69,31 @@ export async function onRequestPost(context) {
         },
         { status: 500 }
       );
-
     }
 
+    // =====================================================
+    // REQUEST VALIDATION
+    // =====================================================
 
-    /* =====================================================
-       REQUEST
-       ===================================================== */
+    let body;
 
-    const body =
-      await context.request.json();
+    try {
+      body = await context.request.json();
+    } catch {
+      return Response.json(
+        {
+          status: "error",
+          message: "Request body must contain valid JSON"
+        },
+        { status: 400 }
+      );
+    }
 
-
-    const requestedStocks =
-      Array.isArray(body.stocks)
-        ? body.stocks
-        : [];
-
+    const requestedStocks = Array.isArray(body?.stocks)
+      ? body.stocks
+      : [];
 
     if (!requestedStocks.length) {
-
       return Response.json(
         {
           status: "error",
@@ -127,39 +102,29 @@ export async function onRequestPost(context) {
         },
         { status: 400 }
       );
-
     }
 
-
-    /*
-     * Safety limit for the initial version.
-     *
-     * We deliberately do NOT allow thousands of stocks
-     * in one request yet.
-     *
-     * This prevents another accidental Upstox overload.
-     */
-
     if (requestedStocks.length > 5) {
-
       return Response.json(
         {
           status: "error",
-          message:
-            "Maximum 5 stocks per refresh request in the initial version."
+          message: "Maximum 5 stocks per refresh request."
         },
         { status: 400 }
       );
-
     }
 
+    // =====================================================
+    // CONFIGURATION
+    // =====================================================
 
-    /* =====================================================
-       HELPERS
-       ===================================================== */
+    const FRESHNESS_MS = 30 * 24 * 60 * 60 * 1000;
+
+    // =====================================================
+    // HELPERS
+    // =====================================================
 
     function num(value) {
-
       if (
         value === null ||
         value === undefined ||
@@ -168,314 +133,125 @@ export async function onRequestPost(context) {
         return null;
       }
 
-      const cleaned =
-        String(value)
-          .replace(/,/g, "")
-          .replace(/%/g, "")
-          .trim();
+      const cleaned = String(value)
+        .replace(/,/g, "")
+        .replace(/%/g, "")
+        .trim();
 
-      const n =
-        Number(cleaned);
+      const n = Number(cleaned);
 
-      return Number.isFinite(n)
-        ? n
-        : null;
-
+      return Number.isFinite(n) ? n : null;
     }
 
-
-    function clamp(
-      value,
-      min,
-      max
-    ) {
-
-      return Math.min(
-        max,
-        Math.max(
-          min,
-          value
-        )
-      );
-
+    function clamp(value, min, max) {
+      return Math.min(max, Math.max(min, value));
     }
 
-
-    function relativeScore(
-      company,
-      sector,
-      inverse
-    ) {
-
+    function relativeScore(company, sector, inverse) {
       if (
         !Number.isFinite(company) ||
         !Number.isFinite(sector) ||
         sector <= 0
       ) {
-
         return null;
-
       }
 
+      const difference = inverse
+        ? (sector - company) / sector
+        : (company - sector) / sector;
 
-      const difference =
-        inverse
-          ? (sector - company) / sector
-          : (company - sector) / sector;
+      return clamp(50 + difference * 50, 0, 100);
+    }
 
+    function findRatio(data, name) {
+      if (!data || !Array.isArray(data.data)) {
+        return null;
+      }
 
-      return clamp(
-        50 + difference * 50,
-        0,
-        100
+      const wanted = String(name).trim().toUpperCase();
+
+      const row = data.data.find(item =>
+        String(item.name || "").trim().toUpperCase() === wanted
       );
 
-    }
-
-
-    function findRatio(
-      data,
-      name
-    ) {
-
-      if (
-        !data ||
-        !Array.isArray(data.data)
-      ) {
-
-        return null;
-
-      }
-
-
-      const wanted =
-        String(name)
-          .trim()
-          .toUpperCase();
-
-
-      const row =
-        data.data.find(
-          function(item) {
-
-            return String(
-              item.name || ""
-            )
-            .trim()
-            .toUpperCase()
-            === wanted;
-
-          }
-        );
-
-
       if (!row) {
-
         return null;
-
       }
-
 
       return {
-
-        company:
-          num(row.company_value),
-
-        sector:
-          num(row.sector_value)
-
+        company: num(row.company_value),
+        sector: num(row.sector_value)
       };
-
     }
 
-
-    function findNetProfitGrowth(
-      income
-    ) {
-
-      if (
-        !income ||
-        !income.data
-      ) {
-
+    function findNetProfitGrowth(income) {
+      if (!income || !income.data) {
         return null;
-
       }
 
+      const statement = income.data.income_statement;
 
-      const statement =
-        income.data.income_statement;
-
-
-      if (
-        !Array.isArray(statement)
-      ) {
-
+      if (!Array.isArray(statement)) {
         return null;
-
       }
 
+      const row = statement.find(item =>
+        String(item.category || "").trim().toLowerCase()
+          === "net_profit"
+      );
 
-      const row =
-        statement.find(
-          function(item) {
-
-            return String(
-              item.category || ""
-            )
-            .trim()
-            .toLowerCase()
-            === "net_profit";
-
-          }
-        );
-
-
-      if (
-        !row ||
-        !Array.isArray(row.history) ||
-        !row.history.length
-      ) {
-
+      if (!row || !Array.isArray(row.history) || !row.history.length) {
         return null;
-
       }
 
+      const latest = row.history[0];
 
-      const latest =
-        row.history[0];
-
-
-      if (
-        latest &&
-        latest.change !== undefined
-      ) {
-
-        return num(
-          latest.change
-        );
-
+      if (latest && latest.change !== undefined) {
+        return num(latest.change);
       }
-
 
       return null;
-
     }
 
-
-    function calculateFinancialStrength(
-      balance
-    ) {
-
+    function calculateFinancialStrength(balance) {
       if (
         !balance ||
         !balance.data ||
-        !Array.isArray(
-          balance.data.history
-        ) ||
+        !Array.isArray(balance.data.history) ||
         !balance.data.history.length
       ) {
-
         return null;
-
       }
 
-
-      const latest =
-        balance.data.history[0];
-
-
-      const assets =
-        num(
-          latest.total_asset
-        );
-
-
-      const liabilities =
-        num(
-          latest.total_liability
-        );
-
+      const latest = balance.data.history[0];
+      const assets = num(latest.total_asset);
+      const liabilities = num(latest.total_liability);
 
       if (
         !Number.isFinite(assets) ||
         !Number.isFinite(liabilities) ||
         assets <= 0
       ) {
-
         return null;
-
       }
 
-
-      const liabilityRatio =
-        liabilities /
-        assets *
-        100;
-
+      const liabilityRatio = liabilities / assets * 100;
 
       let score;
 
+      if (liabilityRatio <= 30) score = 100;
+      else if (liabilityRatio <= 40) score = 90;
+      else if (liabilityRatio <= 50) score = 80;
+      else if (liabilityRatio <= 60) score = 65;
+      else if (liabilityRatio <= 70) score = 50;
+      else if (liabilityRatio <= 80) score = 35;
+      else score = 20;
 
-      if (liabilityRatio <= 30) {
-
-        score = 100;
-
-      }
-      else if (liabilityRatio <= 40) {
-
-        score = 90;
-
-      }
-      else if (liabilityRatio <= 50) {
-
-        score = 80;
-
-      }
-      else if (liabilityRatio <= 60) {
-
-        score = 65;
-
-      }
-      else if (liabilityRatio <= 70) {
-
-        score = 50;
-
-      }
-      else if (liabilityRatio <= 80) {
-
-        score = 35;
-
-      }
-      else {
-
-        score = 20;
-
-      }
-
-
-      return {
-
-        score,
-        liabilityRatio
-
-      };
-
+      return { score, liabilityRatio };
     }
 
-
-    function growthScore(
-      growth
-    ) {
-
-      if (
-        !Number.isFinite(growth)
-      ) {
-
-        return null;
-
-      }
-
+    function growthScore(growth) {
+      if (!Number.isFinite(growth)) return null;
 
       if (growth >= 20) return 100;
       if (growth >= 15) return 90;
@@ -486,470 +262,274 @@ export async function onRequestPost(context) {
       if (growth >= -10) return 30;
 
       return 15;
-
     }
 
-
-    function scoreLabel(
-      score
-    ) {
-
-      if (
-        !Number.isFinite(score)
-      ) {
-
-        return "Insufficient Data";
-
-      }
-
-
+    function scoreLabel(score) {
+      if (!Number.isFinite(score)) return "Insufficient Data";
       if (score >= 80) return "Excellent";
       if (score >= 65) return "Good";
       if (score >= 50) return "Average";
 
       return "Weak";
-
     }
 
+    // =====================================================
+    // CHECK FRESHNESS
+    // =====================================================
 
-    /* =====================================================
-       FETCH ONE STOCK
-       ===================================================== */
+    async function isFresh(isin) {
+      /*
+       * We require both records to exist before skipping.
+       * This avoids skipping a company if its fundamentals
+       * exist but its Health Screener summary is missing.
+       */
+      const existing = await db.prepare(`
+        SELECT
+          cf.updated_at,
+          hs.isin AS health_isin
+        FROM company_fundamentals cf
+        LEFT JOIN health_screener_data hs
+          ON hs.isin = cf.isin
+        WHERE cf.isin = ?
+        LIMIT 1
+      `).bind(isin).first();
 
-    async function fetchFundamentals(
-      stock
-    ) {
+      if (!existing || !existing.health_isin || !existing.updated_at) {
+        return false;
+      }
 
-      const isin =
-        String(
-          stock.isin || ""
-        )
+      const timestamp = Date.parse(existing.updated_at);
+
+      if (!Number.isFinite(timestamp)) {
+        return false;
+      }
+
+      const age = Date.now() - timestamp;
+
+      return age >= 0 && age < FRESHNESS_MS;
+    }
+
+    // =====================================================
+    // FETCH ONE STOCK FROM UPSTOX
+    // =====================================================
+
+    async function fetchFundamentals(stock) {
+      const isin = String(stock.isin || "")
         .trim()
         .toUpperCase();
 
-
-      if (
-        !/^[A-Z]{2}[A-Z0-9]{9}[0-9]$/.test(
-          isin
-        )
-      ) {
-
+      if (!/^[A-Z]{2}[A-Z0-9]{9}[0-9]$/.test(isin)) {
         return {
-
           success: false,
-
           isin,
-
           message: "Invalid ISIN"
-
         };
-
       }
-
 
       const baseUrl =
         "https://api.upstox.com/v2/fundamentals/" +
         encodeURIComponent(isin);
 
-
       const headers = {
-
-        Accept:
-          "application/json",
-
-        Authorization:
-          `Bearer ${token}`
-
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`
       };
 
-
       try {
-
-        /*
-         * Deliberately fetch only ONE stock at a time.
-         *
-         * This is intentional.
-         * We are protecting the Upstox API while
-         * we build the centralized data engine.
-         */
-
-        const keyRatiosResponse =
-          await fetch(
-            baseUrl +
-            "/key-ratios",
-            {
-              method: "GET",
-              headers
-            }
-          );
-
-
-        const keyRatios =
-          await keyRatiosResponse.json();
-
-
-        /*
-         * Small delay before the next Upstox request.
-         */
-
-        await new Promise(
-          resolve =>
-            setTimeout(
-              resolve,
-              250
-            )
+        const keyRatiosResponse = await fetch(
+          baseUrl + "/key-ratios",
+          {
+            method: "GET",
+            headers
+          }
         );
 
+        const keyRatios = await keyRatiosResponse.json();
 
-        const incomeResponse =
-          await fetch(
-            baseUrl +
+        await new Promise(resolve => setTimeout(resolve, 250));
+
+        const incomeResponse = await fetch(
+          baseUrl +
             "/income-statement?type=consolidated&time_period=yearly",
-            {
-              method: "GET",
-              headers
-            }
-          );
-
-
-        const incomeStatement =
-          await incomeResponse.json();
-
-
-        await new Promise(
-          resolve =>
-            setTimeout(
-              resolve,
-              250
-            )
+          {
+            method: "GET",
+            headers
+          }
         );
 
+        const incomeStatement = await incomeResponse.json();
 
-        const balanceResponse =
-          await fetch(
-            baseUrl +
-            "/balance-sheet?type=consolidated",
-            {
-              method: "GET",
-              headers
-            }
-          );
+        await new Promise(resolve => setTimeout(resolve, 250));
 
+        const balanceResponse = await fetch(
+          baseUrl + "/balance-sheet?type=consolidated",
+          {
+            method: "GET",
+            headers
+          }
+        );
 
-        const balanceSheet =
-          await balanceResponse.json();
-
+        const balanceSheet = await balanceResponse.json();
 
         return {
-
           success:
             keyRatiosResponse.ok &&
             incomeResponse.ok &&
             balanceResponse.ok,
-
           isin,
-
           keyRatios,
-
           incomeStatement,
-
           balanceSheet,
-
           statusCodes: {
-
-            keyRatios:
-              keyRatiosResponse.status,
-
-            incomeStatement:
-              incomeResponse.status,
-
-            balanceSheet:
-              balanceResponse.status
-
+            keyRatios: keyRatiosResponse.status,
+            incomeStatement: incomeResponse.status,
+            balanceSheet: balanceResponse.status
           }
-
         };
-
-      }
-      catch(error) {
-
+      } catch (error) {
         return {
-
           success: false,
-
           isin,
-
-          message:
-            error.message ||
-            "Fundamental fetch failed"
-
+          message: error?.message || "Fundamental fetch failed"
         };
-
       }
-
     }
 
+    // =====================================================
+    // PROCESS ONE STOCK
+    // =====================================================
 
-    /* =====================================================
-       PROCESS STOCK
-       ===================================================== */
+    async function processStock(stock) {
+      const isin = String(stock.isin || "")
+        .trim()
+        .toUpperCase();
 
-    async function processStock(
-      stock
-    ) {
-
-      const result =
-        await fetchFundamentals(
-          stock
-        );
-
-
-      if (
-        !result.success
-      ) {
-
-        /*
-         * IMPORTANT:
-         * We do not overwrite existing good data
-         * when Upstox temporarily fails.
-         */
-
+      if (!/^[A-Z]{2}[A-Z0-9]{9}[0-9]$/.test(isin)) {
         return {
-
           success: false,
+          symbol: stock.symbol || "",
+          isin,
+          company_name: stock.company_name || "",
+          message: "Invalid ISIN"
+        };
+      }
 
-          symbol:
-            stock.symbol || "",
+      // Skip before making any Upstox requests.
+      try {
+        if (await isFresh(isin)) {
+          return {
+            success: true,
+            skipped: true,
+            symbol: stock.symbol || "",
+            isin,
+            company_name: stock.company_name || "",
+            message: "Fundamentals are already fresh"
+          };
+        }
+      } catch (error) {
+        /*
+         * Fail closed: if the freshness query fails, do not
+         * risk making unnecessary external API calls.
+         */
+        return {
+          success: false,
+          symbol: stock.symbol || "",
+          isin,
+          company_name: stock.company_name || "",
+          message:
+            "Unable to check fundamental freshness: " +
+            (error?.message || "Database query failed")
+        };
+      }
 
-          isin:
-            stock.isin || "",
+      const result = await fetchFundamentals({
+        ...stock,
+        isin
+      });
 
-          company_name:
-            stock.company_name || "",
-
+      if (!result.success) {
+        return {
+          success: false,
+          symbol: stock.symbol || "",
+          isin,
+          company_name: stock.company_name || "",
           message:
             result.message ||
             "Upstox fundamental data unavailable",
-
-          statusCodes:
-            result.statusCodes || null
-
+          statusCodes: result.statusCodes || null
         };
-
       }
 
-
-      const pe =
-        findRatio(
-          result.keyRatios,
-          "P/E"
-        );
-
-
-      const roe =
-        findRatio(
-          result.keyRatios,
-          "ROE"
-        );
-
-
-      const roce =
-        findRatio(
-          result.keyRatios,
-          "ROCE"
-        );
-
-
-      const roa =
-        findRatio(
-          result.keyRatios,
-          "ROA"
-        );
-
+      const pe = findRatio(result.keyRatios, "P/E");
+      const roe = findRatio(result.keyRatios, "ROE");
+      const roce = findRatio(result.keyRatios, "ROCE");
+      const roa = findRatio(result.keyRatios, "ROA");
 
       const earningsGrowth =
-        findNetProfitGrowth(
-          result.incomeStatement
-        );
-
+        findNetProfitGrowth(result.incomeStatement);
 
       const financial =
-        calculateFinancialStrength(
-          result.balanceSheet
-        );
+        calculateFinancialStrength(result.balanceSheet);
 
+      // StockGyan Health Score factors.
+      const businessQualityScore = roe
+        ? relativeScore(roe.company, roe.sector, false)
+        : null;
 
-      /*
-       * StockGyan Health factors
-       *
-       * Business Quality = ROE relative to sector
-       * ROCE = ROCE relative to sector
-       * Valuation = P/E relative to sector
-       * Growth = Net profit growth
-       * Financial Strength = liabilities/assets
-       * Profitability = ROA relative to sector
-       */
+      const roceScore = roce
+        ? relativeScore(roce.company, roce.sector, false)
+        : null;
 
-      const businessQualityScore =
-        roe
-          ? relativeScore(
-              roe.company,
-              roe.sector,
-              false
-            )
-          : null;
+      const peScore = pe
+        ? relativeScore(pe.company, pe.sector, true)
+        : null;
 
+      const growthScoreValue = growthScore(earningsGrowth);
 
-      const roceScore =
-        roce
-          ? relativeScore(
-              roce.company,
-              roce.sector,
-              false
-            )
-          : null;
+      const profitabilityScore = roa
+        ? relativeScore(roa.company, roa.sector, false)
+        : null;
 
-
-      const peScore =
-        pe
-          ? relativeScore(
-              pe.company,
-              pe.sector,
-              true
-            )
-          : null;
-
-
-      const growthScoreValue =
-        growthScore(
-          earningsGrowth
-        );
-
-
-      const profitabilityScore =
-        roa
-          ? relativeScore(
-              roa.company,
-              roa.sector,
-              false
-            )
-          : null;
-
-
-      const financialScore =
-        financial
-          ? financial.score
-          : null;
-
+      const financialScore = financial
+        ? financial.score
+        : null;
 
       const factors = [
-
-        {
-          score:
-            businessQualityScore,
-          weight: 30
-        },
-
-        {
-          score:
-            roceScore,
-          weight: 20
-        },
-
-        {
-          score:
-            peScore,
-          weight: 20
-        },
-
-        {
-          score:
-            growthScoreValue,
-          weight: 15
-        },
-
-        {
-          score:
-            financialScore,
-          weight: 10
-        },
-
-        {
-          score:
-            profitabilityScore,
-          weight: 5
-        }
-
+        { score: businessQualityScore, weight: 30 },
+        { score: roceScore, weight: 20 },
+        { score: peScore, weight: 20 },
+        { score: growthScoreValue, weight: 15 },
+        { score: financialScore, weight: 10 },
+        { score: profitabilityScore, weight: 5 }
       ];
-
 
       let weightedTotal = 0;
       let availableWeight = 0;
 
-
-      factors.forEach(
-        function(factor) {
-
-          if (
-            Number.isFinite(
-              factor.score
-            )
-          ) {
-
-            weightedTotal +=
-              factor.score *
-              factor.weight;
-
-            availableWeight +=
-              factor.weight;
-
-          }
-
+      factors.forEach(factor => {
+        if (Number.isFinite(factor.score)) {
+          weightedTotal += factor.score * factor.weight;
+          availableWeight += factor.weight;
         }
-      );
+      });
 
+      const availableMetrics = factors.filter(
+        factor => Number.isFinite(factor.score)
+      ).length;
 
-      const availableMetrics =
-        factors.filter(
-          function(factor) {
-
-            return Number.isFinite(
-              factor.score
-            );
-
-          }
-        ).length;
-
-
-      /*
-       * Minimum 4 of 6 factors required.
-       */
-
+      // Require at least 4 of 6 factors.
       const healthScore =
-        availableMetrics >= 4 &&
-        availableWeight > 0
-          ? weightedTotal /
-            availableWeight
+        availableMetrics >= 4 && availableWeight > 0
+          ? weightedTotal / availableWeight
           : null;
 
+      const label = scoreLabel(healthScore);
+      const updatedAt = new Date().toISOString();
 
-      const label =
-        scoreLabel(
-          healthScore
-        );
+      // =====================================================
+      // SAVE COMPLETE FUNDAMENTALS
+      // =====================================================
 
-
-      const updatedAt =
-        new Date()
-          .toISOString();
-
-
-      /* =================================================
-         SAVE TO D1
-         ================================================= */
-
-      // Save complete company fundamentals to D1 before updating the
-      // existing Health Screener summary.
       await db.prepare(`
         INSERT INTO company_fundamentals (
           isin,
@@ -969,7 +549,7 @@ export async function onRequestPost(context) {
           balance_sheet = excluded.balance_sheet,
           updated_at = excluded.updated_at
       `).bind(
-        result.isin,
+        isin,
         stock.symbol || "",
         stock.company_name || "",
         JSON.stringify(result.keyRatios),
@@ -978,8 +558,11 @@ export async function onRequestPost(context) {
         updatedAt
       ).run();
 
-      await db.prepare(
-        `
+      // =====================================================
+      // SAVE HEALTH SCREENER SUMMARY
+      // =====================================================
+
+      await db.prepare(`
         INSERT INTO health_screener_data (
           symbol,
           company_name,
@@ -999,274 +582,112 @@ export async function onRequestPost(context) {
           updated_at
         )
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-
         ON CONFLICT(isin) DO UPDATE SET
-
-          symbol =
-            excluded.symbol,
-
-          company_name =
-            excluded.company_name,
-
-          exchange =
-            excluded.exchange,
-
-          business_quality =
-            excluded.business_quality,
-
-          roce =
-            excluded.roce,
-
-          roe =
-            excluded.roe,
-
-          pe_ratio =
-            excluded.pe_ratio,
-
-          earnings_growth =
-            excluded.earnings_growth,
-
-          debt_equity =
-            excluded.debt_equity,
-
-          profitability =
-            excluded.profitability,
-
-          health_score =
-            excluded.health_score,
-
-          quality_label =
-            excluded.quality_label,
-
-          available_metrics =
-            excluded.available_metrics,
-
-          data_status =
-            excluded.data_status,
-
-          updated_at =
-            excluded.updated_at
-        `
-      )
-      .bind(
-
+          symbol = excluded.symbol,
+          company_name = excluded.company_name,
+          exchange = excluded.exchange,
+          business_quality = excluded.business_quality,
+          roce = excluded.roce,
+          roe = excluded.roe,
+          pe_ratio = excluded.pe_ratio,
+          earnings_growth = excluded.earnings_growth,
+          debt_equity = excluded.debt_equity,
+          profitability = excluded.profitability,
+          health_score = excluded.health_score,
+          quality_label = excluded.quality_label,
+          available_metrics = excluded.available_metrics,
+          data_status = excluded.data_status,
+          updated_at = excluded.updated_at
+      `).bind(
         stock.symbol || "",
-
         stock.company_name || "",
-
-        result.isin,
-
+        isin,
         stock.exchange || "NSE",
-
         businessQualityScore,
-
-        roce
-          ? roce.company
-          : null,
-
-        roe
-          ? roe.company
-          : null,
-
-        pe
-          ? pe.company
-          : null,
-
+        roce ? roce.company : null,
+        roe ? roe.company : null,
+        pe ? pe.company : null,
         earningsGrowth,
-
-        /*
-         * Keep this NULL for now.
-         *
-         * The current Health Screener uses
-         * liabilities/assets as its financial
-         * strength proxy, not true Debt/Equity.
-         *
-         * We will add exact D/E separately.
-         */
-
         null,
-
-        roa
-          ? roa.company
-          : null,
-
+        roa ? roa.company : null,
         healthScore,
-
         label,
-
         availableMetrics,
-
-        availableMetrics >= 4
-          ? "complete"
-          : "partial",
-
+        availableMetrics >= 4 ? "complete" : "partial",
         updatedAt
-
-      )
-      .run();
-
+      ).run();
 
       return {
-
         success: true,
-
-        symbol:
-          stock.symbol || "",
-
-        company_name:
-          stock.company_name || "",
-
-        isin:
-          result.isin,
-
+        skipped: false,
+        symbol: stock.symbol || "",
+        company_name: stock.company_name || "",
+        isin,
         healthScore,
-
         label,
-
         availableMetrics,
-
         values: {
-
-          roe:
-            roe
-              ? roe.company
-              : null,
-
-          roce:
-            roce
-              ? roce.company
-              : null,
-
-          pe:
-            pe
-              ? pe.company
-              : null,
-
+          roe: roe ? roe.company : null,
+          roce: roce ? roce.company : null,
+          pe: pe ? pe.company : null,
           earningsGrowth,
-
-          roa:
-            roa
-              ? roa.company
-              : null,
-
-          financialStrength:
-            financial
-              ? financial.score
-              : null,
-
-          liabilityRatio:
-            financial
-              ? financial.liabilityRatio
-              : null
-
+          roa: roa ? roa.company : null,
+          financialStrength: financial ? financial.score : null,
+          liabilityRatio: financial ? financial.liabilityRatio : null
         }
-
       };
-
     }
 
-
-    /* =====================================================
-       RUN CONTROLLED REFRESH
-       ===================================================== */
+    // =====================================================
+    // RUN CONTROLLED REFRESH
+    // =====================================================
 
     const results = [];
 
+    for (const stock of requestedStocks) {
+      const result = await processStock(stock);
+      results.push(result);
 
-    for (
-      const stock of requestedStocks
-    ) {
-
-      const result =
-        await processStock(
-          stock
-        );
-
-
-      results.push(
-        result
-      );
-
-
-      /*
-       * Delay between stocks.
-       *
-       * We are intentionally conservative.
-       */
-
-      await new Promise(
-        resolve =>
-          setTimeout(
-            resolve,
-            500
-          )
-      );
-
+      // Keep the existing conservative delay between stocks.
+      await new Promise(resolve => setTimeout(resolve, 500));
     }
 
-
-    /* =====================================================
-       RESPONSE
-       ===================================================== */
+    // =====================================================
+    // RESPONSE
+    // =====================================================
 
     return Response.json(
       {
-
         status: "success",
-
-        refreshed:
-          results.filter(
-            item =>
-              item.success
-          ).length,
-
-        failed:
-          results.filter(
-            item =>
-              !item.success
-          ).length,
-
+        refreshed: results.filter(
+          item => item.success && !item.skipped
+        ).length,
+        skipped: results.filter(
+          item => item.skipped
+        ).length,
+        failed: results.filter(
+          item => !item.success
+        ).length,
         results
-
       },
       {
         status: 200,
-
         headers: {
-
-          "Cache-Control":
-            "no-store"
-
+          "Cache-Control": "no-store"
         }
-
       }
     );
-
-
-  }
-  catch(error) {
-
-    console.error(
-      "Health refresh error:",
-      error
-    );
-
+  } catch (error) {
+    console.error("Health refresh error:", error);
 
     return Response.json(
       {
-
         status: "error",
-
         message:
-          error.message ||
+          error?.message ||
           "Unable to refresh Health Screener data"
-
       },
-      {
-        status: 500
-      }
+      { status: 500 }
     );
-
   }
-
 }
