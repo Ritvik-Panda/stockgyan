@@ -1112,8 +1112,10 @@
     .smart-import-warn { background:#fffaeb; color:#b54708; }
     .smart-import-actions { display:flex; justify-content:flex-end; gap:9px; flex-wrap:wrap; margin-top:16px; }
     .smart-import-note { margin-top:12px; font-size:12px; color:#667085; line-height:1.5; }
+    #refreshDashboardButton:disabled { opacity:.7; cursor:wait; }
     @media (max-width:700px) {
       .smart-import-summary { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      #refreshDashboardButton { right:12px !important; bottom:12px !important; padding:11px 14px !important; }
     }
 
 </style>
@@ -1148,6 +1150,13 @@
 
   </header>
 
+  <button id="refreshDashboardButton" type="button"
+    onclick="refreshDashboard()"
+    title="Reload your saved portfolio and refresh dashboard data"
+    style="position:fixed;right:20px;bottom:20px;z-index:9998;display:flex;align-items:center;gap:8px;border:0;border-radius:999px;padding:13px 18px;background:#082a63;color:#fff;font-weight:800;font-size:13px;box-shadow:0 8px 24px rgba(8,42,99,.24);cursor:pointer;">
+    <span aria-hidden="true">↻</span>
+    <span class="refresh-label">Refresh Dashboard</span>
+  </button>
 
   <!-- =========================
        PAGE
@@ -2617,15 +2626,12 @@
               portfolios[0]?.id || "default";
           }
 
-              // Initial dashboard rendering     renderHoldings();     updateSummary();     renderMovingAverageMonitor();     updateMarketDataStatus();      // Load the logged-in user's saved portfolio first.     // The server-load function already triggers the initial refreshes.     loadPortfolioFromServer().then(function(loaded) {       if (!loaded) {         console.warn(           "Portfolio could not be loaded from the server. " +           "Automatic refresh may use the currently available local data."         );       }        // Start periodic updates after the initial load attempt.       startQuoteRefresh();       startMovingAverageRefresh();     });
+          renderHoldings();
           updateSummary();
           renderMovingAverageMonitor();
-          fetchPortfolioQuotes();
-          refreshMovingAverages();
-          refreshPortfolioPerformance();
-          refreshPortfolioAnalytics();
-          refreshPortfolioHealth();
 
+          // Data refreshes are coordinated after the saved portfolio has
+          // finished loading, avoiding duplicate/racing requests on startup.
           return true;
         }
 
@@ -2664,10 +2670,6 @@
           renderHoldings();
           updateSummary();
           renderMovingAverageMonitor();
-          fetchPortfolioQuotes();
-          refreshMovingAverages();
-          refreshPortfolioPerformance();
-          refreshPortfolioHealth();
 
           // Save only the fresh default state for this logged-in email.
           await syncPortfolioToServer();
@@ -6846,18 +6848,76 @@
     );
 
 
+    // Render the page shell immediately, then load the logged-in user's
+    // saved portfolio before starting periodic quote/technical refreshes.
     renderHoldings();
     updateSummary();
     renderMovingAverageMonitor();
     updateMarketDataStatus();
-    startQuoteRefresh();
-    startMovingAverageRefresh();
-    fetchPortfolioQuotes();
-    refreshMovingAverages();
-    refreshPortfolioPerformance();
-    refreshPortfolioAnalytics();
-    refreshPortfolioHealth();
-    loadPortfolioFromServer();
+
+    // Refresh every portfolio section automatically after the account's
+    // saved data has loaded. The same helper is used by the manual button.
+    async function refreshAllDashboardSections() {
+      renderPortfolios();
+      renderHoldings();
+      updateSummary();
+      renderMovingAverageMonitor();
+      updateMarketDataStatus();
+
+      await Promise.allSettled([
+        fetchPortfolioQuotes(),
+        refreshMovingAverages(),
+        refreshPortfolioPerformance(),
+        refreshPortfolioAnalytics(),
+        refreshPortfolioHealth()
+      ]);
+
+      // Repaint dependent UI after quotes/analytics finish.
+      updateSummary();
+      renderHoldings();
+      renderMovingAverageMonitor();
+      updateMarketDataStatus();
+    }
+
+    loadPortfolioFromServer().then(async function(loaded) {
+      if (!loaded) {
+        console.warn(
+          "StockGyan: saved portfolio could not be loaded. " +
+          "The dashboard is showing the currently available local state."
+        );
+      }
+
+      // Initial open refreshes Holdings, Technical Data, Performance,
+      // Portfolio Analytics and Portfolio Health automatically.
+      await refreshAllDashboardSections();
+
+      // Start periodic updates only after initial refresh has started/completed.
+      startQuoteRefresh();
+      startMovingAverageRefresh();
+    });
+
+    // One-click manual refresh for the whole dashboard.
+    window.refreshDashboard = async function() {
+      const button = document.getElementById("refreshDashboardButton");
+      const label = button ? button.querySelector(".refresh-label") : null;
+      if (button && button.disabled) return;
+
+      if (button) button.disabled = true;
+      if (label) label.textContent = "Refreshing…";
+
+      try {
+        // Re-fetch this account's latest saved state first, then refresh
+        // all dashboard sections using the existing APIs/functions.
+        await loadPortfolioFromServer();
+        await refreshAllDashboardSections();
+      } catch (error) {
+        console.error("Dashboard refresh failed:", error);
+        alert("Some dashboard data could not be refreshed. Please try again.");
+      } finally {
+        if (button) button.disabled = false;
+        if (label) label.textContent = "Refresh Dashboard";
+      }
+    };
 
 
     /* --------------------------------
