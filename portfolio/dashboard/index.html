@@ -5434,18 +5434,44 @@
       }
     );
 
+    // When the user switches portfolios, refresh every section using the
+    // newly selected portfolio. Clear portfolio-specific caches first so
+    // prices and technical data from the previous portfolio are not reused.
+    let portfolioSwitchRefreshId = 0;
+
     portfolioSelect.addEventListener(
       "change",
-      function() {
+      async function() {
+        const refreshId = ++portfolioSwitchRefreshId;
+
         quoteCache = {};
         quoteSource = "";
         movingAverageCache = {};
         performanceCache = {};
+
+        // Immediately replace the visible holdings/summary with the selected
+        // portfolio, then fetch all related data for that portfolio.
+        renderHoldings();
+        updateSummary();
+        renderMovingAverageMonitor();
+        updateMarketDataStatus();
+
+        await Promise.allSettled([
+          fetchPortfolioQuotes(),
+          refreshMovingAverages(),
+          refreshPortfolioPerformance(),
+          refreshPortfolioAnalytics(),
+          refreshPortfolioHealth()
+        ]);
+
+        // Ignore an older portfolio-switch completion if the user switched
+        // again while the requests were running.
+        if (refreshId !== portfolioSwitchRefreshId) return;
+
+        updateSummary();
         renderHoldings();
         renderMovingAverageMonitor();
-        fetchPortfolioQuotes();
-        refreshMovingAverages();
-        refreshPortfolioPerformance();
+        updateMarketDataStatus();
       }
     );
 
@@ -6464,6 +6490,7 @@
 
     async function refreshPortfolioHealth() {
 
+      const requestedPortfolioId = portfolioSelect.value;
       const list = getCurrentPortfolioHoldings();
 
       const scoreBox = document.getElementById("portfolioHealthScore");
@@ -6508,10 +6535,9 @@
         return;
       }
 
-      if (portfolioHealthRequestInProgress) {
-        return;
-      }
-
+      // Do not skip a refresh when the user changes portfolios while an
+      // earlier health request is still running. Each request checks its
+      // portfolio ID before painting results, preventing stale health data.
       portfolioHealthRequestInProgress = true;
 
       scoreBox.textContent = "…";
@@ -6531,6 +6557,10 @@
             return fetchPortfolioHealthFundamentals(item);
           })
         );
+
+        // A slower response from a previously selected portfolio must never
+        // overwrite the currently selected portfolio's health panel.
+        if (portfolioSelect.value !== requestedPortfolioId) return;
 
         let businessQualityTotal = 0;
         let businessQualityWeight = 0;
