@@ -1,0 +1,291 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#082a63">
+<meta name="description" content="GyanScreener by StockGyan — curated stock screening strategies and fundamental analysis.">
+<title>GyanScreener | StockGyan</title>
+<style>
+:root{--navy:#082a63;--green:#159447;--orange:#f28c28;--bg:#f4f7fb;--text:#152238;--muted:#68778b;--line:#e3e9f1}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.top{background:var(--navy);color:white;padding:18px max(20px,calc((100% - 1450px)/2));display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px;font-weight:800;font-size:22px}
+.logo{display:grid;place-items:center;width:42px;height:42px;border-radius:12px;background:var(--green);font-size:23px}
+.brand small{display:block;color:#b9cbea;font-size:11px;letter-spacing:2px;font-weight:600}
+.top a{color:#fff;text-decoration:none;border:1px solid #59739c;padding:9px 13px;border-radius:9px;font-size:13px}
+main{max-width:1450px;margin:auto;padding:26px 20px 60px}
+.hero{background:linear-gradient(120deg,#082a63,#12498a);color:white;border-radius:18px;padding:30px;position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;width:260px;height:260px;border:40px solid #ffffff0b;border-radius:50%;right:-55px;top:-100px}
+.eyebrow{font-size:12px;letter-spacing:1.8px;font-weight:800;color:#9ee8b6}
+h1{font-size:clamp(27px,4vw,42px);margin:10px 0}
+.hero p{max-width:720px;color:#d8e5f8;line-height:1.65;margin:0}
+.pill{display:inline-flex;align-items:center;gap:7px;border-radius:30px;padding:7px 11px;font-size:12px;font-weight:700;background:#ffffff15;color:#e6f6eb;margin-top:18px}
+.dot{height:8px;width:8px;background:#54dc84;border-radius:50%}
+.section-title{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:28px 0 14px}
+h2{font-size:21px;margin:0}
+h3{font-size:16px;margin:0}
+.muted{color:var(--muted);font-size:13px;line-height:1.6}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.strategy{background:white;border:1px solid var(--line);border-radius:14px;padding:19px;text-align:left;color:var(--text);transition:.18s}
+.strategy:hover{border-color:var(--green);transform:translateY(-2px);box-shadow:0 8px 24px #082a630d}
+.strategy.active{border:2px solid var(--green);padding:18px}
+.strategy-icon{width:42px;height:42px;border-radius:11px;background:#e7f6ec;color:var(--green);display:grid;place-items:center;font-size:22px;margin-bottom:14px}
+.strategy p{font-size:13px;color:var(--muted);line-height:1.6}
+.tag{display:inline-block;background:#e9f7ee;color:#18773b;border-radius:6px;padding:5px 8px;font-size:11px;font-weight:800}
+.panel{background:#fff;border:1px solid var(--line);border-radius:15px;margin-top:20px;overflow:hidden}
+.panel-head{padding:19px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:16px 20px}
+.stat{background:#f6f8fc;border:1px solid var(--line);border-radius:11px;padding:15px}
+.stat span{font-size:12px;color:var(--muted)}
+.stat strong{display:block;font-size:26px;margin-top:5px}
+.rules{padding:4px 20px 20px}
+.rule-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:9px;margin-top:14px}
+.rule{display:flex;gap:9px;align-items:center;background:#f7f9fc;border:1px solid var(--line);padding:10px;border-radius:8px;font-size:13px}
+.rule b{color:var(--green)}
+.controls{display:flex;gap:9px;flex-wrap:wrap;padding:16px 20px;border-bottom:1px solid var(--line)}
+.controls input,.controls select{background:#fff;border:1px solid #d7dfeb;border-radius:9px;padding:10px 12px;color:var(--text);min-width:0}
+.controls input{flex:1;min-width:180px}
+.btn{border:0;border-radius:9px;padding:10px 15px;font-weight:750;font-size:13px}
+.primary{background:var(--green);color:white}
+.secondary{background:#edf2f9;color:var(--navy)}
+.status{padding:12px 20px;background:#f8fbff;border-bottom:1px solid var(--line);font-size:13px;color:var(--muted)}
+.progress{height:4px;background:#e5ebf4;overflow:hidden}
+.progress div{height:100%;width:0;background:var(--green);transition:width .2s}
+.table-wrap{overflow:auto}
+table{width:100%;border-collapse:collapse;white-space:nowrap;font-size:13px}
+th{background:#f5f7fb;color:#526176;text-align:right;font-size:11px;letter-spacing:.3px;padding:13px 14px;border-bottom:1px solid var(--line)}
+td{padding:13px 14px;border-bottom:1px solid #edf0f5;text-align:right}
+th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){text-align:left}
+tbody tr:hover{background:#f7fbf8}
+.company{font-weight:750;color:#123c78}
+.sector{display:block;color:var(--muted);font-size:11px;margin-top:4px}
+.positive{color:#178447;font-weight:700}
+.empty{text-align:center;padding:30px;color:var(--muted)}
+.footer{text-align:center;color:var(--muted);font-size:12px;line-height:1.7;padding:24px}
+.note{padding:14px 20px;color:#7b5921;background:#fff8e9;border-top:1px solid #f5e7c8;font-size:12px;line-height:1.6}
+@media(max-width:600px){main{padding:16px 12px 40px}.hero{padding:23px 18px}.stats{padding:12px;gap:7px}.stat{padding:10px}.stat strong{font-size:21px}.panel-head{padding:15px}.rules{padding:5px 13px 16px}.controls{padding:12px}.top{padding:14px}.stats .stat span{font-size:11px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><div class="logo">↗</div><div>StockGyan<small>GYANSCREENER</small></div></div>
+  <a href="/">← Back to StockGyan</a>
+</header>
+<main>
+  <section class="hero">
+    <div class="eyebrow">YOUR STRATEGIES. YOUR STOCKS.</div>
+    <h1>Welcome to GyanScreener</h1>
+    <p>A curated library of stock screeners built around your investment criteria. Explore strategies, review the supplied stock data and discover companies through a clean, professional interface.</p>
+    <div class="pill"><span class="dot"></span> Curated dataset · Updated when you provide new data</div>
+  </section>
+
+  <div class="section-title"><div><h2>Your Screeners</h2><div class="muted">Select a strategy to view its stock list and criteria.</div></div></div>
+  <section class="cards">
+    <button class="strategy active" id="strategy1">
+      <div class="strategy-icon">⌕</div>
+      <span class="tag">SCREENER 01</span>
+      <h3 style="margin-top:12px">Advanced Screener</h3>
+      <p>Fundamental stock selection using your 11 custom screening conditions and supplied company dataset.</p>
+      <strong id="cardCount">74 supplied stocks</strong>
+    </button>
+    <button class="strategy" id="addStrategy">
+      <div class="strategy-icon">＋</div>
+      <h3>Add another screener</h3>
+      <p>Future strategies will have their own name, screening rules and dataset supplied by you.</p>
+      <span class="muted">Ready for future screeners</span>
+    </button>
+  </section>
+
+  <section class="panel" id="screenPanel">
+    <div class="panel-head">
+      <div><h2>Advanced Screener</h2><div class="muted">Your supplied stock list and screening strategy</div></div>
+      <button class="btn primary" id="scanBtn">▶ Run visual scan</button>
+    </div>
+    <div class="stats">
+      <div class="stat"><span>Stocks in supplied list</span><strong id="total">74</strong></div>
+      <div class="stat"><span>Stocks displayed</span><strong id="shown">74</strong></div>
+      <div class="stat"><span>Screening conditions</span><strong>11</strong></div>
+    </div>
+    <div class="rules">
+      <h3>Your screening criteria</h3>
+      <div class="muted">The rules below document your strategy. The supplied stock list is displayed as provided; pass/fail status will only be calculated once the source columns are mapped to these conditions.</div>
+      <div class="rule-list" id="ruleList"></div>
+    </div>
+    <div class="panel-head">
+      <div><h3>Stock results</h3><div class="muted">Search or sort the supplied dataset.</div></div>
+      <button class="btn secondary" id="csvBtn">↓ Export CSV</button>
+    </div>
+    <div class="controls">
+      <input id="search" type="search" placeholder="Search company or sector…">
+      <select id="sort">
+        <option value="original">Original supplied order</option>
+        <option value="priceDesc">Price: high to low</option>
+        <option value="priceAsc">Price: low to high</option>
+        <option value="capDesc">Market cap: high to low</option>
+        <option value="nameAsc">Company name: A–Z</option>
+      </select>
+    </div>
+    <div class="status" id="status">Dataset loaded. All supplied stocks are available below.</div>
+    <div class="progress"><div id="progressBar"></div></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>#</th><th>Company / Sector</th><th>Price (₹)</th><th>Market Cap (₹ Cr)</th>
+          <th>Metric 1</th><th>Metric 2</th><th>Metric 3</th><th>Metric 4</th><th>Metric 5</th><th>Metric 6</th>
+        </tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <div class="note">Data integrity: prices, market capitalizations and six additional values are shown from the supplied list. The six metric headings are provisional because the original column labels were not supplied. This page does not claim that the displayed stocks currently pass all 11 rules or that their prices are live.</div>
+  </section>
+  <div class="footer">GyanScreener · StockGyan<br>For educational and informational purposes. This screener is not a recommendation to buy or sell securities.</div>
+</main>
+<script>
+const rules=[
+"ROCE Y1 > 12%","ROE Y1 > 12%","Debt to Equity Y1 < 0.5",
+"Promoter Holding Q1 > 50%","Promoter Pledging Q1 = 0",
+"EPS TTM > 0","PEG Ratio < 1","Market Cap > ₹200 Cr",
+"Net Profit Growth QoQ > 20%","Net Sales Y1 > 20%",
+"Cash Flow per Share > 0"
+];
+const raw=[
+["Bajaj Finserv Ltd.","Finance - Investment",1729,276996.41,26.08,124.81,16.55,19.20,137.38],
+["Oracle Financial Services Software Ltd.","IT - Software",10386,90464.15,11.03,25.48,38.97,49.58,15.82],
+["Torrent Power Ltd.","Power Generation/Distribution",1226.30,61793.69,3.14,24.94,14.10,15.82,2.83],
+["Authum Investment & Infrastructure Ltd.","Finance - Investment",571.90,48567.21,3.10,23.21,13.16,13.63,19.27],
+["K.P.R. Mill Ltd.","Textile",1100.30,37609.79,8.36,57.82,14.88,18.59,8.73],
+["CRISIL Ltd.","Ratings",4547.90,33258.80,16.22,58.29,32.51,38.11,18.51],
+["RR Kabel Ltd.","Cable",2388,27009.59,9.77,44.92,20.68,28.32,2.78],
+["HBL Engineering Ltd.","Batteries",833.15,23094.50,10.14,30.29,43.89,58.27,7.10],
+["Sarda Energy & Minerals Ltd.","Steel & Iron Products",488.85,17226.16,2.45,19.55,15.14,18.11,3.97],
+["Fine Organic Industries Ltd.","Chemicals",5461.50,16744.95,6.32,43.04,14.64,20.25,7.36],
+["Garware Hi-Tech Films Ltd.","Plastic Products",6970,16192.98,5.97,41.87,13.67,17.96,8.31],
+["Supreme Petrochem Ltd.","Petrochemicals",767.25,14427.47,5.54,29.89,14.23,20,2.70],
+["JSW Dulux Ltd.","Paints",3045,13867.03,5.48,7.07,103.09,124.27,3.85],
+["Shipping Corporation Of India Ltd.","Shipping",284.90,13270.61,1.45,8.06,16.34,15.21,2.30],
+["Sudeep Pharma Ltd.","Pharmaceuticals & Drugs",1000.70,11302.77,13.79,97.27,17.73,20.80,33.39],
+["Elecon Engineering Company Ltd.","Engineering - Industrial Equipments",480.35,10779.05,4.86,36.89,25.75,32.86,5.35],
+["Blue Dart Express Ltd.","Courier Services",4390.90,10418.70,5.45,37.28,13.91,20.70,1.70],
+["Blue Jet Healthcare Ltd.","Pharmaceuticals & Drugs",520.65,9854.64,4.40,41.95,19.88,27.18,10.40],
+["Alkyl Amines Chemicals Ltd.","Chemicals",1844.70,9435.31,5.81,41.90,12.30,16.65,6.14],
+["Kennametal India Ltd.","Engineering - Industrial Equipments",4122.40,9060.31,10.61,46.23,13.91,18.99,7.74],
+["Knowledge Marine & Engineering Works Ltd.","Ship Building",3327.70,8440.48,11,64.12,21.20,17.21,37.45],
+["Clean Science And Technology Ltd.","Chemicals",783.80,8330.55,4.85,33.60,16.22,21.67,10.22],
+["Kanohar Electricals Ltd.","Electric Equipment",1019.80,8075.47,11.53,62.25,42.14,54.27,12.35],
+["Indian Metals & Ferro Alloys Ltd.","Ferro & Silica Manganese",1179.80,6365.51,2.21,12.14,16.93,18.73,2.25],
+["Rashi Peripherals Ltd.","Trading",866.25,5752.40,2.79,19.19,14.20,16.65,0.38],
+["Gulf Oil Lubricants India Ltd.","Lubricants",1089.90,5401.06,3.24,14.15,23.43,26.94,1.35],
+["Shakti Pumps (India) Ltd.","Compressors / Pumps",422.75,5216.65,3.21,27.12,18.44,24.28,1.97],
+["Quess Corp Ltd.","Professional Services",332.95,4973.80,4.99,23.12,20.66,24.75,0.35],
+["Jeena Sikho Lifecare Ltd.","Trading",388.30,4827.50,9.10,20.41,61.72,84.84,6.02],
+["Filatex India Ltd.","Textile - Spinning",106.63,4734.99,3.05,24.62,12.98,17.21,1.14],
+["Epigral Ltd.","Chemicals",995.80,4296.01,1.85,15.81,16.15,15.69,1.70],
+["Antelopus Selan Energy Ltd.","Oil Exploration",1003.10,3539.72,5.03,26.67,15.07,19.72,12.69],
+["Apcotex Industries Ltd.","Rubber Products",597.45,3097.48,4.43,19.22,17.27,20.12,2.15],
+["Panama Petrochem Ltd.","Lubricants",488.10,2952.69,2.32,8.89,14.43,19.76,1.51],
+["Jubilant Agri And Consumer Products Ltd.","Chemicals",1854.40,2809.88,5.75,21.48,33.70,41.71,1.51],
+["Crizac Ltd.","Educational Institutions",156.35,2735.85,4.54,15.31,30.93,41.34,10.26],
+["Navneet Education Ltd.","Printing And Publishing",122.76,2715.61,1.17,9.56,48.12,48.72,1.57],
+["Monolithisch India Ltd.","Refractories",1225.30,2663.31,19.88,137.32,23.90,30.48,22.10],
+["Alembic Ltd.","Construction - Real Estate",97.36,2500.03,2.99,20.48,14.87,17.47,10.78],
+["Pix Transmissions Ltd.","Rubber Products",1817.20,2475.97,3.62,21.35,15.46,20.50,4.67],
+["Schneider Electric President Systems Ltd.","IT - Hardware",1825,2207.52,9.11,58.51,17.24,23.45,5.75],
+["GSP Crop science Ltd.","Pesticides & Agrochemicals",465.90,2167.31,2.83,24.13,15.54,18.66,1.35],
+["Motisons Jewellers Ltd.","Diamond & Jewellery",17.58,1999.74,3.20,29.97,15.26,17.80,4.08],
+["NGL Fine-Chem Ltd.","Pharmaceuticals & Drugs",2784.60,1720.33,5.11,34.11,13.89,14.96,3.52],
+["Jindal Drilling & Industries Ltd.","Oil Exploration",570,1651.92,1.09,9.80,12.42,15.97,1.66],
+["Jai Corp Ltd.","Plastic Products",91.97,1614.12,1.15,18.74,12.20,13.85,3.20],
+["Jagsonpal Pharmaceuticals Ltd.","Pharmaceuticals & Drugs",218.37,1442.54,6.26,31.72,18.19,22.69,5.02],
+["Arrow Greentech Ltd.","Packaging",805.75,1215.71,4.92,20.47,20.93,28.78,7.76],
+["Butterfly Gandhimathi Appliances Ltd.","Consumer Durables - Domestic Appliances",603.50,1079.03,2.70,21.04,13.12,18.19,1.14],
+["ADC India Communications Ltd.","Telecommunication - Equipment",2337.20,1075.11,11.28,47.70,24.16,31.44,5.37],
+["Gandhi Special Tubes Ltd.","Steel & Iron Products",934.40,1054.37,3.97,14.12,23.51,31.31,5.50],
+["Gulshan Polyols Ltd.","Breweries & Distilleries",168.34,1049.95,1.36,7.12,16.09,18.29,0.45],
+["Pudumjee Paper Products Ltd.","Paper & Paper Products",97.29,923.77,1.31,10.14,14.95,20.10,1.14],
+["Sunshield Chemicals Ltd.","Chemicals",1031.10,906.84,3.41,25,17.02,19.90,2.06],
+["Dharmaj Crop Guard Ltd.","Pesticides & Agrochemicals",260.90,881.77,1.81,14.66,12.97,16.45,0.77],
+["Shree Rama Multi-Tech Ltd.","Plastic Products",58.53,780.68,4.21,30.64,14.98,17.70,3.26],
+["Magna Electro Castings Ltd.","Castings/Forgings",1352.10,572.22,3.85,36.82,13.47,17.47,2.91],
+["Shri Jagdamba Polymers Ltd.","Plastic Products",650.70,569.88,1.62,12.02,13.23,16.12,1.37],
+["Anlon Technology Solution Ltd.","Engineering",740,555.73,4.53,40.05,21.10,27.09,5.25],
+["Integra Engineering India Ltd.","Engineering - Industrial Equipments",153.90,529.80,4.58,35.69,14.95,18.52,3.14],
+["International Conveyors Ltd.","Engineering - Industrial Equipments",78.19,498.70,0.92,3.67,17.38,20.44,2.45],
+["Aryaman Capital Markets Ltd.","Finance - Investment",415,497.05,4.29,20.21,29.97,32.04,8.41],
+["Kriti Nutrients Ltd.","Edible Oil",70.79,354.68,1.49,10.53,15.35,20.31,0.38],
+["Career Point Edutech Ltd.","Educational Institutions",179.05,325.74,3.99,13.98,34.52,46.70,6.47],
+["GTV Engineering Ltd.","Engineering",18.67,284.53,2.61,17.65,26.42,28.50,2.77],
+["Saraswati Saree Depot Ltd.","Trading",68.46,271.10,1.35,11.46,12.57,17.18,0.43],
+["India Gelatine & Chemicals Ltd.","Chemicals",369,261.71,1.30,10.03,13.75,17.66,1.54],
+["Aveer Foods Ltd.","Consumer Food",553,247.77,4.80,68.41,20.25,19.15,2.28],
+["Kaycee Industries Ltd.","Electric Equipment",752.30,238.74,6.91,50.41,15.96,23.13,3.98],
+["Resonance Specialties Ltd.","Chemicals",198.95,229.67,3.05,15.83,16,21.31,2.54],
+["IVP Ltd.","Chemicals",218.85,225.99,1.32,7.17,12.60,13.95,0.38],
+["Nitin Castings Ltd.","Castings/Forgings",439,225.70,2.39,29.71,12.20,14.96,1.53],
+["Cochin Minerals & Rutile Ltd.","Chemicals",286.50,224.33,1.22,10.37,15.01,23.32,0.70],
+["Multibase India Ltd.","Petrochemicals",169.65,214.10,2.32,18.64,13.76,18.52,3.03]
+];
+const stocks=raw.map((r,i)=>({id:i+1,name:r[0],sector:r[1],price:r[2],cap:r[3],metrics:r.slice(4)}));
+const fmt=n=>Number(n).toLocaleString("en-IN",{maximumFractionDigits:2,minimumFractionDigits:2});
+const ruleList=document.getElementById("ruleList");
+rules.forEach(rule=>{const d=document.createElement("div");d.className="rule";const icon=document.createElement("b");icon.textContent="✓";const t=document.createElement("span");t.textContent=rule;d.append(icon,t);ruleList.appendChild(d)});
+const rows=document.getElementById("rows");
+const search=document.getElementById("search");
+const sort=document.getElementById("sort");
+function render(){
+ let list=stocks.filter(s=>(s.name+" "+s.sector).toLowerCase().includes(search.value.trim().toLowerCase()));
+ if(sort.value==="priceDesc")list.sort((a,b)=>b.price-a.price);
+ if(sort.value==="priceAsc")list.sort((a,b)=>a.price-b.price);
+ if(sort.value==="capDesc")list.sort((a,b)=>b.cap-a.cap);
+ if(sort.value==="nameAsc")list.sort((a,b)=>a.name.localeCompare(b.name));
+ rows.replaceChildren();
+ list.forEach(s=>{
+  const tr=document.createElement("tr");
+  const cells=[s.id,s.name,s.price,s.cap,...s.metrics];
+  cells.forEach((v,i)=>{
+   const td=document.createElement("td");
+   if(i===1){
+    const name=document.createElement("span");name.className="company";name.textContent=s.name;
+    const sector=document.createElement("span");sector.className="sector";sector.textContent=s.sector;
+    td.append(name,sector);
+   }else td.textContent=(i===2||i===3)?fmt(v):String(v);
+   if(i===2)td.classList.add("positive");
+   tr.appendChild(td);
+  });
+  rows.appendChild(tr);
+ });
+ document.getElementById("shown").textContent=list.length;
+ document.getElementById("status").textContent=`Showing ${list.length} of ${stocks.length} supplied stocks. No additional stocks are added automatically.`;
+}
+search.addEventListener("input",render);
+sort.addEventListener("change",render);
+document.getElementById("csvBtn").addEventListener("click",()=>{
+ const header=["Rank","Company","Sector","Price INR","Market Cap Cr","Metric 1","Metric 2","Metric 3","Metric 4","Metric 5","Metric 6"];
+ const data=[header,...stocks.map(s=>[s.id,s.name,s.sector,s.price,s.cap,...s.metrics])];
+ const csv=data.map(row=>row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\r\n");
+ const url=URL.createObjectURL(new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"}));
+ const a=document.createElement("a");a.href=url;a.download="gyanscreener-advanced-stocks.csv";a.click();URL.revokeObjectURL(url);
+});
+document.getElementById("scanBtn").addEventListener("click",()=>{
+ const btn=document.getElementById("scanBtn"),bar=document.getElementById("progressBar"),status=document.getElementById("status");
+ if(btn.disabled)return;
+ btn.disabled=true;btn.textContent="Scanning…";bar.style.width="0%";
+ let p=0;status.textContent="Reviewing your supplied dataset…";
+ const timer=setInterval(()=>{
+  p+=10;bar.style.width=p+"%";
+  status.textContent=p<100?`Scanning supplied stock list… ${p}%`:`Scan complete. ${stocks.length} supplied stocks displayed.`;
+  if(p>=100){clearInterval(timer);btn.disabled=false;btn.textContent="↻ Run scan again";render();}
+ },90);
+});
+document.getElementById("addStrategy").addEventListener("click",()=>{
+ alert("Your next screener can be added when you provide its name, screening rules and stock dataset. No placeholder stock list will be added.");
+});
+render();
+if(stocks.length!==74)document.getElementById("cardCount").textContent=stocks.length+" supplied stocks loaded";
+</script>
+</body>
+</html>
