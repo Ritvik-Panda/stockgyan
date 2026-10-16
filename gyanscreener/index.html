@@ -86,14 +86,21 @@ tbody tr:hover{background:#f7fbf8}
 
   <div class="section-title"><div><h2>Your Screeners</h2><div class="muted">Select a strategy to view its stock list and criteria.</div></div></div>
   <section class="cards">
-    <button class="strategy active" id="strategy1">
+    <button class="strategy active" id="strategy1" type="button">
       <div class="strategy-icon">⌕</div>
       <span class="tag">SCREENER 01</span>
       <h3 style="margin-top:12px">Advanced Screener</h3>
-      <p>Fundamental stock selection using your 11 custom screening conditions and supplied company dataset.</p>
-      <strong id="cardCount">74 supplied stocks</strong>
+      <p>Fundamental stock selection using your original 11 screening conditions and supplied company dataset.</p>
+      <strong>74 supplied stocks</strong>
     </button>
-    <button class="strategy" id="addStrategy">
+    <button class="strategy" id="strategy2" type="button">
+      <div class="strategy-icon">↗</div>
+      <span class="tag">SCREENER 02</span>
+      <h3 style="margin-top:12px">Dynamic EPS Growth</h3>
+      <p>Adjusted EPS growth, valuation, profitability and debt filters from your supplied strategy.</p>
+      <strong>13 supplied stocks</strong>
+    </button>
+    <button class="strategy" id="addStrategy" type="button">
       <div class="strategy-icon">＋</div>
       <h3>Add another screener</h3>
       <p>Future strategies will have their own name, screening rules and dataset supplied by you.</p>
@@ -136,24 +143,43 @@ tbody tr:hover{background:#f7fbf8}
       <table>
         <thead><tr>
           <th>#</th><th>Company / Sector</th><th>Price (₹)</th><th>Market Cap (₹ Cr)</th>
-          <th>Metric 1</th><th>Metric 2</th><th>Metric 3</th><th>Metric 4</th><th>Metric 5</th><th>Metric 6</th>
+          <th>Metric 1</th><th>Metric 2</th><th>Metric 3</th><th>Metric 4</th><th>Metric 5</th>
         </tr></thead>
         <tbody id="rows"></tbody>
       </table>
     </div>
-    <div class="note">Data integrity: prices, market capitalizations and six additional values are shown from the supplied list. The six metric headings are provisional because the original column labels were not supplied. This page does not claim that the displayed stocks currently pass all 11 rules or that their prices are live.</div>
+    <div class="note">Data integrity: prices, market capitalizations and five additional values are shown as supplied. Metric headings are provisional because their original column labels were not supplied. These are curated lists provided by you, not independently recalculated live screening results; prices are not live.</div>
   </section>
   <div class="footer">GyanScreener · StockGyan<br>For educational and informational purposes. This screener is not a recommendation to buy or sell securities.</div>
 </main>
 <script>
-const rules=[
-"ROCE Y1 > 12%","ROE Y1 > 12%","Debt to Equity Y1 < 0.5",
-"Promoter Holding Q1 > 50%","Promoter Pledging Q1 = 0",
-"EPS TTM > 0","PEG Ratio < 1","Market Cap > ₹200 Cr",
-"Net Profit Growth QoQ > 20%","Net Sales Y1 > 20%",
-"Cash Flow per Share > 0"
-];
-const raw=[
+const screenerConfigs = {
+  1: {
+    name: "Advanced Screener",
+    subtitle: "Your supplied stock list and original screening strategy",
+    rules: [
+      "ROCE Y1 > 12%","ROE Y1 > 12%","Debt to Equity Y1 < 0.5",
+      "Promoter Holding Q1 > 50%","Promoter Pledging Q1 = 0",
+      "EPS TTM > 0","PEG Ratio < 1","Market Cap > ₹200 Cr",
+      "Net Profit Growth QoQ > 20%","Net Sales Y1 > 20%",
+      "Cash Flow per Share > 0"
+    ],
+    note: "This is your original supplied list. The metric labels are provisional because the source column headings were not provided. Stocks are not recalculated against these rules, and the data is not live."
+  },
+  2: {
+    name: "Dynamic EPS Growth Screener",
+    subtitle: "Adjusted EPS growth, valuation, profitability and debt filters",
+    rules: [
+      "Adjusted EPS Growth Y1 > 20%","Adjusted EPS Growth Y1 < 35%",
+      "EPS TTM > 0","PEG Ratio < 0.8","ROE Y1 > 18%",
+      "Debt to Equity Y1 < 0.3","Net Profit 3Y CAGR > 20%",
+      "Market Cap > ₹400 Cr","PE Ratio < Adjusted EPS Growth Y1 × 0.7"
+    ],
+    note: "These 13 companies and figures were supplied by you as the results of this strategy. Metric labels are provisional because the original column headings were not provided. The list is not independently recalculated or live."
+  }
+};
+
+const raw = [
 ["Bajaj Finserv Ltd.","Finance - Investment",1729,276996.41,26.08,124.81,16.55,19.20,137.38],
 ["Oracle Financial Services Software Ltd.","IT - Software",10386,90464.15,11.03,25.48,38.97,49.58,15.82],
 ["Torrent Power Ltd.","Power Generation/Distribution",1226.30,61793.69,3.14,24.94,14.10,15.82,2.83],
@@ -229,63 +255,115 @@ const raw=[
 ["Cochin Minerals & Rutile Ltd.","Chemicals",286.50,224.33,1.22,10.37,15.01,23.32,0.70],
 ["Multibase India Ltd.","Petrochemicals",169.65,214.10,2.32,18.64,13.76,18.52,3.03]
 ];
-const stocks=raw.map((r,i)=>({id:i+1,name:r[0],sector:r[1],price:r[2],cap:r[3],metrics:r.slice(4)}));
-const fmt=n=>Number(n).toLocaleString("en-IN",{maximumFractionDigits:2,minimumFractionDigits:2});
-const ruleList=document.getElementById("ruleList");
-rules.forEach(rule=>{const d=document.createElement("div");d.className="rule";const icon=document.createElement("b");icon.textContent="✓";const t=document.createElement("span");t.textContent=rule;d.append(icon,t);ruleList.appendChild(d)});
-const rows=document.getElementById("rows");
-const search=document.getElementById("search");
-const sort=document.getElementById("sort");
-function render(){
- let list=stocks.filter(s=>(s.name+" "+s.sector).toLowerCase().includes(search.value.trim().toLowerCase()));
- if(sort.value==="priceDesc")list.sort((a,b)=>b.price-a.price);
- if(sort.value==="priceAsc")list.sort((a,b)=>a.price-b.price);
- if(sort.value==="capDesc")list.sort((a,b)=>b.cap-a.cap);
- if(sort.value==="nameAsc")list.sort((a,b)=>a.name.localeCompare(b.name));
- rows.replaceChildren();
- list.forEach(s=>{
-  const tr=document.createElement("tr");
-  const cells=[s.id,s.name,s.price,s.cap,...s.metrics];
-  cells.forEach((v,i)=>{
-   const td=document.createElement("td");
-   if(i===1){
-    const name=document.createElement("span");name.className="company";name.textContent=s.name;
-    const sector=document.createElement("span");sector.className="sector";sector.textContent=s.sector;
-    td.append(name,sector);
-   }else td.textContent=(i===2||i===3)?fmt(v):String(v);
-   if(i===2)td.classList.add("positive");
-   tr.appendChild(td);
+const secondRaw = [["Karur Vysya Bank Ltd.", "Bank - Private", 355.65, 34381.16, [2.23, 11.62, 19.29, 23.62, 3.1], "KARURVYSYA"], ["Godfrey Phillips India Ltd.", "Cigarettes/Tobacco", 1852.0, 28887.82, [5.23, 21.9, 30.91, 39.06, 4.52], "GODFRYPHLP"], ["Sandur Manganese & Iron Ores Ltd.", "Mining & Minerals", 174.85, 8499.54, [2.6, 14.77, 19.08, 23.89, 4.23], "SANDUMA"], ["Transrail Lighting Ltd.", "Electric Equipment", 465.85, 6266.37, [2.57, 15.18, 19.41, 32.93, 0.91], "TRANSRAILL"], ["Refex Industries Ltd.", "Environmental Services", 256.55, 3520.6, [2.33, 12.26, 19.5, 23.84, 1.73], "REFEX"], ["Monarch Networth Capital Ltd.", "Finance - Stock Broking", 338.05, 2681.02, [2.74, 15.21, 21.08, 27.78, 7.28], "MONARCH"], ["GK Energy Ltd.", "Engineering - Construction", 107.4, 2178.26, [2.31, 9.72, 36.8, 40.87, 1.42], "GKENERGY"], ["Nitta Gelatin India Ltd.", "Chemicals", 1622.3, 1472.91, [2.83, 12.65, 24.92, 31.41, 2.5], "NITTAGELA"], ["Solarworld Energy Solutions Ltd.", "Engineering - Construction", 125.6, 1088.61, [1.24, 8.23, 22.57, 28.5, 0.91], "SOLARWORLD"], ["Kamdhenu Ltd.", "Steel & Iron Products", 38.0, 1071.16, [2.52, 12.51, 22.53, 29.83, 1.4], "KAMDHENU"], ["Radhika Jeweltech Ltd.", "Diamond & Jewellery", 68.46, 807.83, [1.92, 10.17, 20.76, 25.07, 1.26], "RADHIKAJWE"], ["Borana Weaves Ltd.", "Textile", 258.3, 688.25, [2.31, 9.99, 35.01, 32.93, 1.77], "BORANA"], ["Alufluoride Ltd.", "Chemicals", 597.25, 467.08, [3.63, 19.47, 21.24, 24.85, 2.24], "ALUFLUOR"]];
+
+const dataSets = {
+  1: raw.map((r,i)=>({id:i+1,name:r[0],sector:r[1],price:r[2],cap:r[3],metrics:r.slice(4),url:""})),
+  2: secondRaw.map((r,i)=>({id:i+1,name:r[0],sector:r[1],price:r[2],cap:r[3],metrics:r[4],url:"https://ticker.finology.in/company/"+r[5]}))
+};
+
+let activeScreener = 1;
+let scanTimer = null;
+const fmt = n => Number(n).toLocaleString("en-IN",{maximumFractionDigits:2,minimumFractionDigits:2});
+const rows = document.getElementById("rows");
+const search = document.getElementById("search");
+const sort = document.getElementById("sort");
+const ruleList = document.getElementById("ruleList");
+const strategy1 = document.getElementById("strategy1");
+const strategy2 = document.getElementById("strategy2");
+const scanBtn = document.getElementById("scanBtn");
+const statusEl = document.getElementById("status");
+const progressBar = document.getElementById("progressBar");
+
+function renderRules(){
+  ruleList.replaceChildren();
+  screenerConfigs[activeScreener].rules.forEach(rule=>{
+    const d=document.createElement("div");d.className="rule";
+    const icon=document.createElement("b");icon.textContent="✓";
+    const t=document.createElement("span");t.textContent=rule;
+    d.append(icon,t);ruleList.appendChild(d);
   });
-  rows.appendChild(tr);
- });
- document.getElementById("shown").textContent=list.length;
- document.getElementById("status").textContent=`Showing ${list.length} of ${stocks.length} supplied stocks. No additional stocks are added automatically.`;
 }
+function render(){
+  const stocks = dataSets[activeScreener];
+  let list = stocks.filter(s=>(s.name+" "+s.sector).toLowerCase().includes(search.value.trim().toLowerCase()));
+  if(sort.value==="priceDesc")list.sort((a,b)=>b.price-a.price);
+  if(sort.value==="priceAsc")list.sort((a,b)=>a.price-b.price);
+  if(sort.value==="capDesc")list.sort((a,b)=>b.cap-a.cap);
+  if(sort.value==="nameAsc")list.sort((a,b)=>a.name.localeCompare(b.name));
+  rows.replaceChildren();
+  list.forEach(s=>{
+    const tr=document.createElement("tr");
+    const cells=[s.id,s.name,s.price,s.cap,...s.metrics];
+    cells.forEach((v,i)=>{
+      const td=document.createElement("td");
+      if(i===1){
+        const name=s.url?document.createElement("a"):document.createElement("span");
+        name.className="company";name.textContent=s.name;
+        if(s.url){name.href=s.url;name.target="_blank";name.rel="noopener noreferrer";name.style.textDecoration="none";}
+        const sector=document.createElement("span");sector.className="sector";sector.textContent=s.sector;
+        td.append(name,sector);
+      }else{
+        td.textContent=(i===2||i===3)?fmt(v):String(v);
+      }
+      if(i===2)td.classList.add("positive");
+      tr.appendChild(td);
+    });
+    rows.appendChild(tr);
+  });
+  document.getElementById("total").textContent=stocks.length;
+  document.getElementById("shown").textContent=list.length;
+  statusEl.textContent=`Showing ${list.length} of ${stocks.length} supplied stocks in Screener 0${activeScreener}. No additional stocks are added automatically.`;
+}
+function selectScreener(id){
+  activeScreener=id;
+  const config=screenerConfigs[id];
+  strategy1.classList.toggle("active",id===1);
+  strategy2.classList.toggle("active",id===2);
+  document.querySelector("#screenPanel .panel-head h2").textContent=config.name;
+  document.querySelector("#screenPanel .panel-head .muted").textContent=config.subtitle;
+  document.querySelector("#screenPanel .rules .muted").textContent="The criteria below describe this strategy. The list is the fixed dataset you supplied; the page does not independently recalculate matches.";
+  document.querySelector("#screenPanel .note").textContent=config.note;
+  document.querySelector("#screenPanel .panel-head:nth-of-type(2) h3").textContent="Stock results";
+  search.value="";
+  sort.value="original";
+  scanBtn.disabled=false;
+  scanBtn.textContent="▶ Run visual scan";
+  progressBar.style.width="0%";
+  renderRules();
+  render();
+}
+strategy1.addEventListener("click",()=>selectScreener(1));
+strategy2.addEventListener("click",()=>selectScreener(2));
 search.addEventListener("input",render);
 sort.addEventListener("change",render);
+
 document.getElementById("csvBtn").addEventListener("click",()=>{
- const header=["Rank","Company","Sector","Price INR","Market Cap Cr","Metric 1","Metric 2","Metric 3","Metric 4","Metric 5","Metric 6"];
- const data=[header,...stocks.map(s=>[s.id,s.name,s.sector,s.price,s.cap,...s.metrics])];
- const csv=data.map(row=>row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\r\n");
- const url=URL.createObjectURL(new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"}));
- const a=document.createElement("a");a.href=url;a.download="gyanscreener-advanced-stocks.csv";a.click();URL.revokeObjectURL(url);
+  const stocks=dataSets[activeScreener];
+  const header=["Rank","Company","Sector","Price INR","Market Cap Cr","Metric 1","Metric 2","Metric 3","Metric 4","Metric 5"];
+  const data=[header,...stocks.map(s=>[s.id,s.name,s.sector,s.price,s.cap,...s.metrics])];
+  const csv=data.map(row=>row.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(",")).join("\r\n");
+  const url=URL.createObjectURL(new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"}));
+  const a=document.createElement("a");a.href=url;a.download=`gyanscreener-screener-0${activeScreener}.csv`;a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
 });
-document.getElementById("scanBtn").addEventListener("click",()=>{
- const btn=document.getElementById("scanBtn"),bar=document.getElementById("progressBar"),status=document.getElementById("status");
- if(btn.disabled)return;
- btn.disabled=true;btn.textContent="Scanning…";bar.style.width="0%";
- let p=0;status.textContent="Reviewing your supplied dataset…";
- const timer=setInterval(()=>{
-  p+=10;bar.style.width=p+"%";
-  status.textContent=p<100?`Scanning supplied stock list… ${p}%`:`Scan complete. ${stocks.length} supplied stocks displayed.`;
-  if(p>=100){clearInterval(timer);btn.disabled=false;btn.textContent="↻ Run scan again";render();}
- },90);
+
+scanBtn.addEventListener("click",()=>{
+  if(scanTimer)clearInterval(scanTimer);
+  scanBtn.disabled=true;scanBtn.textContent="Scanning…";progressBar.style.width="0%";
+  let p=0;statusEl.textContent="Reviewing your supplied dataset…";
+  scanTimer=setInterval(()=>{
+    if(activeScreener===0){clearInterval(scanTimer);return;}
+    p+=10;progressBar.style.width=p+"%";
+    statusEl.textContent=p<100?`Reviewing supplied Screener 0${activeScreener} data… ${p}%`:`Display refresh complete. ${dataSets[activeScreener].length} supplied stocks shown.`;
+    if(p>=100){clearInterval(scanTimer);scanTimer=null;scanBtn.disabled=false;scanBtn.textContent="↻ Run scan again";render();}
+  },90);
 });
+
 document.getElementById("addStrategy").addEventListener("click",()=>{
- alert("Your next screener can be added when you provide its name, screening rules and stock dataset. No placeholder stock list will be added.");
+  alert("To add another screener, provide its name, criteria and stock dataset. Each new screener will have its own separate list.");
 });
-render();
-if(stocks.length!==74)document.getElementById("cardCount").textContent=stocks.length+" supplied stocks loaded";
+selectScreener(1);
 </script>
 </body>
 </html>
