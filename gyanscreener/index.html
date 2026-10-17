@@ -84,6 +84,13 @@ tbody tr:hover{background:#f7fbf8}
     <div class="pill"><span class="dot"></span> Curated dataset · Updated when you provide new data</div>
   </section>
 
+  <section class="panel" style="padding:20px 22px;margin-top:20px">
+    <h2>What is Magic Formula Investing?</h2>
+    <p class="muted" style="font-size:14px;margin:10px 0">Magic Formula Investing was popularised by investor and author Joel Greenblatt in <em>The Little Book That Beats the Market</em>. Its central idea is to look for good businesses at attractive valuations by combining business quality with earnings yield.</p>
+    <h3 style="margin-top:16px">How to use StockGyan’s Refined Magic Screener</h3>
+    <p class="muted" style="font-size:14px;margin:8px 0">This StockGyan adaptation uses four filters: Return on Invested Capital (ROIC) above 20%, Earnings Yield above 12%, Book Value above zero, and Market Capitalisation above ₹1,000 crore. Select Screener 03 below to view the supplied company snapshot, search or sort the list, and export it to CSV. Review company results, debt, cash flow, valuation and business risks before making any investment decision.</p>
+    <p class="muted" style="margin:8px 0 0"><strong>Important:</strong> This is an educational research tool, not a buy/sell recommendation. The 48-company list is from the supplied Screener.in PDF dated 17 October 2026. The displayed values are a historical snapshot, not live prices or a freshly recalculated scan.</p>
+  </section>
   <div class="section-title"><div><h2>Your Screeners</h2><div class="muted">Select a strategy to view its stock list and criteria.</div></div></div>
   <section class="cards">
     <button class="strategy active" id="strategy1" type="button">
@@ -99,6 +106,13 @@ tbody tr:hover{background:#f7fbf8}
       <h3 style="margin-top:12px">Dynamic EPS Growth</h3>
       <p>Adjusted EPS growth, valuation, profitability and debt filters from your supplied strategy.</p>
       <strong>13 supplied stocks</strong>
+    </button>
+    <button class="strategy" id="strategy3" type="button">
+      <div class="strategy-icon">✦</div>
+      <span class="tag">SCREENER 03</span>
+      <h3 style="margin-top:12px">Refined Magic Screener</h3>
+      <p>Quality and valuation filters inspired by Joel Greenblatt’s Magic Formula investing approach.</p>
+      <strong>48 supplied stocks</strong>
     </button>
     <button class="strategy" id="addStrategy" type="button">
       <div class="strategy-icon">＋</div>
@@ -176,6 +190,17 @@ const screenerConfigs = {
       "Market Cap > ₹400 Cr","PE Ratio < Adjusted EPS Growth Y1 × 0.7"
     ],
     note: "These 13 companies and figures were supplied by you as the results of this strategy. Metric labels are provisional because the original column headings were not provided. The list is not independently recalculated or live."
+  },
+  3: {
+    name: "Refined Magic Screener",
+    subtitle: "Historical stock list supplied in the 17 October 2026 Screener.in PDF",
+    rules: [
+      "Return on Invested Capital (ROIC) > 20%",
+      "Earnings Yield > 12%",
+      "Book Value > 0",
+      "Market Capitalisation > ₹1,000 crore"
+    ],
+    note: "Historical snapshot from the supplied Screener.in PDF dated 17 October 2026. The source list is displayed as supplied; these rows have not been independently recalculated against the four filters and the prices are not live."
   }
 };
 
@@ -257,9 +282,61 @@ const raw = [
 ];
 const secondRaw = [["Karur Vysya Bank Ltd.", "Bank - Private", 355.65, 34381.16, [2.23, 11.62, 19.29, 23.62, 3.1], "KARURVYSYA"], ["Godfrey Phillips India Ltd.", "Cigarettes/Tobacco", 1852.0, 28887.82, [5.23, 21.9, 30.91, 39.06, 4.52], "GODFRYPHLP"], ["Sandur Manganese & Iron Ores Ltd.", "Mining & Minerals", 174.85, 8499.54, [2.6, 14.77, 19.08, 23.89, 4.23], "SANDUMA"], ["Transrail Lighting Ltd.", "Electric Equipment", 465.85, 6266.37, [2.57, 15.18, 19.41, 32.93, 0.91], "TRANSRAILL"], ["Refex Industries Ltd.", "Environmental Services", 256.55, 3520.6, [2.33, 12.26, 19.5, 23.84, 1.73], "REFEX"], ["Monarch Networth Capital Ltd.", "Finance - Stock Broking", 338.05, 2681.02, [2.74, 15.21, 21.08, 27.78, 7.28], "MONARCH"], ["GK Energy Ltd.", "Engineering - Construction", 107.4, 2178.26, [2.31, 9.72, 36.8, 40.87, 1.42], "GKENERGY"], ["Nitta Gelatin India Ltd.", "Chemicals", 1622.3, 1472.91, [2.83, 12.65, 24.92, 31.41, 2.5], "NITTAGELA"], ["Solarworld Energy Solutions Ltd.", "Engineering - Construction", 125.6, 1088.61, [1.24, 8.23, 22.57, 28.5, 0.91], "SOLARWORLD"], ["Kamdhenu Ltd.", "Steel & Iron Products", 38.0, 1071.16, [2.52, 12.51, 22.53, 29.83, 1.4], "KAMDHENU"], ["Radhika Jeweltech Ltd.", "Diamond & Jewellery", 68.46, 807.83, [1.92, 10.17, 20.76, 25.07, 1.26], "RADHIKAJWE"], ["Borana Weaves Ltd.", "Textile", 258.3, 688.25, [2.31, 9.99, 35.01, 32.93, 1.77], "BORANA"], ["Alufluoride Ltd.", "Chemicals", 597.25, 467.08, [3.63, 19.47, 21.24, 24.85, 2.24], "ALUFLUOR"]];
 
+const thirdRaw = [
+ ["SPARC","Pharmaceuticals",188.64,6121.78,3.84,0.00,-20.98,59.68,39],
+ ["Jindal Poly Investment and Finance","Finance - Investment",953.45,1002.08,1.24,0.00,13.89,-77.87,8],
+ ["Websol Energy System","Solar",68.24,2962.73,9.43,0.37,77.79,15.79,372],
+ ["Rajesh Power Services","Power",825.95,1487.32,10.79,0.12,79.48,32.19,990],
+ ["Elitecon International","Consumer / Tobacco",6.94,1109.36,6.85,0.72,-85.05,-269.56,1880],
+ ["Alpex Solar","Solar",780.30,1993.12,9.93,0.00,39.87,-5.72,503],
+ ["Garuda Construction and Engineering","Construction",165.74,1542.07,11.33,0.02,41.56,48.38,175],
+ ["GK Energy","Engineering - Construction",107.40,2178.26,9.72,0.47,59.67,61.53,505],
+ ["Oriana Power","Renewable Energy",268.05,2723.27,10.79,0.00,130.41,19.02,1032],
+ ["National Aluminium Company","Metals",324.25,59552.79,8.82,3.55,2003.14,90.87,5302],
+ ["K.P. Energy","Renewable Energy",196.87,1334.74,7.33,0.46,26.08,2.60,519],
+ ["Oswal Pumps","Pumps",248.40,2831.88,8.41,0.00,54.14,-42.82,473],
+ ["Life Insurance","Insurance",397.75,503153.57,8.37,2.51,13584.25,23.98,239865],
+ ["Coal India","Mining",417.20,257109.03,8.24,6.35,8849.81,0.63,46254],
+ ["Chennai Petroleum Corporation","Oil & Gas",1406.60,20945.88,5.02,4.41,1031.35,2671.95,27369],
+ ["Transrail Lighting","Electrical Equipment",465.85,6266.37,15.00,0.64,107.88,1.95,1736],
+ ["The Bombay Burmah Trading Corporation","Diversified",1246.40,8696.37,7.02,1.36,582.67,17.47,5088],
+ ["SKM Egg Products Export","Food Products",208.01,1095.38,9.84,0.60,23.82,46.50,184],
+ ["Vikram Solar","Solar",144.00,5217.90,14.47,0.00,19.78,-85.17,1563],
+ ["Sharda Cropchem","Agrochemicals",725.35,6544.14,10.45,2.07,88.02,-38.34,1073],
+ ["Ceinsys Tech","IT / Engineering",696.60,1458.52,10.90,0.50,30.95,-2.18,157],
+ ["NMDC","Mining",71.69,63028.54,8.45,4.88,1976.23,0.44,6795],
+ ["Gulf Oil Lubricants India","Lubricants",1089.90,5401.06,13.59,4.68,127.52,31.93,1320],
+ ["Ashoka Buildcon","Construction",104.95,2946.19,4.35,0.00,127.17,-41.23,1499],
+ ["Bharat Petroleum Corporation","Oil & Gas",293.50,127335.14,8.22,5.96,-1872.70,-154.52,151277],
+ ["Ivalue Infosolutions","IT Services",227.86,1247.62,11.63,0.00,15.72,52.26,179],
+ ["Chambal Fertilisers and Chemicals","Fertilisers",388.10,15549.32,8.06,2.83,523.60,-4.62,5027],
+ ["Expleo Solutions","IT Services",896.65,1391.58,9.48,12.27,34.18,67.30,291],
+ ["Petronet LNG","Oil & Gas",293.00,43950.00,10.44,3.41,1137.14,35.07,5557],
+ ["Senco Gold","Jewellery",337.25,5527.56,9.68,0.52,101.14,-3.35,3056],
+ ["Indian Oil Corporation","Oil & Gas",130.38,184112.71,5.47,6.33,-1141.09,-123.93,266407],
+ ["GHCL","Chemicals",390.75,3600.01,7.89,3.07,115.64,-23.05,790],
+ ["TVS Holdings","Auto / Investment",11507.00,23281.08,11.71,0.75,1173.58,81.87,17076],
+ ["SPIC","Fertilisers",60.49,1231.82,6.01,3.31,60.18,-9.79,848],
+ ["Dolat Algotech","Financial Services",61.00,1073.60,7.46,0.16,53.82,38.68,114],
+ ["HMA Agro Industries","Food Products",25.33,1268.45,5.91,0.00,50.51,6158.02,2110],
+ ["Vedanta","Metals & Mining",246.10,96234.65,8.75,13.82,7918.00,143.61,24205],
+ ["Maharashtra Seamless","Steel & Pipes",585.40,7843.87,10.62,1.71,266.40,15.67,1091],
+ ["Ramky Infrastructure","Infrastructure",269.65,1865.92,9.98,0.37,38.79,-47.18,471],
+ ["Patel Engineering","Engineering / Construction",24.58,2438.68,6.21,0.00,98.50,24.63,1280],
+ ["Dilip Buildcon","Infrastructure",402.00,6530.28,11.69,0.25,128.01,-1.98,2377],
+ ["G R Infraprojects","Infrastructure",777.35,7521.68,8.01,0.32,357.79,27.71,2784],
+ ["JM Financial","Financial Services",121.38,11616.13,11.00,2.68,368.57,-35.67,1200],
+ ["Oil India","Oil & Gas",445.00,72384.05,8.67,2.58,4026.83,91.40,12503],
+ ["H.G. Infra Engineering","Infrastructure",407.45,2655.40,10.22,0.49,-44.52,-41.78,1100],
+ ["Dhunseri Ventures","Diversified",288.40,1009.98,5.29,1.73,174.29,136.29,231],
+ ["Vardhman Holdings","Investment Holding",3740.40,1193.19,4.74,0.13,98.08,56.73,10],
+ ["BF Investment","Investment Holding",433.30,1631.81,4.19,2.31,145.99,279.79,11]
+];
+
 const dataSets = {
   1: raw.map((r,i)=>({id:i+1,name:r[0],sector:r[1],price:r[2],cap:r[3],metrics:r.slice(4),url:""})),
-  2: secondRaw.map((r,i)=>({id:i+1,name:r[0],sector:r[1],price:r[2],cap:r[3],metrics:r[4],url:"https://ticker.finology.in/company/"+r[5]}))
+  2: secondRaw.map((r,i)=>({id:i+1,name:r[0],sector:r[1],price:r[2],cap:r[3],metrics:r[4],url:"https://ticker.finology.in/company/"+r[5]})),
+  3: thirdRaw.map((r,i)=>({id:i+1,name:r[0],sector:r[1],price:r[2],cap:r[3],metrics:r.slice(4),url:""}))
 };
 
 let activeScreener = 1;
@@ -271,6 +348,7 @@ const sort = document.getElementById("sort");
 const ruleList = document.getElementById("ruleList");
 const strategy1 = document.getElementById("strategy1");
 const strategy2 = document.getElementById("strategy2");
+const strategy3 = document.getElementById("strategy3");
 const scanBtn = document.getElementById("scanBtn");
 const statusEl = document.getElementById("status");
 const progressBar = document.getElementById("progressBar");
@@ -286,6 +364,11 @@ function renderRules(){
 }
 function render(){
   const stocks = dataSets[activeScreener];
+  const metricHeaders = activeScreener===3
+    ? ["P/E","Dividend Yield (%)","Net Profit Qtr (₹ Cr)","Quarterly Profit Var. (%)","Sales (₹ Cr)"]
+    : ["Metric 1","Metric 2","Metric 3","Metric 4","Metric 5"];
+  const headerCells = document.querySelectorAll("table thead th");
+  metricHeaders.forEach((label,i)=>{ if(headerCells[i+4]) headerCells[i+4].textContent=label; });
   let list = stocks.filter(s=>(s.name+" "+s.sector).toLowerCase().includes(search.value.trim().toLowerCase()));
   if(sort.value==="priceDesc")list.sort((a,b)=>b.price-a.price);
   if(sort.value==="priceAsc")list.sort((a,b)=>a.price-b.price);
@@ -320,10 +403,12 @@ function selectScreener(id){
   const config=screenerConfigs[id];
   strategy1.classList.toggle("active",id===1);
   strategy2.classList.toggle("active",id===2);
+  strategy3.classList.toggle("active",id===3);
   document.querySelector("#screenPanel .panel-head h2").textContent=config.name;
   document.querySelector("#screenPanel .panel-head .muted").textContent=config.subtitle;
   document.querySelector("#screenPanel .rules .muted").textContent="The criteria below describe this strategy. The list is the fixed dataset you supplied; the page does not independently recalculate matches.";
   document.querySelector("#screenPanel .note").textContent=config.note;
+  document.querySelector("#screenPanel .stats .stat:nth-child(3) strong").textContent=config.rules.length;
   document.querySelector("#screenPanel .panel-head:nth-of-type(2) h3").textContent="Stock results";
   search.value="";
   sort.value="original";
@@ -335,12 +420,16 @@ function selectScreener(id){
 }
 strategy1.addEventListener("click",()=>selectScreener(1));
 strategy2.addEventListener("click",()=>selectScreener(2));
+strategy3.addEventListener("click",()=>selectScreener(3));
 search.addEventListener("input",render);
 sort.addEventListener("change",render);
 
 document.getElementById("csvBtn").addEventListener("click",()=>{
   const stocks=dataSets[activeScreener];
-  const header=["Rank","Company","Sector","Price INR","Market Cap Cr","Metric 1","Metric 2","Metric 3","Metric 4","Metric 5"];
+  const metricHeaders = activeScreener===3
+    ? ["P/E","Dividend Yield (%)","Net Profit Qtr (₹ Cr)","Quarterly Profit Var. (%)","Sales (₹ Cr)"]
+    : ["Metric 1","Metric 2","Metric 3","Metric 4","Metric 5"];
+  const header=["Rank","Company","Sector","Price INR","Market Cap Cr",...metricHeaders];
   const data=[header,...stocks.map(s=>[s.id,s.name,s.sector,s.price,s.cap,...s.metrics])];
   const csv=data.map(row=>row.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(",")).join("\r\n");
   const url=URL.createObjectURL(new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8;"}));
@@ -353,9 +442,9 @@ scanBtn.addEventListener("click",()=>{
   scanBtn.disabled=true;scanBtn.textContent="Scanning…";progressBar.style.width="0%";
   let p=0;statusEl.textContent="Reviewing your supplied dataset…";
   scanTimer=setInterval(()=>{
-    if(activeScreener===0){clearInterval(scanTimer);return;}
+    if(!dataSets[activeScreener]){clearInterval(scanTimer);return;}
     p+=10;progressBar.style.width=p+"%";
-    statusEl.textContent=p<100?`Reviewing supplied Screener 0${activeScreener} data… ${p}%`:`Display refresh complete. ${dataSets[activeScreener].length} supplied stocks shown.`;
+    statusEl.textContent=p<100?`Reviewing supplied Screener 0${activeScreener} data… ${p}%`:`Display refresh complete. ${dataSets[activeScreener].length} supplied stocks shown; no live scan or filter recalculation was performed.`;
     if(p>=100){clearInterval(scanTimer);scanTimer=null;scanBtn.disabled=false;scanBtn.textContent="↻ Run scan again";render();}
   },90);
 });
