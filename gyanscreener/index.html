@@ -58,7 +58,7 @@ h3{font-size:16px;margin:0}
 .progress div{height:100%;width:0;background:var(--green);transition:width .2s}
 .table-wrap{overflow:auto}
 table{width:100%;border-collapse:collapse;white-space:nowrap;font-size:13px}
-th{background:#f5f7fb;color:#526176;text-align:right;font-size:11px;letter-spacing:.3px;padding:13px 14px;border-bottom:1px solid var(--line)}
+th{background:#f5f7fb;color:#526176;text-align:right;font-size:11px;letter-spacing:.3px;padding:13px 14px;border-bottom:1px solid var(--line)}\nth[data-sort]{cursor:pointer;user-select:none}th[data-sort]:hover{color:var(--green);background:#edf7f0}th[aria-sort="ascending"],th[aria-sort="descending"]{color:var(--green)}
 td{padding:13px 14px;border-bottom:1px solid #edf0f5;text-align:right}
 th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){text-align:left}
 tbody tr:hover{background:#f7fbf8}
@@ -84,13 +84,6 @@ tbody tr:hover{background:#f7fbf8}
     <div class="pill"><span class="dot"></span> Curated dataset · Updated when you provide new data</div>
   </section>
 
-  <section class="panel" style="padding:20px 22px;margin-top:20px">
-    <h2>What is Magic Formula Investing?</h2>
-    <p class="muted" style="font-size:14px;margin:10px 0">Magic Formula Investing was popularised by investor and author Joel Greenblatt in <em>The Little Book That Beats the Market</em>. Its central idea is to look for good businesses at attractive valuations by combining business quality with earnings yield.</p>
-    <h3 style="margin-top:16px">How to use StockGyan’s Refined Magic Screener</h3>
-    <p class="muted" style="font-size:14px;margin:8px 0">This StockGyan adaptation uses four filters: Return on Invested Capital (ROIC) above 20%, Earnings Yield above 12%, Book Value above zero, and Market Capitalisation above ₹1,000 crore. Select Screener 03 below to view the supplied company snapshot, search or sort the list, and export it to CSV. Review company results, debt, cash flow, valuation and business risks before making any investment decision.</p>
-    <p class="muted" style="margin:8px 0 0"><strong>Important:</strong> This is an educational research tool, not a buy/sell recommendation. The 48-company list is from the supplied Screener.in PDF dated 17 October 2026. The displayed values are a historical snapshot, not live prices or a freshly recalculated scan.</p>
-  </section>
   <div class="section-title"><div><h2>Your Screeners</h2><div class="muted">Select a strategy to view its stock list and criteria.</div></div></div>
   <section class="cards">
     <button class="strategy active" id="strategy1" type="button">
@@ -127,6 +120,13 @@ tbody tr:hover{background:#f7fbf8}
       <div><h2>Advanced Screener</h2><div class="muted">Your supplied stock list and screening strategy</div></div>
       <button class="btn primary" id="scanBtn">▶ Run visual scan</button>
     </div>
+    <section id="strategyDescription" class="rules" style="display:none;background:#fbfdff;border-bottom:1px solid var(--line)">
+      <h3>What is Magic Formula Investing?</h3>
+      <p class="muted" style="font-size:14px;margin:8px 0">Magic Formula Investing was popularised by investor and author Joel Greenblatt in <em>The Little Book That Beats the Market</em>. Its central idea is to look for good businesses at attractive valuations by combining business quality with earnings yield.</p>
+      <h3 style="margin-top:14px">How to use this Refined Magic Screener</h3>
+      <p class="muted" style="font-size:14px;margin:8px 0">This StockGyan adaptation uses four filters: Return on Invested Capital (ROIC) above 20%, Earnings Yield above 12%, Book Value above zero, and Market Capitalisation above ₹1,000 crore. Search or sort the supplied list, export it to CSV, and review financial results, debt, cash flow, valuation and business risks before making an investment decision.</p>
+      <p class="muted" style="margin:8px 0 0"><strong>Important:</strong> The 48-company list is from the supplied Screener.in PDF dated 17 October 2026. Values are a historical snapshot, not live prices or a freshly recalculated scan. This is for education and research, not a buy/sell recommendation.</p>
+    </section>
     <div class="stats">
       <div class="stat"><span>Stocks in supplied list</span><strong id="total">74</strong></div>
       <div class="stat"><span>Stocks displayed</span><strong id="shown">74</strong></div>
@@ -157,7 +157,7 @@ tbody tr:hover{background:#f7fbf8}
       <table>
         <thead><tr>
           <th>#</th><th>Company / Sector</th><th>Price (₹)</th><th>Market Cap (₹ Cr)</th>
-          <th>Metric 1</th><th>Metric 2</th><th>Metric 3</th><th>Metric 4</th><th>Metric 5</th>
+          <th data-sort="pe" role="button" tabindex="0" aria-label="Sort by P/E">P/E ↕</th><th data-sort="dividend" role="button" tabindex="0" aria-label="Sort by dividend yield">Dividend Yield (%) ↕</th><th data-sort="profit" role="button" tabindex="0" aria-label="Sort by quarterly net profit">Net Profit Qtr (₹ Cr) ↕</th><th data-sort="profitVar" role="button" tabindex="0" aria-label="Sort by quarterly profit variation">Quarterly Profit Var. (%) ↕</th><th data-sort="sales" role="button" tabindex="0" aria-label="Sort by sales">Sales (₹ Cr) ↕</th>
         </tr></thead>
         <tbody id="rows"></tbody>
       </table>
@@ -341,6 +341,7 @@ const dataSets = {
 
 let activeScreener = 1;
 let scanTimer = null;
+const metricSortState = {};
 const fmt = n => Number(n).toLocaleString("en-IN",{maximumFractionDigits:2,minimumFractionDigits:2});
 const rows = document.getElementById("rows");
 const search = document.getElementById("search");
@@ -364,16 +365,20 @@ function renderRules(){
 }
 function render(){
   const stocks = dataSets[activeScreener];
-  const metricHeaders = activeScreener===3
-    ? ["P/E","Dividend Yield (%)","Net Profit Qtr (₹ Cr)","Quarterly Profit Var. (%)","Sales (₹ Cr)"]
-    : ["Metric 1","Metric 2","Metric 3","Metric 4","Metric 5"];
   const headerCells = document.querySelectorAll("table thead th");
-  metricHeaders.forEach((label,i)=>{ if(headerCells[i+4]) headerCells[i+4].textContent=label; });
+  const metricHeaders = ["P/E ↕","Dividend Yield (%) ↕","Net Profit Qtr (₹ Cr) ↕","Quarterly Profit Var. (%) ↕","Sales (₹ Cr) ↕"];
+  const activeMetricHeaders = activeScreener===3 ? metricHeaders : ["Metric 1 ↕","Metric 2 ↕","Metric 3 ↕","Metric 4 ↕","Metric 5 ↕"];
+  activeMetricHeaders.forEach((label,i)=>{ if(headerCells[i+4]) headerCells[i+4].textContent=label; });
+  headerCells.forEach(th=>th.removeAttribute("aria-sort"));
   let list = stocks.filter(s=>(s.name+" "+s.sector).toLowerCase().includes(search.value.trim().toLowerCase()));
   if(sort.value==="priceDesc")list.sort((a,b)=>b.price-a.price);
   if(sort.value==="priceAsc")list.sort((a,b)=>a.price-b.price);
   if(sort.value==="capDesc")list.sort((a,b)=>b.cap-a.cap);
   if(sort.value==="nameAsc")list.sort((a,b)=>a.name.localeCompare(b.name));
+  if(metricSortState[activeScreener]){
+    const {index,direction}=metricSortState[activeScreener];
+    list.sort((a,b)=>(Number(a.metrics[index]||0)-Number(b.metrics[index]||0))*direction);
+  }
   rows.replaceChildren();
   list.forEach(s=>{
     const tr=document.createElement("tr");
@@ -408,6 +413,7 @@ function selectScreener(id){
   document.querySelector("#screenPanel .panel-head .muted").textContent=config.subtitle;
   document.querySelector("#screenPanel .rules .muted").textContent="The criteria below describe this strategy. The list is the fixed dataset you supplied; the page does not independently recalculate matches.";
   document.querySelector("#screenPanel .note").textContent=config.note;
+  document.getElementById("strategyDescription").style.display = id===3 ? "block" : "none";
   document.querySelector("#screenPanel .stats .stat:nth-child(3) strong").textContent=config.rules.length;
   document.querySelector("#screenPanel .panel-head:nth-of-type(2) h3").textContent="Stock results";
   search.value="";
@@ -422,7 +428,22 @@ strategy1.addEventListener("click",()=>selectScreener(1));
 strategy2.addEventListener("click",()=>selectScreener(2));
 strategy3.addEventListener("click",()=>selectScreener(3));
 search.addEventListener("input",render);
-sort.addEventListener("change",render);
+sort.addEventListener("change",()=>{ delete metricSortState[activeScreener]; render(); });
+document.querySelectorAll("table thead th[data-sort]").forEach((th)=>{
+  const sortColumn=()=>{
+    const index=["pe","dividend","profit","profitVar","sales"].indexOf(th.dataset.sort);
+    const previous=metricSortState[activeScreener];
+    const direction=previous && previous.index===index && previous.direction===1 ? -1 : 1;
+    metricSortState[activeScreener]={index,direction};
+    sort.value="original";
+    render();
+    document.querySelectorAll("table thead th[data-sort]").forEach(h=>h.setAttribute("aria-sort","none"));
+    th.setAttribute("aria-sort",direction===1?"ascending":"descending");
+    th.textContent=th.textContent.replace(/ [↑↓↕]$/,"")+(direction===1?" ↑":" ↓");
+  };
+  th.addEventListener("click",sortColumn);
+  th.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();sortColumn();}});
+});
 
 document.getElementById("csvBtn").addEventListener("click",()=>{
   const stocks=dataSets[activeScreener];
