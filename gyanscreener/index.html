@@ -95,7 +95,7 @@ tbody tr:hover td{background:#f7fbff}tbody tr:hover td:first-child{background:#f
       <div class="section-label">Your screeners</div>
       <div class="scan-list">
         <button class="scan-choice active" data-scan="magic" type="button"><span class="scan-icon">✦</span><span><strong>Magic Formula</strong><small>Quality + valuation</small></span></button>
-        <button class="scan-choice" data-scan="coffee" type="button"><span class="scan-icon">☕</span><span><strong>Coffee Can</strong><small>Long-term consistency</small><span class="coming">ADD DATASET NEXT</span></span></button>
+        <button class="scan-choice" data-scan="coffee" type="button"><span class="scan-icon">☕</span><span><strong>Coffee Can</strong><small>Long-term growth + quality</small><span class="coming">5 RULES CONFIGURED</span></span></button>
         <button class="scan-choice" data-scan="quality" type="button"><span class="scan-icon">◆</span><span><strong>Quality Stocks</strong><small>Returns + business quality</small><span class="coming">ADD DATASET NEXT</span></span></button>
         <button class="scan-choice" data-scan="value" type="button"><span class="scan-icon">₹</span><span><strong>Value Stocks</strong><small>Valuation-focused</small><span class="coming">ADD DATASET NEXT</span></span></button>
         <button class="scan-choice" data-scan="growth" type="button"><span class="scan-icon">↗</span><span><strong>Growth Stocks</strong><small>Sales + earnings growth</small><span class="coming">ADD DATASET NEXT</span></span></button>
@@ -184,10 +184,29 @@ tbody tr:hover td{background:#f7fbff}tbody tr:hover td:first-child{background:#f
     {key:"book_value_inr",label:"Book Value (₹)",type:"money"}
   ];
   const scanDefinitions = {
-    magic:{title:"Magic Formula Screener",subtitle:"Run the saved report through its defined criteria and inspect the results.",tag:"Quality + valuation",
-      rules:["ROIC > 25%","Earnings Yield > 15%","Book Value > 0","Market Cap > ₹500 crore"]}
+    magic:{
+      title:"Magic Formula Screener", subtitle:"Run the saved report through its defined criteria and inspect the results.", tag:"Quality + valuation",
+      dataUrl:"./data/magic-formula.json", dateField:"sourceReportDate",
+      rules:["ROIC > 25%","Earnings Yield > 15%","Book Value > 0","Market Cap > ₹500 crore"],
+      columns:columns,
+      passes:r=>{const roic=numeric(r.roic_pct),ey=numeric(r.earnings_yield_pct),bv=numeric(r.book_value_inr),mc=numeric(r.market_cap_cr);return roic!==null&&ey!==null&&bv!==null&&mc!==null&&roic>25&&ey>15&&bv>0&&mc>500;}
+    },
+    coffee:{
+      title:"Coffee Can Screener", subtitle:"Find companies with sustained sales growth and strong long-term capital efficiency.", tag:"Long-term growth + quality",
+      dataUrl:"./data/coffee-can.json", dateField:"sourceReportDate",
+      rules:["Sales Growth > 15%","10-Year Sales Growth > 15%","ROE > 15%","10-Year Average ROCE > 20%","Market Cap > ₹1,000 crore"],
+      columns:[
+        {key:"company",label:"Company",type:"text"},
+        {key:"sales_growth_pct",label:"Sales Growth",type:"pct"},
+        {key:"sales_growth_10_years_pct",label:"Sales Growth · 10Y",type:"pct"},
+        {key:"roe_pct",label:"ROE",type:"pct"},
+        {key:"average_roce_10_years_pct",label:"Average ROCE · 10Y",type:"pct"},
+        {key:"market_cap_cr",label:"Market Cap (₹ Cr)",type:"money"}
+      ],
+      passes:r=>{const sg=numeric(r.sales_growth_pct),sg10=numeric(r.sales_growth_10_years_pct),roe=numeric(r.roe_pct),roce10=numeric(r.average_roce_10_years_pct),mc=numeric(r.market_cap_cr);if(window.__coffeeCanSourcePreFiltered===true)return true;return sg!==null&&sg>15&&sg10!==null&&sg10>15&&roe!==null&&roe>15&&roce10!==null&&roce10>20&&mc!==null&&mc>1000;}
+    }
   };
-  let allRows = [], results = [], loaded = false, hasRun = false, sortKey = "source", sortDir = 1, sourceDate = "";
+  let activeScan = "magic", activeColumns = columns, allRows = [], results = [], loaded = false, hasRun = false, sortKey = "source", sortDir = 1, sourceDate = "";
   const numeric = v => v === null || v === undefined || v === "" || !Number.isFinite(Number(v)) ? null : Number(v);
   const fmt = (v,type) => {
     if (v === null || v === undefined || v === "") return "—";
@@ -201,18 +220,14 @@ tbody tr:hover td{background:#f7fbff}tbody tr:hover td:first-child{background:#f
   function setError(message){ $("errorBox").textContent=message; $("errorBox").classList.add("show"); }
   function hideError(){ $("errorBox").classList.remove("show"); }
   function renderHead(){
-    $("tableHead").innerHTML = columns.map(c=>`<th scope="col" data-key="${c.key}" title="Sort by ${escapeHtml(c.label)}">${escapeHtml(c.label)} ↕</th>`).join("");
+    $("tableHead").innerHTML = activeColumns.map(c=>`<th scope="col" data-key="${c.key}" title="Sort by ${escapeHtml(c.label)}">${escapeHtml(c.label)} ↕</th>`).join("");
     $("tableHead").querySelectorAll("th").forEach(th=>th.addEventListener("click",()=>{
       const key=th.dataset.key;
       if(sortKey===key) sortDir *= -1; else {sortKey=key;sortDir=key==="company"?1:-1;}
       $("sort").value="source"; renderRows();
     }));
   }
-  function applyCriteria(row){
-    // The JSON contains the supplied report results. These checks ensure rows still satisfy the published Magic Formula rules.
-    const roic=numeric(row.roic_pct), ey=numeric(row.earnings_yield_pct), bv=numeric(row.book_value_inr), mc=numeric(row.market_cap_cr);
-    return roic!==null && ey!==null && bv!==null && mc!==null && roic>25 && ey>15 && bv>0 && mc>500;
-  }
+  function applyCriteria(row){ return scanDefinitions[activeScan].passes(row); }
   function orderedRows(rows){
     const mode=$("sort").value;
     if(sortKey!=="source"){
@@ -223,7 +238,9 @@ tbody tr:hover td{background:#f7fbff}tbody tr:hover td:first-child{background:#f
         return (typeof av==="string"?av.localeCompare(bv):av-bv)*sortDir;
       });
     }
-    const map={roic:"roic_pct",yield:"earnings_yield_pct",marketcap:"market_cap_cr",pe:"pe",profit:"pat_12m_cr"};
+    const map=activeScan==="coffee"
+      ? {roic:"average_roce_10_years_pct",yield:"sales_growth_10_years_pct",marketcap:"market_cap_cr",pe:"roe_pct",profit:"sales_growth_pct"}
+      : {roic:"roic_pct",yield:"earnings_yield_pct",marketcap:"market_cap_cr",pe:"pe",profit:"pat_12m_cr"};
     if(mode==="source") return rows;
     const key=map[mode];return [...rows].sort((a,b)=>(numeric(b[key])??-Infinity)-(numeric(a[key])??-Infinity)*(mode==="pe"?-1:1));
   }
@@ -235,10 +252,10 @@ tbody tr:hover td{background:#f7fbff}tbody tr:hover td:first-child{background:#f
     $("matchNote").textContent=hasRun?"Passed all four rules":"Run scan to calculate";
     $("resultSummary").textContent=hasRun?`Showing ${rows.length} of ${results.length} matching companies.`:"No scan has been run yet.";
     if(!rows.length){
-      $("tableBody").innerHTML=`<tr><td colspan="${columns.length}"><div class="empty"><strong>${hasRun?"No matching companies":"Your scan results will appear here"}</strong>${hasRun?"Try a different company search or review the criteria.":"Click Run Scan to evaluate the loaded dataset."}</div></td></tr>`;
+      $("tableBody").innerHTML=`<tr><td colspan="${activeColumns.length}"><div class="empty"><strong>${hasRun?"No matching companies":"Your scan results will appear here"}</strong>${hasRun?"Try a different company search or review the criteria.":"Click Run Scan to evaluate the loaded dataset."}</div></td></tr>`;
       return;
     }
-    $("tableBody").innerHTML=rows.map(r=>`<tr>${columns.map((c,i)=>{
+    $("tableBody").innerHTML=rows.map(r=>`<tr>${activeColumns.map((c,i)=>{
       const v=r[c.key];
       if(i===0) return `<td><div class="company">${escapeHtml(v||"Unnamed company")}</div>${r.symbol?`<span class="symbol">${escapeHtml(r.symbol)}</span>`:""}</td>`;
       const n=numeric(v), cls=(c.key==="roic_pct"||c.key==="earnings_yield_pct"||c.key==="quarterly_profit_change_pct"||c.key==="quarterly_sales_change_pct")&&n>0?"positive":"neutral";
@@ -247,26 +264,39 @@ tbody tr:hover td{background:#f7fbff}tbody tr:hover td:first-child{background:#f
   }
   function setControls(enabled){["search","sort","exportCsv"].forEach(id=>$(id).disabled=!enabled);}
   async function loadData(){
-    $("dataStatus").textContent="Loading saved dataset…";
+    const def=scanDefinitions[activeScan];
+    loaded=false;hasRun=false;allRows=[];results=[];activeColumns=def.columns;
+    $("dataStatus").textContent="Loading "+(activeScan==="coffee"?"Coffee Can":"Magic Formula")+" dataset…";
+    $("scanTitle").textContent=def.title;$("scanSubtitle").textContent=def.subtitle;$("scanTag").textContent="Loading dataset";
+    $("criteriaList").innerHTML=def.rules.map(rule=>`<div class="criterion"><span class="check">✓</span>${escapeHtml(rule)}</div>`).join("");
+    $("ruleCount").textContent=def.rules.length;
+    $("totalCount").textContent="—";$("matchCount").textContent="—";$("matchNote").textContent="Run the scan to calculate";
+    $("reportDate").textContent="—";$("tableBody").innerHTML=`<tr><td colspan="${activeColumns.length}"><div class="empty"><strong>Dataset loading</strong>Preparing the selected screener.</div></td></tr>`;
+    $("search").value="";$("sort").value="source";sortKey="source";sortDir=1;
+    $("scanProgress").classList.remove("show");$("runScan").disabled=false;$("runScan").innerHTML="<span>▶</span> Run Scan";
+    $("runHeading").textContent="Ready to run "+(activeScan==="coffee"?"Coffee Can":"Magic Formula")+"?";
+    $("runDescription").textContent=activeScan==="coffee"?"This scan requires its own dataset at data/coffee-can.json.":"Click Run Scan to check the available dataset and display matching companies.";
+    renderHead();setControls(false);hideError();
     try{
-      const response=await fetch(DATA_URL,{cache:"no-store"});
-      if(!response.ok) throw new Error(`Could not load ${DATA_URL} (HTTP ${response.status}).`);
+      const response=await fetch(def.dataUrl,{cache:"no-store"});
+      if(!response.ok) throw new Error(`Could not load ${def.dataUrl} (HTTP ${response.status}).`);
       const payload=await response.json();
-      if(!payload || !Array.isArray(payload.data)) throw new Error("JSON format is not valid: expected an object with a data array.");
-      allRows=payload.data;
-      sourceDate=payload.sourceReportDate||payload.reportDate||payload.data[0]?.source_report_date||"Not specified";
-      $("totalCount").textContent=allRows.length.toLocaleString("en-IN");
-      $("reportDate").textContent=sourceDate;
-      $("dataStatus").textContent=`Dataset loaded · ${allRows.length} rows`;
-      loaded=true;setControls(true);hideError();
-      $("runHeading").textContent="Ready to run Magic Formula?";
-      $("runDescription").textContent="Click Run Scan to apply the four published rules to the saved dataset.";
-      $("scanTag").textContent="Dataset ready";
+      if(!payload||!Array.isArray(payload.data)) throw new Error("JSON format is not valid: expected an object with a data array.");
+      allRows=payload.data;window.__coffeeCanSourcePreFiltered=(activeScan==="coffee" && payload.preFilteredBySource===true);sourceDate=payload.sourceReportDate||payload.reportDate||payload.data[0]?.source_report_date||"Not specified";
+      $("totalCount").textContent=allRows.length.toLocaleString("en-IN");$("reportDate").textContent=sourceDate;
+      $("dataStatus").textContent=`${activeScan==="coffee"?"Coffee Can":"Magic Formula"} dataset loaded · ${allRows.length} rows`;
+      loaded=true;setControls(true);$("scanTag").textContent="Dataset ready";
+      $("runDescription").textContent=(activeScan==="coffee" && window.__coffeeCanSourcePreFiltered)?"This is the 48-company result set from your supplied screener PDF. Click Run Scan to display and search the imported results.":"Click Run Scan to apply every rule to the loaded dataset.";
       renderRows();
     }catch(err){
       $("dataStatus").textContent="Dataset could not be loaded";
       $("totalCount").textContent="0";$("reportDate").textContent="Unavailable";
-      setError(`${err.message} Confirm that the JSON file is committed at gyanscreener/data/magic-formula.json and that the page is served over HTTPS. Opening index.html directly from your computer will block fetch in many browsers.`);
+      if(activeScan==="coffee"){
+        setError(`Coffee Can rules are configured, but its dataset is not uploaded yet. Add a JSON file at gyanscreener/data/coffee-can.json with a data array containing company, sales_growth_pct, sales_growth_10_years_pct, roe_pct, average_roce_10_years_pct and market_cap_cr. ${err.message}`);
+      } else {
+        setError(`${err.message} Confirm that the JSON file is committed at gyanscreener/data/magic-formula.json and that the page is served over HTTPS.`);
+      }
+      $("scanTag").textContent="Dataset missing";
     }
   }
   async function runScan(){
@@ -288,25 +318,27 @@ tbody tr:hover td{background:#f7fbff}tbody tr:hover td:first-child{background:#f
     hasRun=true;sortKey="source";sortDir=1;$("sort").value="source";
     $("scanTag").textContent="Scan complete";
     $("runHeading").textContent="Scan completed successfully";
-    $("runDescription").textContent=`${results.length.toLocaleString("en-IN")} companies passed all four Magic Formula rules in this dataset.`;
+    $("runDescription").textContent=(activeScan==="coffee" && window.__coffeeCanSourcePreFiltered)?`${results.length.toLocaleString("en-IN")} companies imported from your saved Coffee Can query results.`:`${results.length.toLocaleString("en-IN")} companies passed all four Magic Formula rules in this dataset.`;
     $("matchCount").textContent=results.length.toLocaleString("en-IN");
-    $("matchNote").textContent="Passed all four rules";
+    $("matchNote").textContent=(activeScan==="coffee" && window.__coffeeCanSourcePreFiltered)?"Saved query results":"Passed all four rules";
     renderRows();button.disabled=false;button.innerHTML="<span>↻</span> Run Scan Again";
   }
   function exportCsv(){
     if(!hasRun||!results.length){setError("Run the scan and make sure results are available before exporting.");return;}
     const query=$("search").value.trim().toLowerCase();const rows=orderedRows(results.filter(r=>String(r.company||"").toLowerCase().includes(query)));
     const quote=v=>`"${String(v??"").replace(/"/g,'""')}"`;
-    const csv=[columns.map(c=>quote(c.label)).join(","),...rows.map(r=>columns.map(c=>quote(r[c.key])).join(","))].join("\r\n");
+    const csv=[activeColumns.map(c=>quote(c.label)).join(","),...rows.map(r=>activeColumns.map(c=>quote(r[c.key])).join(","))].join("\r\n");
     const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8;"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=`stockgyan-magic-formula-${sourceDate||"results"}.csv`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
   }
   document.querySelectorAll(".scan-choice").forEach(button=>button.addEventListener("click",()=>{
-    if(button.dataset.scan!=="magic"){
-      setError(`${button.querySelector("strong").textContent} is planned, but its rules and dataset have not been connected yet. We will add each screener with its own verified data file.`);
-      document.querySelectorAll(".scan-choice").forEach(b=>b.classList.toggle("active",b===document.querySelector('[data-scan="magic"]')));
+    const requested=button.dataset.scan;
+    if(!scanDefinitions[requested]){
+      setError(`${button.querySelector("strong").textContent} has not been configured yet. Coffee Can and Magic Formula are the first two supported scans.`);
       return;
     }
-    document.querySelectorAll(".scan-choice").forEach(b=>b.classList.toggle("active",b===button));hideError();
+    activeScan=requested;
+    document.querySelectorAll(".scan-choice").forEach(b=>b.classList.toggle("active",b===button));
+    loadData();
   }));
   $("runScan").addEventListener("click",runScan);
   $("search").addEventListener("input",renderRows);
