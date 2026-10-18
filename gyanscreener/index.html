@@ -96,6 +96,7 @@ tbody tr:hover td{background:#f7fbff}tbody tr:hover td:first-child{background:#f
       <div class="scan-list">
         <button class="scan-choice active" data-scan="magic" type="button"><span class="scan-icon">✦</span><span><strong>Magic Formula</strong><small>Quality + valuation</small></span></button>
         <button class="scan-choice" data-scan="coffee" type="button"><span class="scan-icon">☕</span><span><strong>Coffee Can</strong><small>Long-term growth + quality</small><span class="coming">5 RULES CONFIGURED</span></span></button>
+        <button class="scan-choice" data-scan="buffett" type="button"><span class="scan-icon">◈</span><span><strong>Benjamin Graham &amp; Warren Buffett</strong><small>Value + financial strength</small><span class="coming">53 SAVED RESULTS</span></span></button>
         <button class="scan-choice" data-scan="quality" type="button"><span class="scan-icon">◆</span><span><strong>Quality Stocks</strong><small>Returns + business quality</small><span class="coming">ADD DATASET NEXT</span></span></button>
         <button class="scan-choice" data-scan="value" type="button"><span class="scan-icon">₹</span><span><strong>Value Stocks</strong><small>Valuation-focused</small><span class="coming">ADD DATASET NEXT</span></span></button>
         <button class="scan-choice" data-scan="growth" type="button"><span class="scan-icon">↗</span><span><strong>Growth Stocks</strong><small>Sales + earnings growth</small><span class="coming">ADD DATASET NEXT</span></span></button>
@@ -155,7 +156,7 @@ tbody tr:hover td{background:#f7fbff}tbody tr:hover td:first-child{background:#f
           </div>
           <div class="table-foot"><span id="resultSummary">No scan has been run yet.</span><span id="pageHint">Click a column heading to sort.</span></div>
         </div>
-        <div class="footer-note">This is a dated research snapshot, not a live quote or a guarantee of future returns. Verify current prices, financial statements and risks before making investment decisions. Educational and informational purposes only; not a recommendation to buy or sell securities.</div>
+        <div class="footer-note">The Benjamin Graham and Warren Buffett list is a saved September 2026 query snapshot, not a newly recalculated live scan. This is a dated research snapshot, not a live quote or a guarantee of future returns. Verify current prices, financial statements and risks before making investment decisions. Educational and informational purposes only; not a recommendation to buy or sell securities.</div>
       </section>
     </main>
   </div>
@@ -204,6 +205,15 @@ tbody tr:hover td{background:#f7fbff}tbody tr:hover td:first-child{background:#f
         {key:"market_cap_cr",label:"Market Cap (₹ Cr)",type:"money"}
       ],
       passes:r=>{const sg=numeric(r.sales_growth_pct),sg10=numeric(r.sales_growth_10_years_pct),roe=numeric(r.roe_pct),roce10=numeric(r.average_roce_10_years_pct),mc=numeric(r.market_cap_cr);if(window.__coffeeCanSourcePreFiltered===true)return true;return sg!==null&&sg>15&&sg10!==null&&sg10>15&&roe!==null&&roe>15&&roce10!==null&&roce10>20&&mc!==null&&mc>1000;}
+    },
+    buffett:{
+      title:"Benjamin Graham and Warren Buffett Screener", subtitle:"53 saved results from your September 2026 Screener.in report. Historical snapshot, not live data.", tag:"Value + financial strength",
+      dataUrl:"./data/buffett-screener.json", dateField:"sourceReportDate",
+      rules:["Sales > ₹250 crore","Debt to equity < 0.3","Interest coverage > 4","Return on equity > 15%","P/E < Industry P/E","Dividend yield > 1%","P/E < 20"],
+      columns:[
+        {key:"rank",label:"#",type:"number"},{key:"company",label:"Company",type:"text"},{key:"cmp_inr",label:"CMP (₹)",type:"money"},{key:"pe",label:"P/E",type:"number"},{key:"market_cap_cr",label:"Market Cap (₹ Cr)",type:"money"},{key:"dividend_yield_pct",label:"Dividend Yield (%)",type:"pct"},{key:"net_profit_quarter_cr",label:"Net Profit Qtr (₹ Cr)",type:"money"},{key:"quarterly_profit_change_pct",label:"Qtr Profit Var. (%)",type:"pct"},{key:"sales_quarter_cr",label:"Sales Qtr (₹ Cr)",type:"money"},{key:"quarterly_sales_change_pct",label:"Qtr Sales Var. (%)",type:"pct"},{key:"roce_pct",label:"ROCE (%)",type:"pct"},{key:"pat_12m_cr",label:"PAT 12M (₹ Cr)",type:"money"},{key:"sales_12m_cr",label:"Sales 12M (₹ Cr)",type:"money"},{key:"debt_to_equity",label:"Debt / Equity",type:"number"},{key:"interest_coverage",label:"Interest Coverage",type:"number"}
+      ],
+      passes:r=>r && r.company && numeric(r.rank)!==null
     }
   };
   let activeScan = "magic", activeColumns = columns, allRows = [], results = [], loaded = false, hasRun = false, sortKey = "source", sortDir = 1, sourceDate = "";
@@ -249,7 +259,7 @@ tbody tr:hover td{background:#f7fbff}tbody tr:hover td:first-child{background:#f
     let rows=results.filter(r=>String(r.company||"").toLowerCase().includes(query));
     rows=orderedRows(rows);
     $("matchCount").textContent=results.length.toLocaleString("en-IN");
-    $("matchNote").textContent=hasRun?"Passed all four rules":"Run scan to calculate";
+    $("matchNote").textContent=hasRun?(((activeScan==="coffee"||activeScan==="buffett")&&window.__coffeeCanSourcePreFiltered)?"Saved query results":"Passed all configured rules"):"Run scan to calculate";
     $("resultSummary").textContent=hasRun?`Showing ${rows.length} of ${results.length} matching companies.`:"No scan has been run yet.";
     if(!rows.length){
       $("tableBody").innerHTML=`<tr><td colspan="${activeColumns.length}"><div class="empty"><strong>${hasRun?"No matching companies":"Your scan results will appear here"}</strong>${hasRun?"Try a different company search or review the criteria.":"Click Run Scan to evaluate the loaded dataset."}</div></td></tr>`;
@@ -266,7 +276,7 @@ tbody tr:hover td{background:#f7fbff}tbody tr:hover td:first-child{background:#f
   async function loadData(){
     const def=scanDefinitions[activeScan];
     loaded=false;hasRun=false;allRows=[];results=[];activeColumns=def.columns;
-    $("dataStatus").textContent="Loading "+(activeScan==="coffee"?"Coffee Can":"Magic Formula")+" dataset…";
+    $("dataStatus").textContent="Loading "+(activeScan==="coffee"?"Coffee Can":activeScan==="buffett"?"Benjamin Graham and Warren Buffett":"Magic Formula")+" dataset…";
     $("scanTitle").textContent=def.title;$("scanSubtitle").textContent=def.subtitle;$("scanTag").textContent="Loading dataset";
     $("criteriaList").innerHTML=def.rules.map(rule=>`<div class="criterion"><span class="check">✓</span>${escapeHtml(rule)}</div>`).join("");
     $("ruleCount").textContent=def.rules.length;
@@ -274,7 +284,7 @@ tbody tr:hover td{background:#f7fbff}tbody tr:hover td:first-child{background:#f
     $("reportDate").textContent="—";$("tableBody").innerHTML=`<tr><td colspan="${activeColumns.length}"><div class="empty"><strong>Dataset loading</strong>Preparing the selected screener.</div></td></tr>`;
     $("search").value="";$("sort").value="source";sortKey="source";sortDir=1;
     $("scanProgress").classList.remove("show");$("runScan").disabled=false;$("runScan").innerHTML="<span>▶</span> Run Scan";
-    $("runHeading").textContent="Ready to run "+(activeScan==="coffee"?"Coffee Can":"Magic Formula")+"?";
+    $("runHeading").textContent="Ready to run "+(activeScan==="coffee"?"Coffee Can":activeScan==="buffett"?"Benjamin Graham and Warren Buffett":"Magic Formula")+"?";
     $("runDescription").textContent=activeScan==="coffee"?"This scan requires its own dataset at data/coffee-can.json.":"Click Run Scan to check the available dataset and display matching companies.";
     renderHead();setControls(false);hideError();
     try{
@@ -282,11 +292,11 @@ tbody tr:hover td{background:#f7fbff}tbody tr:hover td:first-child{background:#f
       if(!response.ok) throw new Error(`Could not load ${def.dataUrl} (HTTP ${response.status}).`);
       const payload=await response.json();
       if(!payload||!Array.isArray(payload.data)) throw new Error("JSON format is not valid: expected an object with a data array.");
-      allRows=payload.data;window.__coffeeCanSourcePreFiltered=(activeScan==="coffee" && payload.preFilteredBySource===true);sourceDate=payload.sourceReportDate||payload.reportDate||payload.data[0]?.source_report_date||"Not specified";
+      allRows=payload.data;window.__coffeeCanSourcePreFiltered=((activeScan==="coffee" || activeScan==="buffett") && payload.preFilteredBySource===true);sourceDate=payload.sourceReportDate||payload.reportDate||payload.data[0]?.source_report_date||"Not specified";
       $("totalCount").textContent=allRows.length.toLocaleString("en-IN");$("reportDate").textContent=sourceDate;
-      $("dataStatus").textContent=`${activeScan==="coffee"?"Coffee Can":"Magic Formula"} dataset loaded · ${allRows.length} rows`;
+      $("dataStatus").textContent=`${activeScan==="coffee"?"Coffee Can":activeScan==="buffett"?"Benjamin Graham and Warren Buffett":"Magic Formula"} dataset loaded · ${allRows.length} rows`;
       loaded=true;setControls(true);$("scanTag").textContent="Dataset ready";
-      $("runDescription").textContent=(activeScan==="coffee" && window.__coffeeCanSourcePreFiltered)?"This is the 48-company result set from your supplied screener PDF. Click Run Scan to display and search the imported results.":"Click Run Scan to apply every rule to the loaded dataset.";
+      $("runDescription").textContent=((activeScan==="coffee" || activeScan==="buffett") && window.__coffeeCanSourcePreFiltered)?"This is the saved result set from your supplied report. Click Run Scan to display and search the imported results.":"Click Run Scan to apply every rule to the loaded dataset.";
       renderRows();
     }catch(err){
       $("dataStatus").textContent="Dataset could not be loaded";
@@ -305,8 +315,8 @@ tbody tr:hover td{background:#f7fbff}tbody tr:hover td:first-child{background:#f
     $("scanProgress").classList.add("show");$("scanTag").textContent="Scanning";
     const steps=[
       [12,"Preparing scan","Checking the dataset structure"],
-      [34,"Reading company metrics","Checking ROIC, earnings yield and book value"],
-      [62,"Applying valuation rule","Checking market capitalisation threshold"],
+      [34,"Reading company metrics",activeScan==="buffett"?"Preparing imported financial metrics":"Checking ROIC, earnings yield and book value"],
+      [62,"Applying valuation rule",activeScan==="buffett"?"Loading the saved query results":"Checking market capitalisation threshold"],
       [84,"Building result table","Sorting and preparing company rows"],
       [100,"Scan complete","Your matching results are ready"]
     ];
@@ -318,9 +328,9 @@ tbody tr:hover td{background:#f7fbff}tbody tr:hover td:first-child{background:#f
     hasRun=true;sortKey="source";sortDir=1;$("sort").value="source";
     $("scanTag").textContent="Scan complete";
     $("runHeading").textContent="Scan completed successfully";
-    $("runDescription").textContent=(activeScan==="coffee" && window.__coffeeCanSourcePreFiltered)?`${results.length.toLocaleString("en-IN")} companies imported from your saved Coffee Can query results.`:`${results.length.toLocaleString("en-IN")} companies passed all four Magic Formula rules in this dataset.`;
+    $("runDescription").textContent=((activeScan==="coffee" || activeScan==="buffett") && window.__coffeeCanSourcePreFiltered)?`${results.length.toLocaleString("en-IN")} companies imported from your saved ${activeScan==="buffett"?"Benjamin Graham and Warren Buffett":"Coffee Can"} query results.`:`${results.length.toLocaleString("en-IN")} companies passed all configured rules in this dataset.`;
     $("matchCount").textContent=results.length.toLocaleString("en-IN");
-    $("matchNote").textContent=(activeScan==="coffee" && window.__coffeeCanSourcePreFiltered)?"Saved query results":"Passed all four rules";
+    $("matchNote").textContent=((activeScan==="coffee" || activeScan==="buffett") && window.__coffeeCanSourcePreFiltered)?"Saved query results":"Passed all four rules";
     renderRows();button.disabled=false;button.innerHTML="<span>↻</span> Run Scan Again";
   }
   function exportCsv(){
@@ -333,7 +343,7 @@ tbody tr:hover td{background:#f7fbff}tbody tr:hover td:first-child{background:#f
   document.querySelectorAll(".scan-choice").forEach(button=>button.addEventListener("click",()=>{
     const requested=button.dataset.scan;
     if(!scanDefinitions[requested]){
-      setError(`${button.querySelector("strong").textContent} has not been configured yet. Coffee Can and Magic Formula are the first two supported scans.`);
+      setError(`${button.querySelector("strong").textContent} has not been configured yet. This scan needs its own dataset and rules.`);
       return;
     }
     activeScan=requested;
