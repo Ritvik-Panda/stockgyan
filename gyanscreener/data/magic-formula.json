@@ -1,1 +1,96 @@
-
+{
+  "strategy": "Magic Formula",
+  "source": "Screener.in PDF export supplied by user",
+  "sourceReportDate": "2026-10-16",
+  "currency": "INR",
+  "marketCapUnit": "INR crore",
+  "rules": {
+    "roic_pct": {
+      "operator": ">",
+      "value": 25
+    },
+    "earnings_yield_pct": {
+      "operator": ">",
+      "value": 15
+    },
+    "book_value_inr": {
+      "operator": ">",
+      "value": 0
+    },
+    "market_cap_cr": {
+      "operator": ">",
+      "value": 500
+    }
+  },
+  "data": [
+    {
+      "source_report_date": "2026-10-16",
+      "source": "Screener.in PDF export",
+      "company": "SPARC",
+      "cmp_inr": 188.64,
+      "pe": 3.84,
+      "market_cap_cr": 6121.78,
+      "dividend_yield_pct": 0.0,
+      "net_profit_quarter_cr": -20.98,
+      "quarterly_profit_change_pct": 59.68,
+      "sales_quarter_cr": 39.92,
+      "quarterly_sales_change_pct": 314.11,
+      "roce_pct": 164.99,
+      "pat_12m_cr": 1595.54,
+      "roic_pct": 134.34,
+      "earnings_yield_pct": 24.42,
+      "book_value_inr": 41.09
+    },
+    {
+      "source_report_date": "2026-10-16",
+      "source": "Screener.in PDF export",
+      "company": "Indosolar",
+      "cmp_inr": 212.71,
+      "pe": 5.32,
+      "market_cap_cr": 884.95,
+      "dividend_yield_pct": 0.0,
+      "net_profit_quarter_cr": 36.62,
+      "quarterly_profit_change_pct": -68.64,
+      "sales_quarter_cr": 68.36,
+      "quarterly_sales_change_pct": -64.89,
+      "roce_pct": 123.8,
+      "pat_12m_cr": 166.43,
+      "roic_pct": 80.16,
+      "earnings_yield_pct": 25.76,
+      "book_value_inr": 68.98
+    },
+    {
+      "source_report_date": "2026-10-16",
+      "source": "Screener.in PDF export",
+      "company": "Jindal Poly Investments",
+      "cmp_inr": 953.45,
+      "pe": 1.24,
+      "market_cap_cr": 1002.08,
+      "dividend_yield_pct": 0.0,
+      "net_profit_quarter_cr": 13.89,
+      "quarterly_profit_change_pct": -77.87,
+      "sales_quarter_cr": 8.83,
+      "quarterly_sales_change_pct": 5.75,
+      "roce_pct": 63.42,
+      "pat_12m_cr": 808.64,
+      "roic_pct": 63.42,
+      "earnings_yield_pct": 93.56,
+      "book_value_inr": 1526.79
+    },
+    {
+      "source_report_date": "2026-10-16",
+      "source": "Screener.in PDF export",
+      "company": "Unifinz Capital",
+      "cmp_inr": 132.6,
+      "pe": 6.69,
+      "market_cap_cr": 586.99,
+      "dividend_yield_pct": 0.38,
+      "net_profit_quarter_cr": 17.35,
+      "quarterly_profit_change_pct": 3.21,
+      "sales_quarter_cr": 180.21,
+      "quarterly_sales_change_pct": 117.15,
+      "roce_pct": 55.21,
+      "pat_12m_cr": 87.68,
+      "roic_pct": 55.21,
+      "earnings_yield_pct": 20.98,
+      "book_value_inr": 37.08
