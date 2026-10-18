@@ -178,16 +178,21 @@ function buildUpstoxUrl(instrumentKey, interval) {
   }
 
   if (interval === "1d") {
-    const today = new Date();
+    // Use the Indian market's calendar date instead of UTC's date.
+    // This avoids requesting the wrong date around midnight IST.
+    const toDate = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Kolkata",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).format(new Date());
 
-    const toDate = today.toISOString().slice(0, 10);
+    const [year, month, day] = toDate.split("-").map(Number);
+    const fromDateObj = new Date(Date.UTC(year, month - 1, day));
+    fromDateObj.setUTCDate(fromDateObj.getUTCDate() - 366);
+    const fromDate = fromDateObj.toISOString().slice(0, 10);
 
-    const fromDate = new Date(
-      today.getTime() - 366 * 24 * 60 * 60 * 1000
-    )
-      .toISOString()
-      .slice(0, 10);
-
+    // Upstox V3 daily candle endpoint takes to_date before from_date.
     return `https://api.upstox.com/v3/historical-candle/${encodedKey}/days/1/${toDate}/${fromDate}`;
   }
 
