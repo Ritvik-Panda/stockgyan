@@ -1003,7 +1003,7 @@
       // Show only during the Dussehra festive window in October 2026.
       const now = new Date();
       const festiveStart = new Date(2026, 9, 19);
-      const festiveEnd = new Date(2026, 9, 27); // exclusive end date
+      const festiveEnd = new Date(2026, 9, 21); // exclusive end date: show Oct 19 and Oct 20 only
       let alreadyDismissed = false;
       try { alreadyDismissed = sessionStorage.getItem('stockgyan-dussehra-popup-2026') === 'dismissed'; } catch (_) {}
       if (now < festiveStart || now >= festiveEnd || alreadyDismissed) return;
