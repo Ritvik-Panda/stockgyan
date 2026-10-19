@@ -972,76 +972,62 @@
   </script>
 
 
-  <!-- Reusable birthday popup: change only the settings in birthdaySettings below. -->
+  <!-- StockGyan Dussehra festive popup: uses /assets/stockgyan-dussehra.png -->
   <style>
-    .sg-birthday-overlay{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(3,14,35,.78);backdrop-filter:blur(5px)}
-    .sg-birthday-overlay.is-visible{display:flex;animation:sgBirthdayFade .25s ease-out}
-    .sg-birthday-modal{position:relative;isolation:isolate;overflow:hidden;width:min(100%,520px);padding:36px 28px 30px;border:1px solid rgba(247,201,105,.65);border-radius:26px;text-align:center;color:#fff;background:radial-gradient(circle at 50% 0%,#174b86 0,#082a63 52%,#061b40 100%);box-shadow:0 24px 90px rgba(0,0,0,.4)}
-    .sg-birthday-modal:before,.sg-birthday-modal:after{content:'✦  ✧  ✦  ✧  ✦';position:absolute;z-index:-1;color:#f7c969;opacity:.6;letter-spacing:13px;font-size:20px;white-space:nowrap;pointer-events:none}
-    .sg-birthday-modal:before{top:20px;left:-5px;transform:rotate(-12deg)}.sg-birthday-modal:after{bottom:20px;right:-10px;transform:rotate(-12deg)}
-    .sg-birthday-close{position:absolute;top:12px;right:13px;width:38px;height:38px;border:1px solid rgba(255,255,255,.25);border-radius:50%;background:rgba(255,255,255,.1);color:#fff;font-size:25px;line-height:1;cursor:pointer}
-    .sg-birthday-close:hover{background:rgba(255,255,255,.2)}
-    .sg-birthday-emoji{font-size:clamp(42px,9vw,60px);line-height:1.2;margin:5px 0 14px;filter:drop-shadow(0 5px 12px rgba(0,0,0,.2))}
-    .sg-birthday-kicker{margin:0 0 10px;color:#f7c969;font-size:12px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase}
-    .sg-birthday-title{margin:0 auto 16px;color:#fff;font-size:clamp(27px,6vw,39px);line-height:1.15;font-weight:800}
-    .sg-birthday-message{max-width:410px;margin:0 auto 22px;color:#e6eefb;font-size:16px;line-height:1.7}
-    .sg-birthday-signoff{margin:0;color:#f7c969;font-size:15px;font-weight:700}
-    .sg-birthday-button{display:inline-flex;align-items:center;justify-content:center;margin-top:24px;padding:12px 22px;border:0;border-radius:999px;background:#159447;color:#fff;font:700 14px inherit;cursor:pointer;box-shadow:0 7px 20px rgba(0,0,0,.18)}
-    .sg-birthday-button:hover{background:#117b3b}
-    @keyframes sgBirthdayFade{from{opacity:0}to{opacity:1}}
-    @media(prefers-reduced-motion:reduce){.sg-birthday-overlay.is-visible{animation:none}}
+    .sg-festival-overlay{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(3,14,35,.78);backdrop-filter:blur(6px)}
+    .sg-festival-overlay.is-visible{display:flex;animation:sgFestivalFade .25s ease-out}
+    .sg-festival-modal{position:relative;width:min(100%,1100px);max-height:calc(100vh - 36px);overflow:auto;border:2px solid #f28c28;border-radius:22px;background:#082a63;box-shadow:0 24px 90px rgba(0,0,0,.48)}
+    .sg-festival-image-link{display:block;line-height:0;cursor:pointer}
+    .sg-festival-image{display:block;width:100%;height:auto;max-height:calc(100vh - 40px);object-fit:contain;border-radius:20px}
+    .sg-festival-close{position:absolute;top:12px;right:12px;z-index:2;display:grid;place-items:center;width:42px;height:42px;border:2px solid #fff;border-radius:50%;background:rgba(8,42,99,.88);color:#fff;font:400 30px/1 Arial,sans-serif;cursor:pointer;box-shadow:0 3px 12px rgba(0,0,0,.25)}
+    .sg-festival-close:hover{background:#f28c28}
+    @keyframes sgFestivalFade{from{opacity:0}to{opacity:1}}
+    @media(max-width:600px){.sg-festival-overlay{padding:8px}.sg-festival-modal{max-height:calc(100vh - 16px);border-radius:14px}.sg-festival-image{max-height:calc(100vh - 20px);object-fit:contain}.sg-festival-close{top:8px;right:8px;width:36px;height:36px;font-size:25px}}
+    @media(prefers-reduced-motion:reduce){.sg-festival-overlay.is-visible{animation:none}}
   </style>
-  <div class="sg-birthday-overlay" id="sgBirthdayOverlay" role="dialog" aria-modal="true" aria-labelledby="sgBirthdayTitle" aria-describedby="sgBirthdayMessage">
-    <div class="sg-birthday-modal" role="document">
-      <button class="sg-birthday-close" id="sgBirthdayClose" type="button" aria-label="Close birthday message">×</button>
-      <div class="sg-birthday-emoji" aria-hidden="true">🎈 🎂 🎉</div>
-      <p class="sg-birthday-kicker">A special celebration</p>
-      <h2 class="sg-birthday-title" id="sgBirthdayTitle">Happy Birthday, Rupali!</h2>
-      <p class="sg-birthday-message" id="sgBirthdayMessage">May your special day be filled with happiness, love and beautiful memories. Wishing you good health, success, endless smiles and a wonderful year ahead.</p>
-      <p class="sg-birthday-signoff">Warm wishes from StockGyan ❤️</p>
-      <button class="sg-birthday-button" id="sgBirthdayCelebrate" type="button">Celebrate your special day ✨</button>
+  <div class="sg-festival-overlay" id="sgFestivalOverlay" role="dialog" aria-modal="true" aria-label="StockGyan Happy Dussehra greeting">
+    <div class="sg-festival-modal" role="document">
+      <button class="sg-festival-close" id="sgFestivalClose" type="button" aria-label="Close Dussehra greeting">×</button>
+      <a class="sg-festival-image-link" id="sgFestivalExplore" href="/market" aria-label="Explore StockGyan market dashboard">
+        <img class="sg-festival-image" src="/assets/stockgyan-dussehra.png" alt="StockGyan wishes you a Happy Dussehra. Explore StockGyan." fetchpriority="high">
+      </a>
     </div>
   </div>
   <script>
-    // BIRTHDAY SETTINGS: update name, day, month, and message for the next celebration.
-    // Month is numeric: January = 1, October = 10, December = 12.
     (function () {
-      const birthdaySettings = {
-        name: 'Rupali',
-        day: 18,
-        month: 10,
-        message: 'May your special day be filled with happiness, love and beautiful memories. Wishing you good health, success, endless smiles and a wonderful year ahead.'
-      };
+      const overlay = document.getElementById('sgFestivalOverlay');
+      const closeButton = document.getElementById('sgFestivalClose');
+      const exploreButton = document.getElementById('sgFestivalExplore');
+      if (!overlay || !closeButton || !exploreButton) return;
+
+      // Show only during the Dussehra festive window in October 2026.
       const now = new Date();
-      if (now.getDate() !== birthdaySettings.day || (now.getMonth() + 1) !== birthdaySettings.month) return;
+      const festiveStart = new Date(2026, 9, 19);
+      const festiveEnd = new Date(2026, 9, 27); // exclusive end date
+      let alreadyDismissed = false;
+      try { alreadyDismissed = sessionStorage.getItem('stockgyan-dussehra-popup-2026') === 'dismissed'; } catch (_) {}
+      if (now < festiveStart || now >= festiveEnd || alreadyDismissed) return;
 
-      const overlay = document.getElementById('sgBirthdayOverlay');
-      const closeButton = document.getElementById('sgBirthdayClose');
-      const celebrateButton = document.getElementById('sgBirthdayCelebrate');
-      const title = document.getElementById('sgBirthdayTitle');
-      const message = document.getElementById('sgBirthdayMessage');
-      if (!overlay || !closeButton || !celebrateButton || !title || !message) return;
-
-      title.textContent = 'Happy Birthday, ' + birthdaySettings.name + '!';
-      message.textContent = birthdaySettings.message;
       overlay.classList.add('is-visible');
       document.body.style.overflow = 'hidden';
       closeButton.focus();
 
-      function closeBirthdayPopup() {
+      function closeFestivalPopup() {
         overlay.classList.remove('is-visible');
         document.body.style.overflow = '';
+        try { sessionStorage.setItem('stockgyan-dussehra-popup-2026', 'dismissed'); } catch (_) {}
       }
-      closeButton.addEventListener('click', closeBirthdayPopup);
-      celebrateButton.addEventListener('click', closeBirthdayPopup);
+      closeButton.addEventListener('click', closeFestivalPopup);
+      exploreButton.addEventListener('click', function () {
+        try { sessionStorage.setItem('stockgyan-dussehra-popup-2026', 'dismissed'); } catch (_) {}
+      });
       overlay.addEventListener('click', function (event) {
-        if (event.target === overlay) closeBirthdayPopup();
+        if (event.target === overlay) closeFestivalPopup();
       });
       document.addEventListener('keydown', function (event) {
-        if (event.key === 'Escape' && overlay.classList.contains('is-visible')) closeBirthdayPopup();
+        if (event.key === 'Escape' && overlay.classList.contains('is-visible')) closeFestivalPopup();
       });
     })();
   </script>
-
 </body>
 </html>
