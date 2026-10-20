@@ -1029,5 +1029,65 @@
       });
     })();
   </script>
+  <!-- StockGyan birthday popup for Mansi and Niraj -->
+  <style>
+    .sg-birthday-overlay{position:fixed;inset:0;z-index:100001;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(3,14,35,.78);backdrop-filter:blur(6px)}
+    .sg-birthday-overlay.is-visible{display:flex;animation:sgBirthdayFade .25s ease-out}
+    .sg-birthday-card{position:relative;width:min(100%,560px);overflow:hidden;border:2px solid #f28c28;border-radius:24px;padding:clamp(28px,6vw,48px) clamp(22px,5vw,40px);text-align:center;color:#fff;background:radial-gradient(circle at top,#174a91 0,#082a63 58%,#061a3e 100%);box-shadow:0 24px 90px rgba(0,0,0,.48)}
+    .sg-birthday-card:before{content:'✦  ✧  ✦  ✧  ✦';display:block;margin-bottom:18px;color:#ffc857;font-size:24px;letter-spacing:7px}
+    .sg-birthday-kicker{display:inline-block;margin-bottom:12px;padding:7px 13px;border:1px solid rgba(255,255,255,.3);border-radius:999px;color:#ffe1a0;font-size:12px;font-weight:800;letter-spacing:2px}
+    .sg-birthday-card h2{margin:0 0 14px;color:#fff;font-size:clamp(30px,7vw,46px);line-height:1.12}
+    .sg-birthday-card h2 span{display:block;margin-top:8px;color:#ffc857}
+    .sg-birthday-card p{margin:0 auto 22px;max-width:420px;color:#e7efff;font-size:16px;line-height:1.7}
+    .sg-birthday-emoji{margin:4px 0 18px;font-size:40px;letter-spacing:8px}
+    .sg-birthday-signoff{color:#b9d4ff;font-size:13px;font-weight:700;letter-spacing:1px}
+    .sg-birthday-close{position:absolute;top:10px;right:10px;display:grid;place-items:center;width:40px;height:40px;border:1px solid rgba(255,255,255,.65);border-radius:50%;background:rgba(255,255,255,.12);color:#fff;font:400 28px/1 Arial,sans-serif;cursor:pointer}
+    .sg-birthday-close:hover{background:#f28c28}
+    @keyframes sgBirthdayFade{from{opacity:0}to{opacity:1}}
+    @media(max-width:600px){.sg-birthday-overlay{padding:10px}.sg-birthday-card{border-radius:18px}.sg-birthday-card p{font-size:15px}}
+    @media(prefers-reduced-motion:reduce){.sg-birthday-overlay.is-visible{animation:none}}
+  </style>
+  <div class="sg-birthday-overlay" id="sgBirthdayOverlay" role="dialog" aria-modal="true" aria-labelledby="sgBirthdayTitle" aria-describedby="sgBirthdayMessage">
+    <section class="sg-birthday-card" role="document">
+      <button class="sg-birthday-close" id="sgBirthdayClose" type="button" aria-label="Close birthday greeting">×</button>
+      <div class="sg-birthday-kicker">A SPECIAL CELEBRATION</div>
+      <h2 id="sgBirthdayTitle">Happy Birthday<span>Mansi &amp; Niraj!</span></h2>
+      <div class="sg-birthday-emoji" aria-hidden="true">🎂 🎉 🎁</div>
+      <p id="sgBirthdayMessage">Wishing you both a wonderful birthday filled with happiness, good health, laughter and success. May the year ahead bring you countless beautiful moments and dreams come true!</p>
+      <div class="sg-birthday-signoff">WITH WARM WISHES ❤️</div>
+    </section>
+  </div>
+  <script>
+    (function () {
+      const overlay = document.getElementById('sgBirthdayOverlay');
+      const closeButton = document.getElementById('sgBirthdayClose');
+      if (!overlay || !closeButton) return;
+      // Display on October 20 and 21, 2026; the end date is exclusive.
+      const now = new Date();
+      const start = new Date(2026, 9, 20);
+      const end = new Date(2026, 9, 22);
+      let dismissed = false;
+      try { dismissed = sessionStorage.getItem('stockgyan-birthday-mansi-niraj-2026') === 'dismissed'; } catch (_) {}
+      if (now < start || now >= end || dismissed) return;
+      // Avoid two overlays competing: the birthday greeting takes priority while active.
+      const dussehraOverlay = document.getElementById('sgFestivalOverlay');
+      if (dussehraOverlay) dussehraOverlay.classList.remove('is-visible');
+      overlay.classList.add('is-visible');
+      document.body.style.overflow = 'hidden';
+      closeButton.focus();
+      function closeBirthdayPopup() {
+        overlay.classList.remove('is-visible');
+        document.body.style.overflow = '';
+        try { sessionStorage.setItem('stockgyan-birthday-mansi-niraj-2026', 'dismissed'); } catch (_) {}
+      }
+      closeButton.addEventListener('click', closeBirthdayPopup);
+      overlay.addEventListener('click', function (event) {
+        if (event.target === overlay) closeBirthdayPopup();
+      });
+      document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && overlay.classList.contains('is-visible')) closeBirthdayPopup();
+      });
+    })();
+  </script>
 </body>
 </html>
