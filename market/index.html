@@ -172,43 +172,75 @@ button,input{font:inherit}
       </div>
 
       <style>
-        /* TradingView replaces the visible chart while the original StockGyan chart/API code is preserved below as a hidden fallback. */
+        /* Darqube replaces the visible chart; existing StockGyan chart/API
+           logic remains intact for compatibility with the Market page. */
         #chartPanel .chart-tools,
         #chartPanel #chart { display: none !important; }
-        #stockgyanTradingView { width: 100%; height: 560px; }
-        #stockgyanTradingView .tradingview-widget-container,
-        #stockgyanTradingView .tradingview-widget-container__widget { width: 100%; height: 100%; }
-        #stockgyanTradingView .tradingview-widget-copyright { font-size: 11px; padding: 6px 10px; color: #6f7b90; }
-        @media (max-width: 650px) { #stockgyanTradingView { height: 470px; } }
+
+        #stockgyanDarqube {
+          width: 100%;
+          height: 560px;
+          background: #fff;
+          overflow: hidden;
+        }
+        #stockgyanDarqube iframe {
+          display: block;
+          width: 100%;
+          height: 100%;
+          border: 0;
+        }
+        @media (max-width: 650px) {
+          #stockgyanDarqube { height: 470px; }
+        }
       </style>
-      <div id="stockgyanTradingView" aria-label="TradingView Advanced Chart">
-        <div class="tradingview-widget-container" style="height:100%;width:100%">
-          <div class="tradingview-widget-container__widget" style="height:calc(100% - 32px);width:100%"></div>
-          <div class="tradingview-widget-copyright">
-            Charts by <a href="https://www.tradingview.com/" rel="noopener nofollow" target="_blank">TradingView</a>
-          </div>
-          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
-          {
-            "autosize": true,
-            "symbol": "NSE:RELIANCE",
-            "interval": "5",
-            "timezone": "Asia/Kolkata",
-            "theme": "light",
-            "style": "1",
-            "locale": "en",
-            "allow_symbol_change": true,
-            "withdateranges": true,
-            "hide_side_toolbar": false,
-            "hide_top_toolbar": false,
-            "hide_legend": false,
-            "hide_volume": false,
-            "save_image": true,
-            "calendar": false,
-            "support_host": "https://www.tradingview.com"
-          }
-          </script>
-        </div>
+
+      <div id="stockgyanDarqube" aria-label="Darqube Advanced Chart">
+        <iframe
+          id="AdvancedChartWidget-xvutvap"
+          data-widget-name="AdvancedChartWidget"
+          src="https://widget.darqube.com/advanced-chart-widget?token=6ad8ed1568f5a92c3faa1b14"
+          title="StockGyan Darqube Advanced Chart"
+          loading="lazy"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allowfullscreen
+        ></iframe>
       </div>
+
+      <script>
+        // Accept only resize/style messages from this Darqube iframe.
+        (function () {
+          const widget = document.getElementById("AdvancedChartWidget-xvutvap");
+          if (!widget) return;
+
+          const allowedStyles = [
+            "height", "min-height", "max-height",
+            "width", "min-width", "max-width"
+          ];
+          const validSize = /^(?:\\d+(?:\\.\\d+)?(?:px|%|vh|vw|rem)|auto)$/;
+
+          window.addEventListener("message", function (event) {
+            if (event.origin !== "https://widget.darqube.com") return;
+            if (event.source !== widget.contentWindow) return;
+
+            const data = event.data;
+            if (!data || typeof data !== "object") return;
+
+            const urlToken = new URL(widget.src).searchParams.get("token");
+            if (!data.styles || data.token !== urlToken) return;
+
+            Object.keys(data.styles).forEach(function (key) {
+              const value = data.styles[key];
+              if (
+                allowedStyles.includes(key) &&
+                typeof value === "string" &&
+                validSize.test(value)
+              ) {
+                widget.style.setProperty(key, value);
+              }
+            });
+          });
+        })();
+      </script>
 
       <div class="chart-tools">
         <button data-range="1D" class="active">1D</button>
