@@ -220,8 +220,12 @@
     .stock-swot-controls { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
     .stock-swot-controls label { color:#082a63; font-weight:700; font-size:14px; }
     .stock-swot-controls select { min-width:180px; max-width:100%; padding:11px 12px; border:1px solid #cbd5e1; border-radius:10px; background:#fff; color:#0f172a; font:inherit; }
-    .stock-swot-controls input { min-width:190px; max-width:100%; padding:11px 12px; border:1px solid #cbd5e1; border-radius:10px; background:#fff; color:#0f172a; font:inherit; text-transform:uppercase; }
+    .stock-swot-controls input { min-width:190px; max-width:100%; padding:11px 12px; border:1px solid #cbd5e1; border-radius:10px; background:#fff; color:#0f172a; font:inherit; text-transform:none; }
     .stock-swot-controls button { white-space:nowrap; cursor:pointer; border:0; }
+    .stock-swot-controls input { text-transform:none; }
+    .stock-swot-input-help { flex-basis:100%; color:#64748b; font-size:12px; line-height:1.4; }
+    .stock-swot-controls input:focus-visible { outline:3px solid rgba(21,148,71,.25); border-color:#159447; }
+
     .stock-swot-status { margin:0 0 10px; color:#64748b; font-size:13px; }
 
     .stock-swot-widget { min-height:260px; overflow-x:auto; border-radius:12px; }
@@ -596,10 +600,12 @@
             <form class="stock-swot-controls" id="stockSwotForm">
               <label for="stockSwotSymbol">Enter stock symbol</label>
               <input id="stockSwotSymbol" name="symbol" type="text"
-                placeholder="e.g. INFY, TCS, IFCI" value="INFY"
-                maxlength="30" autocomplete="off" autocapitalize="characters"
-                spellcheck="false" required>
+                placeholder="Type a ticker, e.g. INFY or TCS"
+                value="INFY" maxlength="30" autocomplete="off"
+                autocapitalize="characters" spellcheck="false"
+                aria-describedby="stockSwotInputHelp" required>
               <button type="submit" class="button button-primary">Analyse Stock →</button>
+              <small id="stockSwotInputHelp" class="stock-swot-input-help">Enter a ticker symbol, then click Analyse Stock.</small>
             </form>
           </div>
 
@@ -1023,7 +1029,7 @@
 
 
   <script>
-    // StockGyan Trendlyne SWOT: users can enter a ticker symbol.
+    // StockGyan Trendlyne SWOT: free-entry ticker field.
     (function () {
       const form = document.getElementById('stockSwotForm');
       const input = document.getElementById('stockSwotSymbol');
@@ -1031,6 +1037,7 @@
       if (!form || !input || !container) return;
 
       const colors = 'posCol=00A25B&primaryCol=006AFF&negCol=EB3B00&neuCol=F7941E';
+      let requestId = 0;
 
       function showStatus(message) {
         let status = document.getElementById('stockSwotStatus');
@@ -1047,17 +1054,21 @@
       function loadSwot(rawSymbol) {
         const symbol = rawSymbol.trim().toUpperCase();
 
-        // Accept NSE-style ticker symbols. Do not treat arbitrary company names as valid tickers.
+        if (!symbol) {
+          showStatus('Please enter a stock ticker symbol.');
+          input.focus();
+          return;
+        }
         if (!/^[A-Z0-9&.-]{1,30}$/.test(symbol)) {
-          showStatus('Enter a valid stock symbol, for example INFY, TCS, RELIANCE or IFCI.');
+          showStatus('Use a ticker symbol such as INFY, TCS, RELIANCE or IFCI. Avoid spaces and punctuation other than &, . or -.');
+          input.focus();
           return;
         }
 
-        input.value = symbol;
-        showStatus('Loading SWOT analysis for ' + symbol + '…');
+        const thisRequest = ++requestId;
+        showStatus('Requesting SWOT analysis for ' + symbol + '…');
         container.replaceChildren();
 
-        // Remove prior Trendlyne widget scripts to trigger the standard loader for the new blockquote.
         document.querySelectorAll('script[data-stockgyan-trendlyne="true"]').forEach(function (oldScript) {
           oldScript.remove();
         });
@@ -1078,20 +1089,28 @@
         providerScript.dataset.stockgyanTrendlyne = 'true';
         providerScript.src = 'https://cdn-static.trendlyne.com/static/js/webwidgets/tl-widgets.js';
         providerScript.onload = function () {
-          showStatus('Requested SWOT analysis for ' + symbol + '. If no analysis appears, check that Trendlyne supports this ticker.');
+          if (thisRequest !== requestId) return;
+          showStatus('Requested ' + symbol + '. If no SWOT appears, Trendlyne may not support that ticker or dynamic reloading.');
         };
         providerScript.onerror = function () {
-          showStatus('Trendlyne could not be loaded. Check your connection and try again.');
+          if (thisRequest === requestId) {
+            showStatus('Could not load Trendlyne. Please check your connection and try again.');
+          }
         };
         document.body.appendChild(providerScript);
       }
 
+      // Do not alter the field while the visitor is typing. Only submit on button click or Enter.
       form.addEventListener('submit', function (event) {
         event.preventDefault();
         loadSwot(input.value);
       });
 
-      // Load the default example (INFY) on first page view.
+      // Keep typed symbols uppercase after the visitor pauses; do not rewrite the field on each keystroke.
+      input.addEventListener('blur', function () {
+        input.value = input.value.toUpperCase();
+      });
+
       loadSwot(input.value || 'INFY');
     })();
   </script>
