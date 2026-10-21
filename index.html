@@ -1065,7 +1065,7 @@
 
 
   <script>
-    // StockGyan Trendlyne SWOT: free-entry ticker field.
+    // StockGyan Trendlyne SWOT: enter a ticker and explicitly reload the provider widget.
     (function () {
       const form = document.getElementById('stockSwotForm');
       const input = document.getElementById('stockSwotSymbol');
@@ -1089,58 +1089,71 @@
 
       function loadSwot(rawSymbol) {
         const symbol = rawSymbol.trim().toUpperCase();
-
         if (!symbol) {
-          showStatus('Please enter a stock ticker symbol.');
+          showStatus('Please enter a stock ticker symbol, such as TCS or INFY.');
           input.focus();
           return;
         }
         if (!/^[A-Z0-9&.-]{1,30}$/.test(symbol)) {
-          showStatus('Use a ticker symbol such as INFY, TCS, RELIANCE or IFCI. Avoid spaces and punctuation other than &, . or -.');
+          showStatus('Enter a ticker symbol such as TCS, INFY, RELIANCE or IFCI. Use the stock symbol, not the full company name.');
           input.focus();
           return;
         }
 
         const thisRequest = ++requestId;
-        showStatus('Requesting SWOT analysis for ' + symbol + '…');
+        input.value = symbol;
+        showStatus('Loading SWOT analysis for ' + symbol + '…');
         container.replaceChildren();
 
-        document.querySelectorAll('script[data-stockgyan-trendlyne="true"]').forEach(function (oldScript) {
-          oldScript.remove();
-        });
-
-        const widget = document.createElement('blockquote');
-        widget.className = 'trendlyne-widgets';
-        widget.setAttribute(
+        const blockquote = document.createElement('blockquote');
+        blockquote.className = 'trendlyne-widgets';
+        blockquote.setAttribute(
           'data-get-url',
           'https://trendlyne.com/web-widget/swot-widget/Poppins/' +
             encodeURIComponent(symbol) + '/?' + colors
         );
-        widget.setAttribute('data-theme', 'light');
-        container.appendChild(widget);
+        blockquote.setAttribute('data-theme', 'light');
+        container.appendChild(blockquote);
 
-        // Trendlyne's loader is shared with the IPO widget below. It is loaded once
-        // at the end of the page; changing symbols rebuilds this blockquote.
-        showStatus('Requested ' + symbol + '. If no SWOT appears, Trendlyne may not support that ticker or dynamic reloading.');
+        // Trendlyne's embed script scans widget blockquotes during initialization.
+        // Replace the script element and use a cache-busting query so the loader executes again.
+        document.querySelectorAll('script[data-stockgyan-trendlyne-loader="true"]').forEach(function (node) {
+          node.remove();
+        });
+
+        const loader = document.createElement('script');
+        loader.async = true;
+        loader.charset = 'utf-8';
+        loader.dataset.stockgyanTrendlyneLoader = 'true';
+        loader.src = 'https://cdn-static.trendlyne.com/static/js/webwidgets/tl-widgets.js?stockgyan=' +
+          Date.now() + '-' + thisRequest;
+        loader.onload = function () {
+          if (thisRequest === requestId) {
+            showStatus('Trendlyne widget requested for ' + symbol + '. If it remains blank, use Trendlyne’s official widget generator to create an embed for this symbol; the provider may not support reinitializing dynamic widgets.');
+          }
+        };
+        loader.onerror = function () {
+          if (thisRequest === requestId) {
+            showStatus('Trendlyne could not be loaded. Please try again later.');
+          }
+        };
+        document.body.appendChild(loader);
       }
 
-      // Do not alter the field while the visitor is typing. Only submit on button click or Enter.
       form.addEventListener('submit', function (event) {
         event.preventDefault();
         loadSwot(input.value);
       });
 
-      // Keep typed symbols uppercase after the visitor pauses; do not rewrite the field on each keystroke.
       input.addEventListener('blur', function () {
         input.value = input.value.toUpperCase();
       });
 
-      loadSwot(input.value || 'INFY');
+      // Avoid a second loader competing with the IPO widget's static loader.
+      // The first page load initializes both widgets through the shared loader.
+      const initialSymbol = input.value || 'INFY';
+      loadSwot(initialSymbol);
     })();
   </script>
-
-
-  <script async src="https://cdn-static.trendlyne.com/static/js/webwidgets/tl-widgets.js" charset="utf-8"></script>
-
 </body>
 </html>
