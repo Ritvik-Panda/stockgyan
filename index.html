@@ -210,6 +210,20 @@
         margin-top: 22px;
       }
     }
+
+    /* Stock SWOT section */
+    .stock-swot-section { padding: 42px 0; background: #f5f9ff; }
+    .stock-swot-card { background:#fff; border:1px solid #dbe7f5; border-radius:18px; padding:22px; box-shadow:0 12px 30px rgba(8,42,99,.06); }
+    .stock-swot-head { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:16px; }
+    .stock-swot-head h2 { margin:6px 0 8px; color:#082a63; }
+    .stock-swot-head p { margin:0; color:#64748b; line-height:1.5; }
+    .stock-swot-controls { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .stock-swot-controls label { color:#082a63; font-weight:700; font-size:14px; }
+    .stock-swot-controls select { min-width:180px; max-width:100%; padding:11px 12px; border:1px solid #cbd5e1; border-radius:10px; background:#fff; color:#0f172a; font:inherit; }
+    .stock-swot-widget { min-height:260px; overflow-x:auto; border-radius:12px; }
+    .stock-swot-note { margin:12px 0 0; color:#64748b; font-size:12px; line-height:1.5; }
+    @media (max-width:640px) { .stock-swot-card { padding:15px; } .stock-swot-head { align-items:stretch; } .stock-swot-controls { width:100%; } .stock-swot-controls select { flex:1; min-width:0; width:100%; } }
+
   </style>
 </head>
 
@@ -560,6 +574,41 @@
             <span class="tool-link">Explore GyanScreener <b>→</b></span>
           </a>
 
+        </div>
+      </div>
+    </section>
+
+
+    <!-- Stock SWOT Analysis: homepage section -->
+    <section class="stock-swot-section" id="stock-swot" aria-labelledby="stockSwotTitle">
+      <div class="container">
+        <div class="stock-swot-card">
+          <div class="stock-swot-head">
+            <div>
+              <span class="section-kicker">COMPANY RESEARCH</span>
+              <h2 id="stockSwotTitle">Stock SWOT Analysis</h2>
+              <p>Explore a company's strengths, weaknesses, opportunities and threats.</p>
+            </div>
+            <div class="stock-swot-controls">
+              <label for="stockSwotSymbol">Choose stock</label>
+              <select id="stockSwotSymbol">
+                <option value="INFY">Infosys (INFY)</option>
+                <option value="IFCI">IFCI (IFCI)</option>
+                <option value="RELIANCE">Reliance Industries (RELIANCE)</option>
+                <option value="TCS">Tata Consultancy Services (TCS)</option>
+                <option value="HDFCBANK">HDFC Bank (HDFCBANK)</option>
+                <option value="ICICIBANK">ICICI Bank (ICICIBANK)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="stock-swot-widget" id="stockSwotWidget" aria-live="polite">
+            <blockquote
+              class="trendlyne-widgets"
+              data-get-url="https://trendlyne.com/web-widget/swot-widget/Poppins/INFY/?posCol=00A25B&amp;primaryCol=006AFF&amp;negCol=EB3B00&amp;neuCol=F7941E"
+              data-theme="light"></blockquote>
+          </div>
+          <p class="stock-swot-note">SWOT analysis is provided by Trendlyne. Availability and coverage can vary by company. This information is for research and educational purposes, not investment advice.</p>
         </div>
       </div>
     </section>
@@ -968,6 +1017,76 @@
         });
       }
 
+    })();
+  </script>
+
+
+  <script>
+    // Trendlyne SWOT widget stock selector.
+    // Re-load the provider script when the selected symbol changes so it can
+    // initialize the newly configured widget. Verify the provider's behavior
+    // on the deployed site because third-party widget initialization is controlled by Trendlyne.
+    (function () {
+      const select = document.getElementById('stockSwotSymbol');
+      const container = document.getElementById('stockSwotWidget');
+      if (!select || !container) return;
+
+      const colors = 'posCol=00A25B&primaryCol=006AFF&negCol=EB3B00&neuCol=F7941E';
+      let loadVersion = 0;
+
+      function loadSwot(symbol) {
+        if (!/^[A-Z0-9&.-]{1,30}$/.test(symbol)) return;
+        loadVersion += 1;
+        const currentVersion = loadVersion;
+
+        // Remove the prior widget and provider script before rebuilding it.
+        container.replaceChildren();
+        document.querySelectorAll('script[data-stockgyan-trendlyne="true"]').forEach(function (oldScript) {
+          oldScript.remove();
+        });
+
+        const widget = document.createElement('blockquote');
+        widget.className = 'trendlyne-widgets';
+        widget.setAttribute(
+          'data-get-url',
+          'https://trendlyne.com/web-widget/swot-widget/Poppins/' +
+            encodeURIComponent(symbol) + '/?' + colors
+        );
+        widget.setAttribute('data-theme', 'light');
+        container.appendChild(widget);
+
+        const providerScript = document.createElement('script');
+        providerScript.async = true;
+        providerScript.charset = 'utf-8';
+        providerScript.dataset.stockgyanTrendlyne = 'true';
+        providerScript.src = 'https://cdn-static.trendlyne.com/static/js/webwidgets/tl-widgets.js';
+        providerScript.onload = function () {
+          // No undocumented provider API is called; script reload lets the
+          // provider run its standard initialization on the new blockquote.
+          if (currentVersion !== loadVersion) return;
+        };
+        providerScript.onerror = function () {
+          if (currentVersion === loadVersion) {
+            container.textContent = 'The SWOT widget could not be loaded. Please try again later.';
+          }
+        };
+        document.body.appendChild(providerScript);
+      }
+
+      select.addEventListener('change', function () {
+        loadSwot(select.value);
+      });
+
+      // The initial INFY widget is present in the HTML. Load the provider script once.
+      const initialScript = document.createElement('script');
+      initialScript.async = true;
+      initialScript.charset = 'utf-8';
+      initialScript.dataset.stockgyanTrendlyne = 'true';
+      initialScript.src = 'https://cdn-static.trendlyne.com/static/js/webwidgets/tl-widgets.js';
+      initialScript.onerror = function () {
+        container.textContent = 'The SWOT widget could not be loaded. Please try again later.';
+      };
+      document.body.appendChild(initialScript);
     })();
   </script>
 
