@@ -211,6 +211,17 @@
       }
     }
 
+
+    /* IPO widget section */
+    .ipo-section { padding: 42px 0; background:#fff; scroll-margin-top:90px; }
+    .ipo-card { padding:22px; background:#f8fbff; border:1px solid #dbe7f5; border-radius:18px; box-shadow:0 12px 30px rgba(8,42,99,.06); }
+    .ipo-heading-row { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:16px; }
+    .ipo-heading-row h2 { margin:6px 0 8px; color:#082a63; }
+    .ipo-heading-row p { margin:0; color:#64748b; line-height:1.5; }
+    .ipo-widget-wrap { width:100%; min-height:300px; overflow-x:auto; border-radius:12px; background:#fff; }
+    .ipo-note { margin:12px 0 0; color:#64748b; font-size:12px; line-height:1.5; }
+    @media (max-width:640px) { .ipo-card { padding:15px; } }
+
     /* Stock SWOT section */
     .stock-swot-section { padding: 42px 0; background: #f5f9ff; }
     .stock-swot-card { background:#fff; border:1px solid #dbe7f5; border-radius:18px; padding:22px; box-shadow:0 12px 30px rgba(8,42,99,.06); }
@@ -274,6 +285,7 @@
         <a href="/screener1">Health Screener</a>
         <a href="/gyanscreener/">GyanScreener</a>
         <a href="#analysis">Learn</a>
+        <a href="#ipo">IPO</a>
         <a class="nav-login" href="/portfolio">Login</a>
         <button class="nav-cta" type="button" data-open-register>
           Register <span aria-hidden="true">↗</span>
@@ -492,6 +504,28 @@
         </div>
 
       </aside>
+    </section>
+
+
+    <!-- IPO Dashboard -->
+    <section class="ipo-section" id="ipo" aria-labelledby="ipoTitle">
+      <div class="container">
+        <div class="ipo-card">
+          <div class="ipo-heading-row">
+            <div>
+              <span class="section-kicker">IPO MARKET TRACKER</span>
+              <h2 id="ipoTitle">IPO Dashboard</h2>
+              <p>Explore IPOs, subscription information, allotment updates and listing performance.</p>
+            </div>
+          </div>
+          <div class="ipo-widget-wrap">
+            <blockquote class="trendlyne-widgets"
+              data-get-url="https://trendlyne.com/web-widget/ipo-widget/Poppins/?activeCol=006AFF&amp;linksCol=006CFF&amp;primary=202020&amp;secondary=666666&amp;positive=00a25b&amp;negative=ff4e54"
+              data-theme="light"></blockquote>
+          </div>
+          <p class="ipo-note">IPO information is provided by Trendlyne. Please verify offer dates and details in official offer documents before making investment decisions.</p>
+        </div>
+      </div>
     </section>
 
     <!-- Tools -->
@@ -1083,21 +1117,9 @@
         widget.setAttribute('data-theme', 'light');
         container.appendChild(widget);
 
-        const providerScript = document.createElement('script');
-        providerScript.async = true;
-        providerScript.charset = 'utf-8';
-        providerScript.dataset.stockgyanTrendlyne = 'true';
-        providerScript.src = 'https://cdn-static.trendlyne.com/static/js/webwidgets/tl-widgets.js';
-        providerScript.onload = function () {
-          if (thisRequest !== requestId) return;
-          showStatus('Requested ' + symbol + '. If no SWOT appears, Trendlyne may not support that ticker or dynamic reloading.');
-        };
-        providerScript.onerror = function () {
-          if (thisRequest === requestId) {
-            showStatus('Could not load Trendlyne. Please check your connection and try again.');
-          }
-        };
-        document.body.appendChild(providerScript);
+        // Trendlyne's loader is shared with the IPO widget below. It is loaded once
+        // at the end of the page; changing symbols rebuilds this blockquote.
+        showStatus('Requested ' + symbol + '. If no SWOT appears, Trendlyne may not support that ticker or dynamic reloading.');
       }
 
       // Do not alter the field while the visitor is typing. Only submit on button click or Enter.
@@ -1114,6 +1136,9 @@
       loadSwot(input.value || 'INFY');
     })();
   </script>
+
+
+  <script async src="https://cdn-static.trendlyne.com/static/js/webwidgets/tl-widgets.js" charset="utf-8"></script>
 
 </body>
 </html>
