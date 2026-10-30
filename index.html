@@ -244,6 +244,81 @@
     @media (max-width:640px) { .stock-swot-card { padding:15px; } .stock-swot-head { align-items:stretch; } .stock-swot-controls { width:100%; } .stock-swot-controls select { flex:1; min-width:0; width:100%; } }
 
   </style>
+<style>
+
+    /* Gaurangi Madam's personalised StockGyan welcome */
+    .sg-welcome-overlay {
+      position: fixed; inset: 0; z-index: 99999;
+      display: none; align-items: center; justify-content: center;
+      padding: 20px; background: rgba(4, 18, 43, .72);
+      backdrop-filter: blur(7px);
+    }
+    .sg-welcome-overlay.is-visible { display: flex; animation: sgFadeIn .35s ease both; }
+    .sg-welcome-card {
+      position: relative; width: min(540px, 100%); overflow: hidden;
+      border: 1px solid rgba(255,255,255,.7); border-radius: 26px;
+      background: linear-gradient(145deg, #ffffff 0%, #f1f7ff 58%, #e9f8ef 100%);
+      box-shadow: 0 28px 90px rgba(0,0,0,.3);
+      padding: 42px 38px 34px; text-align: center;
+      animation: sgRise .5s cubic-bezier(.2,.8,.2,1) both;
+    }
+    .sg-welcome-card:before {
+      content:""; position:absolute; inset:0 0 auto; height:7px;
+      background:linear-gradient(90deg,#082a63,#159447,#d7b45a);
+    }
+    .sg-welcome-close {
+      position:absolute; top:14px; right:16px; width:36px; height:36px;
+      border:0; border-radius:50%; background:#eaf0f8; color:#334155;
+      font-size:23px; line-height:1; cursor:pointer;
+    }
+    .sg-welcome-emblem {
+      width:68px; height:68px; margin:0 auto 18px; display:grid;
+      place-items:center; border-radius:21px; color:#fff;
+      background:linear-gradient(145deg,#082a63,#159447);
+      font-size:24px; font-weight:800; letter-spacing:-1px;
+      box-shadow:0 10px 24px rgba(8,42,99,.2);
+    }
+    .sg-welcome-kicker {
+      margin:0 0 10px; color:#159447; font-size:11px;
+      font-weight:800; letter-spacing:2.4px; text-transform:uppercase;
+    }
+    .sg-welcome-card h2 {
+      margin:0 0 12px; color:#082a63; font-size:clamp(27px,5vw,37px);
+      line-height:1.15; letter-spacing:-1px;
+    }
+    .sg-welcome-card h2 span { color:#159447; }
+    .sg-welcome-message {
+      max-width:420px; margin:0 auto 22px; color:#52627a;
+      font-size:15px; line-height:1.75;
+    }
+    .sg-welcome-highlight {
+      margin:0 auto 24px; padding:14px 16px; max-width:410px;
+      border:1px solid #dcebe2; border-radius:15px;
+      background:rgba(255,255,255,.78); color:#24466c;
+      font-size:14px; line-height:1.6;
+    }
+    .sg-welcome-highlight strong { color:#159447; }
+    .sg-welcome-cta {
+      display:inline-flex; align-items:center; justify-content:center; gap:10px;
+      min-height:49px; padding:0 25px; border-radius:999px;
+      background:#082a63; color:#fff; text-decoration:none;
+      font-weight:750; box-shadow:0 9px 20px rgba(8,42,99,.2);
+      transition:transform .2s,background .2s;
+    }
+    .sg-welcome-cta:hover { transform:translateY(-2px); background:#159447; }
+    .sg-welcome-foot { margin:18px 0 0; color:#8190a4; font-size:11px; letter-spacing:.3px; }
+    @keyframes sgFadeIn { from{opacity:0} to{opacity:1} }
+    @keyframes sgRise { from{opacity:0;transform:translateY(18px) scale(.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+    @media(max-width:520px) {
+      .sg-welcome-card { padding:38px 22px 27px; border-radius:21px; }
+      .sg-welcome-message { font-size:14px; }
+    }
+    @media(prefers-reduced-motion:reduce) {
+      .sg-welcome-overlay.is-visible,.sg-welcome-card { animation:none; }
+      .sg-welcome-cta { transition:none; }
+    }
+
+  </style>
 </head>
 
 <body>
@@ -1155,5 +1230,72 @@
       loadSwot(initialSymbol);
     })();
   </script>
+
+  <!-- Personalised welcome for Gaurangi Madam -->
+  <div class="sg-welcome-overlay" id="sgWelcomeOverlay"
+       role="dialog" aria-modal="true" aria-labelledby="sgWelcomeTitle"
+       aria-describedby="sgWelcomeMessage">
+    <div class="sg-welcome-card">
+      <button class="sg-welcome-close" id="sgWelcomeClose"
+              type="button" aria-label="Close welcome message">×</button>
+      <div class="sg-welcome-emblem" aria-hidden="true">SG</div>
+      <p class="sg-welcome-kicker">A special welcome to you</p>
+      <h2 id="sgWelcomeTitle">Welcome, <span>Gaurangi Madam!</span></h2>
+      <p class="sg-welcome-message" id="sgWelcomeMessage">
+        We’re delighted to have you at StockGyan. This is your space to explore
+        the markets, discover insights and make your investing journey more
+        informed and confident.
+      </p>
+      <div class="sg-welcome-highlight">
+        <strong>Learn. Analyse. Understand.</strong><br>
+        Your journey into smarter market understanding starts here.
+      </div>
+      <a class="sg-welcome-cta" href="/market" id="sgWelcomeExplore">
+        Explore StockGyan <span aria-hidden="true">↗</span>
+      </a>
+      <p class="sg-welcome-foot">With warm regards · Team StockGyan</p>
+    </div>
+  </div>
+
+
+  <script>
+    // Show the personalised welcome once per browser session.
+    (function () {
+      const overlay = document.getElementById('sgWelcomeOverlay');
+      const closeButton = document.getElementById('sgWelcomeClose');
+      const exploreButton = document.getElementById('sgWelcomeExplore');
+      if (!overlay || !closeButton) return;
+
+      let alreadyShown = false;
+      try {
+        alreadyShown = sessionStorage.getItem('sg_gaurangi_welcome_seen') === '1';
+      } catch (error) {}
+
+      if (!alreadyShown) {
+        window.setTimeout(function () {
+          overlay.classList.add('is-visible');
+          closeButton.focus();
+        }, 650);
+      }
+
+      function closeWelcome() {
+        overlay.classList.remove('is-visible');
+        try { sessionStorage.setItem('sg_gaurangi_welcome_seen', '1'); }
+        catch (error) {}
+      }
+
+      closeButton.addEventListener('click', closeWelcome);
+      overlay.addEventListener('click', function (event) {
+        if (event.target === overlay) closeWelcome();
+      });
+      document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && overlay.classList.contains('is-visible')) {
+          closeWelcome();
+        }
+      });
+      if (exploreButton) exploreButton.addEventListener('click', closeWelcome);
+    })();
+  </script>
+
 </body>
 </html>
