@@ -1,495 +1,1447 @@
-{
-  "strategy": "Magic Formula",
-  "source": "Screener.in PDF export supplied by user",
-  "sourceReportDate": "2026-10-16",
-  "currency": "INR",
-  "marketCapUnit": "INR crore",
-  "rules": {
-    "roic_pct": {
-      "operator": ">",
-      "value": 25
-    },
-    "earnings_yield_pct": {
-      "operator": ">",
-      "value": 15
-    },
-    "book_value_inr": {
-      "operator": ">",
-      "value": 0
-    },
-    "market_cap_cr": {
-      "operator": ">",
-      "value": 500
-    }
-  },
-  "data": [
-    {
-      "source_report_date": "2026-10-16",
-      "source": "Screener.in PDF export",
-      "company": "SPARC",
-      "cmp_inr": 188.64,
-      "pe": 3.84,
-      "market_cap_cr": 6121.78,
-      "dividend_yield_pct": 0.0,
-      "net_profit_quarter_cr": -20.98,
-      "quarterly_profit_change_pct": 59.68,
-      "sales_quarter_cr": 39.92,
-      "quarterly_sales_change_pct": 314.11,
-      "roce_pct": 164.99,
-      "pat_12m_cr": 1595.54,
-      "roic_pct": 134.34,
-      "earnings_yield_pct": 24.42,
-      "book_value_inr": 41.09
-    },
-    {
-      "source_report_date": "2026-10-16",
-      "source": "Screener.in PDF export",
-      "company": "Indosolar",
-      "cmp_inr": 212.71,
-      "pe": 5.32,
-      "market_cap_cr": 884.95,
-      "dividend_yield_pct": 0.0,
-      "net_profit_quarter_cr": 36.62,
-      "quarterly_profit_change_pct": -68.64,
-      "sales_quarter_cr": 68.36,
-      "quarterly_sales_change_pct": -64.89,
-      "roce_pct": 123.8,
-      "pat_12m_cr": 166.43,
-      "roic_pct": 80.16,
-      "earnings_yield_pct": 25.76,
-      "book_value_inr": 68.98
-    },
-    {
-      "source_report_date": "2026-10-16",
-      "source": "Screener.in PDF export",
-      "company": "Jindal Poly Investments",
-      "cmp_inr": 953.45,
-      "pe": 1.24,
-      "market_cap_cr": 1002.08,
-      "dividend_yield_pct": 0.0,
-      "net_profit_quarter_cr": 13.89,
-      "quarterly_profit_change_pct": -77.87,
-      "sales_quarter_cr": 8.83,
-      "quarterly_sales_change_pct": 5.75,
-      "roce_pct": 63.42,
-      "pat_12m_cr": 808.64,
-      "roic_pct": 63.42,
-      "earnings_yield_pct": 93.56,
-      "book_value_inr": 1526.79
-    },
-    {
-      "source_report_date": "2026-10-16",
-      "source": "Screener.in PDF export",
-      "company": "Unifinz Capital",
-      "cmp_inr": 132.6,
-      "pe": 6.69,
-      "market_cap_cr": 586.99,
-      "dividend_yield_pct": 0.38,
-      "net_profit_quarter_cr": 17.35,
-      "quarterly_profit_change_pct": 3.21,
-      "sales_quarter_cr": 180.21,
-      "quarterly_sales_change_pct": 117.15,
-      "roce_pct": 55.21,
-      "pat_12m_cr": 87.68,
-      "roic_pct": 55.21,
-      "earnings_yield_pct": 20.98,
-      "book_value_inr": 37.08
-    },
-    {
-      "source_report_date": "2026-10-16",
-      "source": "Screener.in PDF export",
-      "company": "Elitecon International",
-      "cmp_inr": 6.94,
-      "pe": 6.85,
-      "market_cap_cr": 1109.36,
-      "dividend_yield_pct": 0.72,
-      "net_profit_quarter_cr": -85.05,
-      "quarterly_profit_change_pct": -269.56,
-      "sales_quarter_cr": 1880.69,
-      "quarterly_sales_change_pct": 500.55,
-      "roce_pct": 46.33,
-      "pat_12m_cr": 161.98,
-      "roic_pct": 32.91,
-      "earnings_yield_pct": 16.75,
-      "book_value_inr": 2.18
-    },
-    {
-      "source_report_date": "2026-10-16",
-      "source": "Screener.in PDF export",
-      "company": "GK Energy",
-      "cmp_inr": 107.4,
-      "pe": 9.72,
-      "market_cap_cr": 2178.26,
-      "dividend_yield_pct": 0.47,
-      "net_profit_quarter_cr": 59.67,
-      "quarterly_profit_change_pct": 61.53,
-      "sales_quarter_cr": 505.19,
-      "quarterly_sales_change_pct": 71.09,
-      "roce_pct": 40.87,
-      "pat_12m_cr": 224.01,
-      "roic_pct": 26.11,
-      "earnings_yield_pct": 17.37,
-      "book_value_inr": 43.62
-    },
-    {
-      "source_report_date": "2026-10-16",
-      "source": "Screener.in PDF export",
-      "company": "National Aluminium",
-      "cmp_inr": 324.25,
-      "pe": 8.82,
-      "market_cap_cr": 59552.79,
-      "dividend_yield_pct": 3.55,
-      "net_profit_quarter_cr": 2003.14,
-      "quarterly_profit_change_pct": 90.87,
-      "sales_quarter_cr": 5302.38,
-      "quarterly_sales_change_pct": 39.28,
-      "roce_pct": 39.59,
-      "pat_12m_cr": 6750.67,
-      "roic_pct": 37.51,
-      "earnings_yield_pct": 17.82,
-      "book_value_inr": 117.63
-    },
-    {
-      "source_report_date": "2026-10-16",
-      "source": "Screener.in PDF export",
-      "company": "SRM Contractors",
-      "cmp_inr": 391.25,
-      "pe": 7.61,
-      "market_cap_cr": 897.69,
-      "dividend_yield_pct": 0.0,
-      "net_profit_quarter_cr": 19.71,
-      "quarterly_profit_change_pct": 54.59,
-      "sales_quarter_cr": 196.26,
-      "quarterly_sales_change_pct": 37.82,
-      "roce_pct": 37.1,
-      "pat_12m_cr": 117.99,
-      "roic_pct": 25.7,
-      "earnings_yield_pct": 20.01,
-      "book_value_inr": 161.74
-    },
-    {
-      "source_report_date": "2026-10-16",
-      "source": "Screener.in PDF export",
-      "company": "Ganesh Green",
-      "cmp_inr": 213.0,
-      "pe": 7.03,
-      "market_cap_cr": 528.26,
-      "dividend_yield_pct": 0.23,
-      "net_profit_quarter_cr": 42.34,
-      "quarterly_profit_change_pct": 147.6,
-      "sales_quarter_cr": 724.85,
-      "quarterly_sales_change_pct": 300.98,
-      "roce_pct": 36.81,
-      "pat_12m_cr": 75.15,
-      "roic_pct": 35.24,
-      "earnings_yield_pct": 18.94,
-      "book_value_inr": 110.54
-    },
-    {
-      "source_report_date": "2026-10-16",
-      "source": "Screener.in PDF export",
-      "company": "Chennai Petroleum Corporation",
-      "cmp_inr": 1406.6,
-      "pe": 5.02,
-      "market_cap_cr": 20945.88,
-      "dividend_yield_pct": 4.41,
-      "net_profit_quarter_cr": 1031.35,
-      "quarterly_profit_change_pct": 2671.95,
-      "sales_quarter_cr": 27369.27,
-      "quarterly_sales_change_pct": 84.77,
-      "roce_pct": 34.94,
-      "pat_12m_cr": 4173.98,
-      "roic_pct": 31.11,
-      "earnings_yield_pct": 26.51,
-      "book_value_inr": 746.03
-    },
-    {
-      "source_report_date": "2026-10-16",
-      "source": "Screener.in PDF export",
-      "company": "The Bombay Burmah Trading",
-      "cmp_inr": 1246.4,
-      "pe": 7.02,
-      "market_cap_cr": 8696.37,
-      "dividend_yield_pct": 1.36,
-      "net_profit_quarter_cr": 582.67,
-      "quarterly_profit_change_pct": 17.47,
-      "sales_quarter_cr": 5088.69,
-      "quarterly_sales_change_pct": 8.0,
-      "roce_pct": 32.98,
-      "pat_12m_cr": 1238.93,
-      "roic_pct": 83.3,
-      "earnings_yield_pct": 36.86,
-      "book_value_inr": 1009.29
-    },
-    {
-      "source_report_date": "2026-10-16",
-      "source": "Screener.in PDF export",
-      "company": "S J Logistics",
-      "cmp_inr": 321.8,
-      "pe": 6.72,
-      "market_cap_cr": 509.19,
-      "dividend_yield_pct": 0.0,
-      "net_profit_quarter_cr": 43.43,
-      "quarterly_profit_change_pct": 49.5,
-      "sales_quarter_cr": 370.89,
-      "quarterly_sales_change_pct": 33.62,
-      "roce_pct": 32.49,
-      "pat_12m_cr": 75.81,
-      "roic_pct": 28.04,
-      "earnings_yield_pct": 18.2,
-      "book_value_inr": 198.17
-    },
-    {
-      "source_report_date": "2026-10-16",
-      "source": "Screener.in PDF export",
-      "company": "NMDC",
-      "cmp_inr": 71.69,
-      "pe": 8.45,
-      "market_cap_cr": 63028.54,
-      "dividend_yield_pct": 4.88,
-      "net_profit_quarter_cr": 1976.23,
-      "quarterly_profit_change_pct": 0.44,
-      "sales_quarter_cr": 6795.25,
-      "quarterly_sales_change_pct": 0.84,
-      "roce_pct": 27.58,
-      "pat_12m_cr": 7459.76,
-      "roic_pct": 32.41,
-      "earnings_yield_pct": 17.77,
-      "book_value_inr": 38.74
-    },
-    {
-      "source_report_date": "2026-10-16",
-      "source": "Screener.in PDF export",
-      "company": "Ashoka Buildcon",
-      "cmp_inr": 104.95,
-      "pe": 4.35,
-      "market_cap_cr": 2946.19,
-      "dividend_yield_pct": 0.0,
-      "net_profit_quarter_cr": 127.17,
-      "quarterly_profit_change_pct": -41.23,
-      "sales_quarter_cr": 1499.61,
-      "quarterly_sales_change_pct": -20.53,
-      "roce_pct": 26.36,
-      "pat_12m_cr": 676.82,
-      "roic_pct": 32.77,
-      "earnings_yield_pct": 39.72,
-      "book_value_inr": 234.37
-    },
-    {
-      "source_report_date": "2026-10-16",
-      "source": "Screener.in PDF export",
-      "company": "Madras Fertilizers",
-      "cmp_inr": 58.94,
-      "pe": 12.17,
-      "market_cap_cr": 949.53,
-      "dividend_yield_pct": 0.0,
-      "net_profit_quarter_cr": 34.59,
-      "quarterly_profit_change_pct": -21.49,
-      "sales_quarter_cr": 814.01,
-      "quarterly_sales_change_pct": 21.12,
-      "roce_pct": 25.01,
-      "pat_12m_cr": 78.01,
-      "roic_pct": 25.01,
-      "earnings_yield_pct": 16.89,
-      "book_value_inr": 5.71
-    },
-    {
-      "source_report_date": "2026-10-16",
-      "source": "Screener.in PDF export",
-      "company": "Indian Oil Corporation",
-      "cmp_inr": 130.38,
-      "pe": 5.47,
-      "market_cap_cr": 184112.71,
-      "dividend_yield_pct": 6.33,
-      "net_profit_quarter_cr": -1141.09,
-      "quarterly_profit_change_pct": -123.93,
-      "sales_quarter_cr": 266407.28,
-      "quarterly_sales_change_pct": 38.51,
-      "roce_pct": 18.66,
-      "pat_12m_cr": 33651.81,
-      "roic_pct": 33.7,
-      "earnings_yield_pct": 17.9,
-      "book_value_inr": 155.45
-    },
-    {
-      "source_report_date": "2026-10-16",
-      "source": "Screener.in PDF export",
-      "company": "TVS Holdings",
-      "cmp_inr": 11507.0,
-      "pe": 11.71,
-      "market_cap_cr": 23281.08,
-      "dividend_yield_pct": 0.75,
-      "net_profit_quarter_cr": 1173.58,
-      "quarterly_profit_change_pct": 81.87,
-      "sales_quarter_cr": 17076.18,
-      "quarterly_sales_change_pct": 34.01,
-      "roce_pct": 16.95,
-      "pat_12m_cr": 1987.61,
-      "roic_pct": 57.2,
-      "earnings_yield_pct": 15.74,
-      "book_value_inr": 3200.86
-    },
-    {
-      "source_report_date": "2026-10-16",
-      "source": "Screener.in PDF export",
-      "company": "Southern Petrochemical Industries Corporation",
-      "cmp_inr": 60.49,
-      "pe": 6.01,
-      "market_cap_cr": 1231.82,
-      "dividend_yield_pct": 3.31,
-      "net_profit_quarter_cr": 60.18,
-      "quarterly_profit_change_pct": -9.79,
-      "sales_quarter_cr": 848.81,
-      "quarterly_sales_change_pct": 8.73,
-      "roce_pct": 16.77,
-      "pat_12m_cr": 204.96,
-      "roic_pct": 41.57,
-      "earnings_yield_pct": 16.73,
-      "book_value_inr": 67.28
-    },
-    {
-      "source_report_date": "2026-10-16",
-      "source": "Screener.in PDF export",
-      "company": "Dolat Algotech",
-      "cmp_inr": 61.0,
-      "pe": 7.46,
-      "market_cap_cr": 1073.6,
-      "dividend_yield_pct": 0.16,
-      "net_profit_quarter_cr": 53.82,
-      "quarterly_profit_change_pct": 38.68,
-      "sales_quarter_cr": 114.25,
-      "quarterly_sales_change_pct": 37.37,
-      "roce_pct": 16.32,
-      "pat_12m_cr": 143.94,
-      "roic_pct": 30.26,
-      "earnings_yield_pct": 16.73,
-      "book_value_inr": 64.22
-    },
-    {
-      "source_report_date": "2026-10-16",
-      "source": "Screener.in PDF export",
-      "company": "HMA Agro Industries",
-      "cmp_inr": 25.33,
-      "pe": 5.91,
-      "market_cap_cr": 1268.45,
-      "dividend_yield_pct": 0.0,
-      "net_profit_quarter_cr": 50.51,
-      "quarterly_profit_change_pct": 6158.02,
-      "sales_quarter_cr": 2110.32,
-      "quarterly_sales_change_pct": 87.98,
-      "roce_pct": 16.19,
-      "pat_12m_cr": 214.65,
-      "roic_pct": 30.31,
-      "earnings_yield_pct": 16.95,
-      "book_value_inr": 18.79
-    },
-    {
-      "source_report_date": "2026-10-16",
-      "source": "Screener.in PDF export",
-      "company": "Vedanta",
-      "cmp_inr": 246.1,
-      "pe": 8.75,
-      "market_cap_cr": 96234.65,
-      "dividend_yield_pct": 13.82,
-      "net_profit_quarter_cr": 7918.0,
-      "quarterly_profit_change_pct": 143.61,
-      "sales_quarter_cr": 24205.0,
-      "quarterly_sales_change_pct": 53.64,
-      "roce_pct": 16.08,
-      "pat_12m_cr": 11003.29,
-      "roic_pct": 204.21,
-      "earnings_yield_pct": 19.22,
-      "book_value_inr": 126.97
-    },
-    {
-      "source_report_date": "2026-10-16",
-      "source": "Screener.in PDF export",
-      "company": "Ramky Infrastructure",
-      "cmp_inr": 269.65,
-      "pe": 9.98,
-      "market_cap_cr": 1865.92,
-      "dividend_yield_pct": 0.37,
-      "net_profit_quarter_cr": 38.79,
-      "quarterly_profit_change_pct": -47.18,
-      "sales_quarter_cr": 471.23,
-      "quarterly_sales_change_pct": 24.26,
-      "roce_pct": 13.51,
-      "pat_12m_cr": 186.97,
-      "roic_pct": 30.03,
-      "earnings_yield_pct": 15.39,
-      "book_value_inr": 312.5
-    },
-    {
-      "source_report_date": "2026-10-16",
-      "source": "Screener.in PDF export",
-      "company": "IST",
-      "cmp_inr": 633.35,
-      "pe": 4.5,
-      "market_cap_cr": 738.75,
-      "dividend_yield_pct": 0.0,
-      "net_profit_quarter_cr": 83.11,
-      "quarterly_profit_change_pct": 14.87,
-      "sales_quarter_cr": 34.89,
-      "quarterly_sales_change_pct": 18.71,
-      "roce_pct": 13.06,
-      "pat_12m_cr": 164.26,
-      "roic_pct": 54.92,
-      "earnings_yield_pct": 28.64,
-      "book_value_inr": 1450.79
-    },
-    {
-      "source_report_date": "2026-10-16",
-      "source": "Screener.in PDF export",
-      "company": "Dhunseri Ventures",
-      "cmp_inr": 288.4,
-      "pe": 5.29,
-      "market_cap_cr": 1009.98,
-      "dividend_yield_pct": 1.73,
-      "net_profit_quarter_cr": 174.29,
-      "quarterly_profit_change_pct": 136.29,
-      "sales_quarter_cr": 231.59,
-      "quarterly_sales_change_pct": 44.85,
-      "roce_pct": 6.74,
-      "pat_12m_cr": 190.87,
-      "roic_pct": 32.7,
-      "earnings_yield_pct": 15.47,
-      "book_value_inr": 939.31
-    },
-    {
-      "source_report_date": "2026-10-16",
-      "source": "Screener.in PDF export",
-      "company": "Vardhman Holdings",
-      "cmp_inr": 3740.4,
-      "pe": 4.74,
-      "market_cap_cr": 1193.19,
-      "dividend_yield_pct": 0.13,
-      "net_profit_quarter_cr": 98.08,
-      "quarterly_profit_change_pct": 56.73,
-      "sales_quarter_cr": 10.83,
-      "quarterly_sales_change_pct": 217.6,
-      "roce_pct": 6.28,
-      "pat_12m_cr": 251.53,
-      "roic_pct": 2025.26,
-      "earnings_yield_pct": 22.34,
-      "book_value_inr": 11799.09
-    },
-    {
-      "source_report_date": "2026-10-16",
-      "source": "Screener.in PDF export",
-      "company": "BF Investment",
-      "cmp_inr": 433.3,
-      "pe": 4.19,
-      "market_cap_cr": 1631.81,
-      "dividend_yield_pct": 2.31,
-      "net_profit_quarter_cr": 145.99,
-      "quarterly_profit_change_pct": 279.79,
-      "sales_quarter_cr": 11.28,
-      "quarterly_sales_change_pct": 19.62,
-      "roce_pct": 4.86,
-      "pat_12m_cr": 389.57,
-      "roic_pct": 47.01,
-      "earnings_yield_pct": 48.85,
-      "book_value_inr": 2266.84
-    }
-  ]
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>StockGyan Health Screener</title>
+
+<style>
+*{
+  box-sizing:border-box;
 }
+
+body{
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:#f4f7fb;
+  color:#172033;
+}
+
+header{
+  background:linear-gradient(135deg,#082a63,#0b478f);
+  color:#fff;
+  padding:24px 20px;
+}
+
+.header-inner,
+main{
+  max-width:1500px;
+  margin:auto;
+}
+
+.brand{
+  font-size:29px;
+  font-weight:800;
+}
+
+.brand span{
+  color:#f28c28;
+}
+
+.subtitle{
+  margin-top:6px;
+  font-size:14px;
+  opacity:.92;
+}
+
+main{
+  padding:22px 16px 40px;
+}
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:14px;
+  margin-bottom:18px;
+}
+
+.stat,
+.controls,
+.table-container,
+.methodology{
+  background:#fff;
+  border-radius:12px;
+  box-shadow:0 2px 10px rgba(0,0,0,.07);
+  border:1px solid #e7edf5;
+}
+
+.stat{
+  padding:18px;
+}
+
+.stat-title{
+  font-size:12px;
+  color:#697386;
+  margin-bottom:8px;
+}
+
+.stat-value{
+  font-size:25px;
+  font-weight:800;
+  color:#082a63;
+}
+
+.controls{
+  padding:16px;
+  margin-bottom:18px;
+}
+
+.control-row{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+
+input,
+select,
+button{
+  font-family:inherit;
+}
+
+input[type=text],
+select{
+  height:42px;
+  border:1px solid #ccd5e2;
+  border-radius:8px;
+  padding:0 12px;
+  background:#fff;
+  font-size:14px;
+}
+
+#search{
+  flex:1;
+  min-width:250px;
+}
+
+button{
+  height:42px;
+  border:0;
+  border-radius:8px;
+  padding:0 16px;
+  cursor:pointer;
+  font-weight:700;
+  background:#082a63;
+  color:#fff;
+}
+
+button:hover{
+  opacity:.92;
+}
+
+
+.btn-orange{
+  background:#f28c28;
+}
+
+.btn-light{
+  background:#edf2f8;
+  color:#17335f;
+}
+
+button:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+}
+
+.status{
+  margin-top:12px;
+  font-size:13px;
+  color:#536174;
+}
+
+
+
+.table-container{
+  overflow:hidden;
+}
+
+.table-header{
+  padding:15px 16px;
+  background:#f8fafc;
+  border-bottom:1px solid #e7edf5;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+}
+
+.table-title{
+  font-size:18px;
+  font-weight:800;
+  color:#082a63;
+}
+
+.table-wrap{
+  overflow:auto;
+  max-height:72vh;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:1250px;
+}
+
+th{
+  position:sticky;
+  top:0;
+  z-index:2;
+  background:#082a63;
+  color:#fff;
+  padding:12px 10px;
+  text-align:right;
+  font-size:12px;
+  white-space:nowrap;
+}
+
+th:first-child,
+th:nth-child(2){
+  text-align:left;
+}
+
+td{
+  padding:11px 10px;
+  border-bottom:1px solid #edf1f6;
+  font-size:13px;
+  text-align:right;
+  white-space:nowrap;
+}
+
+td:first-child,
+td:nth-child(2){
+  text-align:left;
+}
+
+tr:hover td{
+  background:#f7faff;
+}
+
+.symbol{
+  font-weight:800;
+  color:#082a63;
+}
+
+.company{
+  color:#667085;
+  max-width:250px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.score{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:58px;
+  padding:5px 9px;
+  border-radius:20px;
+  font-weight:800;
+}
+
+.score-excellent{
+  background:#dff7e8;
+  color:#067647;
+}
+
+.score-good{
+  background:#e9f7df;
+  color:#477a16;
+}
+
+.score-average{
+  background:#fff3d6;
+  color:#a15c00;
+}
+
+.score-weak{
+  background:#fde4e4;
+  color:#b42318;
+}
+
+.muted{
+  color:#8a94a6;
+}
+
+.positive{
+  color:#159447;
+  font-weight:700;
+}
+
+.negative{
+  color:#d83232;
+  font-weight:700;
+}
+
+.status-pill{
+  display:inline-block;
+  padding:4px 8px;
+  border-radius:15px;
+  font-size:11px;
+  font-weight:700;
+}
+
+.status-ready{
+  background:#dff7e8;
+  color:#067647;
+}
+
+.status-partial{
+  background:#fff3d6;
+  color:#a15c00;
+}
+
+.status-unavailable{
+  background:#fde4e4;
+  color:#b42318;
+}
+
+.empty{
+  padding:60px 20px;
+  text-align:center;
+  color:#697386;
+}
+
+.methodology{
+  margin-top:18px;
+  padding:16px;
+}
+
+.methodology-title{
+  font-size:16px;
+  font-weight:800;
+  color:#082a63;
+  margin-bottom:8px;
+}
+
+.methodology-text{
+  font-size:12px;
+  color:#697386;
+  line-height:1.6;
+}
+
+@media(max-width:1000px){
+  .stats{
+    grid-template-columns:repeat(2,1fr);
+  }
+}
+
+@media(max-width:600px){
+  .brand{
+    font-size:23px;
+  }
+
+  .stats{
+    grid-template-columns:1fr;
+  }
+
+  main{
+    padding:15px 10px 30px;
+  }
+}
+
+.strategy-btn{background:#edf2f8;color:#17335f;border:1px solid #d7e0ec}
+.strategy-btn.active{background:#082a63;color:#fff;border-color:#082a63}
+#strategyPanel label{display:flex;align-items:center;gap:6px;font-size:12px;color:#536174;flex-wrap:wrap}
+#strategyPanel input[type=number]{height:36px;border:1px solid #ccd5e2;border-radius:7px;padding:0 8px;font:inherit;color:#172033;min-width:75px}
+#strategyPanel .control-row{align-items:center}
+@media(max-width:600px){#strategyPanel label{width:100%;justify-content:space-between}#strategyPanel input[type=number]{flex:1}}
+
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="header-inner">
+
+    <div class="brand">
+      Stock<span>Gyan</span> Health Screener
+    </div>
+
+    <div class="subtitle">
+      Fundamental Health Analysis • NSE Universe • Powered by StockGyan Health Data
+    </div>
+
+  </div>
+</header>
+
+<main>
+
+  <!-- =========================
+       STATS
+  ========================== -->
+
+  <section class="stats">
+
+    <div class="stat">
+      <div class="stat-title">NSE Universe</div>
+      <div class="stat-value" id="universeCount">0</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-title">Health Data Loaded</div>
+      <div class="stat-value" id="dataCount">0</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-title">Excellent</div>
+      <div class="stat-value" id="excellentCount">0</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-title">Good</div>
+      <div class="stat-value" id="goodCount">0</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-title">Displayed</div>
+      <div class="stat-value" id="displayedCount">0</div>
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       CONTROLS
+  ========================== -->
+
+  <section class="controls">
+
+    <div class="control-row">
+
+      <input
+        id="search"
+        type="text"
+        placeholder="Search stock symbol or company name..."
+      >
+
+      <select id="healthFilter">
+        <option value="all">All Health Scores</option>
+        <option value="80">80+ Excellent</option>
+        <option value="65">65+ Good</option>
+        <option value="50">50+ Average</option>
+        <option value="0">Below 50</option>
+      </select>
+
+      <select id="sortBy">
+
+        <option value="healthDesc">
+          Health Score ↓
+        </option>
+
+        <option value="healthAsc">
+          Health Score ↑
+        </option>
+
+        <option value="roeDesc">
+          ROE ↓
+        </option>
+
+        <option value="roceDesc">
+          ROCE ↓
+        </option>
+
+        <option value="peAsc">
+          P/E ↑
+        </option>
+
+        <option value="growthDesc">
+          Earnings Growth ↓
+        </option>
+
+        <option value="symbol">
+          Symbol A-Z
+        </option>
+
+      </select>
+
+      <button
+        id="loadUniverseBtn"
+        onclick="loadUniverse()"
+      >
+        Refresh NSE
+      </button>
+<button
+        class="btn-light"
+        onclick="clearFilters()"
+      >
+        Clear
+      </button>
+
+    </div>
+
+    <div class="status" id="status">
+      Loading StockGyan Health Data...
+    </div>
+</section>
+
+  <section class="controls" id="strategyPanel">
+    <div style="font-size:18px;font-weight:800;color:#082a63;margin-bottom:8px;">Strategy Scans</div>
+    <div class="control-row" style="margin-bottom:12px;">
+      <button type="button" class="strategy-btn" data-strategy="health">Health Screener</button>
+      <button type="button" class="strategy-btn" data-strategy="quality">Quality</button>
+      <button type="button" class="strategy-btn" data-strategy="value">Value</button>
+      <button type="button" class="strategy-btn" data-strategy="growth">Growth</button>
+      <button type="button" class="strategy-btn" data-strategy="lowDebt">Low Debt</button>
+      <button type="button" class="strategy-btn" data-strategy="coffeeCan">Coffee Can</button>
+      <button type="button" class="strategy-btn" data-strategy="magicFormula">Magic Formula</button>
+      <button type="button" class="strategy-btn" data-strategy="piotroski">Piotroski F-Score &gt; 7</button>
+    </div>
+    <div class="methodology-text" id="strategyDescription">
+      Select a strategy. A stock qualifies only when all required metrics are available and satisfy the selected rules.
+    </div>
+    <div style="height:12px"></div>
+    <div class="control-row">
+      <label>ROIC min % <input id="f_roic_min" type="number" placeholder="25" style="width:100px"></label>
+      <label>Earnings yield min % <input id="f_ey_min" type="number" placeholder="15" style="width:120px"></label>
+      <label>Book value min <input id="f_bv_min" type="number" placeholder="0" style="width:100px"></label>
+      <label>Market cap min (₹ Cr) <input id="f_mcap_min" type="number" value="500" placeholder="500" style="width:120px"></label>
+      <label>Sales growth min % <input id="f_sales_min" type="number" placeholder="10" style="width:110px"></label>
+      <label>10Y sales growth min % <input id="f_sales10_min" type="number" placeholder="10" style="width:130px"></label>
+      <label>10Y avg ROCE min % <input id="f_roce10_min" type="number" placeholder="15" style="width:130px"></label>
+      <button type="button" id="applyStrategyFilters" class="btn-orange">Apply thresholds</button>
+      <button type="button" id="exportHealthCsv" class="btn-light">Export filtered CSV</button>
+    </div>
+    <div class="status" id="strategyStatus">Strategy filters use fields already returned by the existing Health Data API. No additional API calls are made.</div>
+  </section>
+
+  <!-- =========================
+       TABLE
+  ========================== -->
+
+  <section class="table-container">
+
+    <div class="table-header">
+
+      <div class="table-title" id="tableTitle">
+        StockGyan Health Stocks
+      </div>
+
+      <div id="resultInfo">
+        Loading stored Health data...
+      </div>
+
+    </div>
+
+    <div class="table-wrap">
+
+      <table>
+
+        <thead id="stockTableHead">
+
+          <tr>
+
+            <th>Symbol</th>
+
+            <th>Company</th>
+
+            <th>Health Score</th>
+
+            <th>Business Quality</th>
+
+            <th>ROCE</th>
+
+            <th>ROE</th>
+
+            <th>P/E</th>
+
+            <th>Earnings Growth</th>
+
+            <th>Financial Strength</th>
+
+            <th>Profitability</th>
+            <th>ROIC</th>
+            <th>Earnings Yield</th>
+            <th>Book Value</th>
+            <th>Market Cap</th>
+            <th>Sales Growth</th>
+            <th>Sales Growth 10Y</th>
+            <th>Avg ROCE 10Y</th>
+            <th>Piotroski</th>
+            <th>Data</th>
+
+          </tr>
+
+        </thead>
+
+        <tbody id="stockTable">
+
+          <tr>
+            <td
+              colspan="19"
+              class="empty"
+            >
+              Loading NSE universe...
+            </td>
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================
+       METHODOLOGY
+  ========================== -->
+
+  <section class="methodology">
+
+    <div class="methodology-title">
+      StockGyan Health Score Methodology
+    </div>
+
+    <div class="methodology-text">
+
+      <strong>Business Quality – 30%</strong>:
+      ROE compared with the company's sector benchmark.
+
+      <br>
+
+      <strong>ROCE – 20%</strong>:
+      ROCE compared with the sector benchmark.
+
+      <br>
+
+      <strong>P/E / Valuation – 20%</strong>:
+      P/E compared with the sector benchmark.
+      Lower relative P/E scores better.
+
+      <br>
+
+      <strong>Earnings Growth – 15%</strong>:
+      Latest available year-on-year net-profit growth.
+
+      <br>
+
+      <strong>Financial Strength – 10%</strong>:
+      Balance-sheet liability-to-asset strength.
+
+      <br>
+
+      <strong>Profitability – 5%</strong>:
+      ROA relative to the sector benchmark.
+
+      <br><br>
+
+      The Health Score is calculated by the StockGyan backend refresh engine
+      and stored in StockGyan D1. This screener only reads stored data;
+      it does not make live Upstox requests. Missing fundamental data is not treated as zero.
+
+      <br><br>
+      Strategy scans only work when their required values are present in the existing API response.
+      Optional fields are displayed as unavailable when absent; the page does not infer or fabricate them.
+      Quality, Value and Growth quick scans are simple convenience filters and are not investment recommendations.
+
+    </div>
+
+  </section>
+
+</main>
+
+
+<script>
+/* =========================================================
+   STOCKGYAN HEALTH SCREENER — D1 ONLY
+   =========================================================
+   IMPORTANT:
+   This page ONLY reads data already stored in StockGyan D1.
+   It does NOT call Upstox and does NOT run a browser scan.
+   ========================================================= */
+
+const UNIVERSE_API = "/api/health-screener/universe";
+const HEALTH_DATA_API = "/api/fundamentals/health-screener-data";
+
+let universe = [];
+let healthData = [];
+let activeStrategy = "health";
+
+// Screener.in Magic Formula snapshot supplied on 30 Oct 2026 (report date: 2026-10-16).
+const MAGIC_FORMULA_SNAPSHOT = {"strategy":"Magic Formula","source":"Screener.in PDF export supplied by user","sourceReportDate":"2026-10-16","currency":"INR","marketCapUnit":"INR crore","rules":{"roic_pct":{"operator":">","value":25},"earnings_yield_pct":{"operator":">","value":15},"book_value_inr":{"operator":">","value":0},"market_cap_cr":{"operator":">","value":500}},"data":[{"source_report_date":"2026-10-16","source":"Screener.in PDF export","company":"SPARC","cmp_inr":188.64,"pe":3.84,"market_cap_cr":6121.78,"dividend_yield_pct":0.0,"net_profit_quarter_cr":-20.98,"quarterly_profit_change_pct":59.68,"sales_quarter_cr":39.92,"quarterly_sales_change_pct":314.11,"roce_pct":164.99,"pat_12m_cr":1595.54,"roic_pct":134.34,"earnings_yield_pct":24.42,"book_value_inr":41.09},{"source_report_date":"2026-10-16","source":"Screener.in PDF export","company":"Indosolar","cmp_inr":212.71,"pe":5.32,"market_cap_cr":884.95,"dividend_yield_pct":0.0,"net_profit_quarter_cr":36.62,"quarterly_profit_change_pct":-68.64,"sales_quarter_cr":68.36,"quarterly_sales_change_pct":-64.89,"roce_pct":123.8,"pat_12m_cr":166.43,"roic_pct":80.16,"earnings_yield_pct":25.76,"book_value_inr":68.98},{"source_report_date":"2026-10-16","source":"Screener.in PDF export","company":"Jindal Poly Investments","cmp_inr":953.45,"pe":1.24,"market_cap_cr":1002.08,"dividend_yield_pct":0.0,"net_profit_quarter_cr":13.89,"quarterly_profit_change_pct":-77.87,"sales_quarter_cr":8.83,"quarterly_sales_change_pct":5.75,"roce_pct":63.42,"pat_12m_cr":808.64,"roic_pct":63.42,"earnings_yield_pct":93.56,"book_value_inr":1526.79},{"source_report_date":"2026-10-16","source":"Screener.in PDF export","company":"Unifinz Capital","cmp_inr":132.6,"pe":6.69,"market_cap_cr":586.99,"dividend_yield_pct":0.38,"net_profit_quarter_cr":17.35,"quarterly_profit_change_pct":3.21,"sales_quarter_cr":180.21,"quarterly_sales_change_pct":117.15,"roce_pct":55.21,"pat_12m_cr":87.68,"roic_pct":55.21,"earnings_yield_pct":20.98,"book_value_inr":37.08},{"source_report_date":"2026-10-16","source":"Screener.in PDF export","company":"Elitecon International","cmp_inr":6.94,"pe":6.85,"market_cap_cr":1109.36,"dividend_yield_pct":0.72,"net_profit_quarter_cr":-85.05,"quarterly_profit_change_pct":-269.56,"sales_quarter_cr":1880.69,"quarterly_sales_change_pct":500.55,"roce_pct":46.33,"pat_12m_cr":161.98,"roic_pct":32.91,"earnings_yield_pct":16.75,"book_value_inr":2.18},{"source_report_date":"2026-10-16","source":"Screener.in PDF export","company":"GK Energy","cmp_inr":107.4,"pe":9.72,"market_cap_cr":2178.26,"dividend_yield_pct":0.47,"net_profit_quarter_cr":59.67,"quarterly_profit_change_pct":61.53,"sales_quarter_cr":505.19,"quarterly_sales_change_pct":71.09,"roce_pct":40.87,"pat_12m_cr":224.01,"roic_pct":26.11,"earnings_yield_pct":17.37,"book_value_inr":43.62},{"source_report_date":"2026-10-16","source":"Screener.in PDF export","company":"National Aluminium","cmp_inr":324.25,"pe":8.82,"market_cap_cr":59552.79,"dividend_yield_pct":3.55,"net_profit_quarter_cr":2003.14,"quarterly_profit_change_pct":90.87,"sales_quarter_cr":5302.38,"quarterly_sales_change_pct":39.28,"roce_pct":39.59,"pat_12m_cr":6750.67,"roic_pct":37.51,"earnings_yield_pct":17.82,"book_value_inr":117.63},{"source_report_date":"2026-10-16","source":"Screener.in PDF export","company":"SRM Contractors","cmp_inr":391.25,"pe":7.61,"market_cap_cr":897.69,"dividend_yield_pct":0.0,"net_profit_quarter_cr":19.71,"quarterly_profit_change_pct":54.59,"sales_quarter_cr":196.26,"quarterly_sales_change_pct":37.82,"roce_pct":37.1,"pat_12m_cr":117.99,"roic_pct":25.7,"earnings_yield_pct":20.01,"book_value_inr":161.74},{"source_report_date":"2026-10-16","source":"Screener.in PDF export","company":"Ganesh Green","cmp_inr":213.0,"pe":7.03,"market_cap_cr":528.26,"dividend_yield_pct":0.23,"net_profit_quarter_cr":42.34,"quarterly_profit_change_pct":147.6,"sales_quarter_cr":724.85,"quarterly_sales_change_pct":300.98,"roce_pct":36.81,"pat_12m_cr":75.15,"roic_pct":35.24,"earnings_yield_pct":18.94,"book_value_inr":110.54},{"source_report_date":"2026-10-16","source":"Screener.in PDF export","company":"Chennai Petroleum Corporation","cmp_inr":1406.6,"pe":5.02,"market_cap_cr":20945.88,"dividend_yield_pct":4.41,"net_profit_quarter_cr":1031.35,"quarterly_profit_change_pct":2671.95,"sales_quarter_cr":27369.27,"quarterly_sales_change_pct":84.77,"roce_pct":34.94,"pat_12m_cr":4173.98,"roic_pct":31.11,"earnings_yield_pct":26.51,"book_value_inr":746.03},{"source_report_date":"2026-10-16","source":"Screener.in PDF export","company":"The Bombay Burmah Trading","cmp_inr":1246.4,"pe":7.02,"market_cap_cr":8696.37,"dividend_yield_pct":1.36,"net_profit_quarter_cr":582.67,"quarterly_profit_change_pct":17.47,"sales_quarter_cr":5088.69,"quarterly_sales_change_pct":8.0,"roce_pct":32.98,"pat_12m_cr":1238.93,"roic_pct":83.3,"earnings_yield_pct":36.86,"book_value_inr":1009.29},{"source_report_date":"2026-10-16","source":"Screener.in PDF export","company":"S J Logistics","cmp_inr":321.8,"pe":6.72,"market_cap_cr":509.19,"dividend_yield_pct":0.0,"net_profit_quarter_cr":43.43,"quarterly_profit_change_pct":49.5,"sales_quarter_cr":370.89,"quarterly_sales_change_pct":33.62,"roce_pct":32.49,"pat_12m_cr":75.81,"roic_pct":28.04,"earnings_yield_pct":18.2,"book_value_inr":198.17},{"source_report_date":"2026-10-16","source":"Screener.in PDF export","company":"NMDC","cmp_inr":71.69,"pe":8.45,"market_cap_cr":63028.54,"dividend_yield_pct":4.88,"net_profit_quarter_cr":1976.23,"quarterly_profit_change_pct":0.44,"sales_quarter_cr":6795.25,"quarterly_sales_change_pct":0.84,"roce_pct":27.58,"pat_12m_cr":7459.76,"roic_pct":32.41,"earnings_yield_pct":17.77,"book_value_inr":38.74},{"source_report_date":"2026-10-16","source":"Screener.in PDF export","company":"Ashoka Buildcon","cmp_inr":104.95,"pe":4.35,"market_cap_cr":2946.19,"dividend_yield_pct":0.0,"net_profit_quarter_cr":127.17,"quarterly_profit_change_pct":-41.23,"sales_quarter_cr":1499.61,"quarterly_sales_change_pct":-20.53,"roce_pct":26.36,"pat_12m_cr":676.82,"roic_pct":32.77,"earnings_yield_pct":39.72,"book_value_inr":234.37},{"source_report_date":"2026-10-16","source":"Screener.in PDF export","company":"Madras Fertilizers","cmp_inr":58.94,"pe":12.17,"market_cap_cr":949.53,"dividend_yield_pct":0.0,"net_profit_quarter_cr":34.59,"quarterly_profit_change_pct":-21.49,"sales_quarter_cr":814.01,"quarterly_sales_change_pct":21.12,"roce_pct":25.01,"pat_12m_cr":78.01,"roic_pct":25.01,"earnings_yield_pct":16.89,"book_value_inr":5.71},{"source_report_date":"2026-10-16","source":"Screener.in PDF export","company":"Indian Oil Corporation","cmp_inr":130.38,"pe":5.47,"market_cap_cr":184112.71,"dividend_yield_pct":6.33,"net_profit_quarter_cr":-1141.09,"quarterly_profit_change_pct":-123.93,"sales_quarter_cr":266407.28,"quarterly_sales_change_pct":38.51,"roce_pct":18.66,"pat_12m_cr":33651.81,"roic_pct":33.7,"earnings_yield_pct":17.9,"book_value_inr":155.45},{"source_report_date":"2026-10-16","source":"Screener.in PDF export","company":"TVS Holdings","cmp_inr":11507.0,"pe":11.71,"market_cap_cr":23281.08,"dividend_yield_pct":0.75,"net_profit_quarter_cr":1173.58,"quarterly_profit_change_pct":81.87,"sales_quarter_cr":17076.18,"quarterly_sales_change_pct":34.01,"roce_pct":16.95,"pat_12m_cr":1987.61,"roic_pct":57.2,"earnings_yield_pct":15.74,"book_value_inr":3200.86},{"source_report_date":"2026-10-16","source":"Screener.in PDF export","company":"Southern Petrochemical Industries Corporation","cmp_inr":60.49,"pe":6.01,"market_cap_cr":1231.82,"dividend_yield_pct":3.31,"net_profit_quarter_cr":60.18,"quarterly_profit_change_pct":-9.79,"sales_quarter_cr":848.81,"quarterly_sales_change_pct":8.73,"roce_pct":16.77,"pat_12m_cr":204.96,"roic_pct":41.57,"earnings_yield_pct":16.73,"book_value_inr":67.28},{"source_report_date":"2026-10-16","source":"Screener.in PDF export","company":"Dolat Algotech","cmp_inr":61.0,"pe":7.46,"market_cap_cr":1073.6,"dividend_yield_pct":0.16,"net_profit_quarter_cr":53.82,"quarterly_profit_change_pct":38.68,"sales_quarter_cr":114.25,"quarterly_sales_change_pct":37.37,"roce_pct":16.32,"pat_12m_cr":143.94,"roic_pct":30.26,"earnings_yield_pct":16.73,"book_value_inr":64.22},{"source_report_date":"2026-10-16","source":"Screener.in PDF export","company":"HMA Agro Industries","cmp_inr":25.33,"pe":5.91,"market_cap_cr":1268.45,"dividend_yield_pct":0.0,"net_profit_quarter_cr":50.51,"quarterly_profit_change_pct":6158.02,"sales_quarter_cr":2110.32,"quarterly_sales_change_pct":87.98,"roce_pct":16.19,"pat_12m_cr":214.65,"roic_pct":30.31,"earnings_yield_pct":16.95,"book_value_inr":18.79},{"source_report_date":"2026-10-16","source":"Screener.in PDF export","company":"Vedanta","cmp_inr":246.1,"pe":8.75,"market_cap_cr":96234.65,"dividend_yield_pct":13.82,"net_profit_quarter_cr":7918.0,"quarterly_profit_change_pct":143.61,"sales_quarter_cr":24205.0,"quarterly_sales_change_pct":53.64,"roce_pct":16.08,"pat_12m_cr":11003.29,"roic_pct":204.21,"earnings_yield_pct":19.22,"book_value_inr":126.97},{"source_report_date":"2026-10-16","source":"Screener.in PDF export","company":"Ramky Infrastructure","cmp_inr":269.65,"pe":9.98,"market_cap_cr":1865.92,"dividend_yield_pct":0.37,"net_profit_quarter_cr":38.79,"quarterly_profit_change_pct":-47.18,"sales_quarter_cr":471.23,"quarterly_sales_change_pct":24.26,"roce_pct":13.51,"pat_12m_cr":186.97,"roic_pct":30.03,"earnings_yield_pct":15.39,"book_value_inr":312.5},{"source_report_date":"2026-10-16","source":"Screener.in PDF export","company":"IST","cmp_inr":633.35,"pe":4.5,"market_cap_cr":738.75,"dividend_yield_pct":0.0,"net_profit_quarter_cr":83.11,"quarterly_profit_change_pct":14.87,"sales_quarter_cr":34.89,"quarterly_sales_change_pct":18.71,"roce_pct":13.06,"pat_12m_cr":164.26,"roic_pct":54.92,"earnings_yield_pct":28.64,"book_value_inr":1450.79},{"source_report_date":"2026-10-16","source":"Screener.in PDF export","company":"Dhunseri Ventures","cmp_inr":288.4,"pe":5.29,"market_cap_cr":1009.98,"dividend_yield_pct":1.73,"net_profit_quarter_cr":174.29,"quarterly_profit_change_pct":136.29,"sales_quarter_cr":231.59,"quarterly_sales_change_pct":44.85,"roce_pct":6.74,"pat_12m_cr":190.87,"roic_pct":32.7,"earnings_yield_pct":15.47,"book_value_inr":939.31},{"source_report_date":"2026-10-16","source":"Screener.in PDF export","company":"Vardhman Holdings","cmp_inr":3740.4,"pe":4.74,"market_cap_cr":1193.19,"dividend_yield_pct":0.13,"net_profit_quarter_cr":98.08,"quarterly_profit_change_pct":56.73,"sales_quarter_cr":10.83,"quarterly_sales_change_pct":217.6,"roce_pct":6.28,"pat_12m_cr":251.53,"roic_pct":2025.26,"earnings_yield_pct":22.34,"book_value_inr":11799.09},{"source_report_date":"2026-10-16","source":"Screener.in PDF export","company":"BF Investment","cmp_inr":433.3,"pe":4.19,"market_cap_cr":1631.81,"dividend_yield_pct":2.31,"net_profit_quarter_cr":145.99,"quarterly_profit_change_pct":279.79,"sales_quarter_cr":11.28,"quarterly_sales_change_pct":19.62,"roce_pct":4.86,"pat_12m_cr":389.57,"roic_pct":47.01,"earnings_yield_pct":48.85,"book_value_inr":2266.84}]};
+const magicFormulaData = MAGIC_FORMULA_SNAPSHOT.data.map((r, index) => ({
+  symbol: r.company, name: r.company, snapshotRow: index + 1,
+  cmp: num(r.cmp_inr), pe: num(r.pe), marketCap: num(r.market_cap_cr),
+  dividendYield: num(r.dividend_yield_pct), netProfitQuarter: num(r.net_profit_quarter_cr),
+  quarterlyProfitChange: num(r.quarterly_profit_change_pct), salesQuarter: num(r.sales_quarter_cr),
+  quarterlySalesChange: num(r.quarterly_sales_change_pct), roce: num(r.roce_pct),
+  pat12m: num(r.pat_12m_cr), roic: num(r.roic_pct), earningsYield: num(r.earnings_yield_pct),
+  bookValue: num(r.book_value_inr), reportDate: r.source_report_date
+}));
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
+
+function num(value){
+  if(value === null || value === undefined || value === ""){
+    return null;
+  }
+
+  const n = Number(
+    String(value)
+      .replace(/,/g,"")
+      .replace(/%/g,"")
+      .trim()
+  );
+
+  return Number.isFinite(n) ? n : null;
+}
+
+function escapeHtml(value){
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+function scoreLabel(score){
+  if(!Number.isFinite(score)){
+    return "Insufficient Data";
+  }
+
+  if(score >= 80) return "Excellent";
+  if(score >= 65) return "Good";
+  if(score >= 50) return "Average";
+  return "Weak";
+}
+
+function scoreClass(score){
+  if(!Number.isFinite(score)) return "status-unavailable";
+  if(score >= 80) return "score-excellent";
+  if(score >= 65) return "score-good";
+  if(score >= 50) return "score-average";
+  return "score-weak";
+}
+
+function formatNumber(value, decimals=2){
+  return Number.isFinite(value)
+    ? value.toFixed(decimals)
+    : "—";
+}
+
+function formatPercent(value){
+  if(!Number.isFinite(value)) return "—";
+  return `${value.toFixed(2)}%`;
+}
+
+function formatPE(value){
+  if(!Number.isFinite(value)) return "—";
+  return value.toFixed(2);
+}
+
+/* =========================================================
+   LOAD NSE UNIVERSE
+   ========================================================= */
+
+async function loadUniverse(){
+  const status = document.getElementById("status");
+
+  try{
+    status.textContent = "Loading NSE universe...";
+
+    const response = await fetch(
+      UNIVERSE_API,
+      {
+        cache:"no-store",
+        headers:{Accept:"application/json"}
+      }
+    );
+
+    if(!response.ok){
+      throw new Error(`Universe request failed: ${response.status}`);
+    }
+
+    const payload = await response.json();
+
+    const rows =
+      Array.isArray(payload)
+        ? payload
+        : Array.isArray(payload.data)
+          ? payload.data
+          : Array.isArray(payload.stocks)
+            ? payload.stocks
+            : [];
+
+    universe = rows;
+
+    document.getElementById("universeCount").textContent =
+      universe.length.toLocaleString();
+
+    status.textContent =
+      `NSE universe loaded: ${universe.length.toLocaleString()} stocks. Loading stored Health data...`;
+
+  }catch(error){
+    console.error("Universe load error:", error);
+
+    universe = [];
+
+    document.getElementById("universeCount").textContent = "—";
+
+    status.textContent =
+      "NSE universe could not be loaded. Stored Health data can still be displayed.";
+  }
+
+  renderTable();
+}
+
+/* =========================================================
+   LOAD HEALTH DATA FROM D1
+   ========================================================= */
+
+async function loadHealthData(){
+  const status = document.getElementById("status");
+
+  try{
+    status.textContent =
+      "Loading stored StockGyan Health data...";
+
+    const response = await fetch(
+      HEALTH_DATA_API,
+      {
+        cache:"no-store",
+        headers:{Accept:"application/json"}
+      }
+    );
+
+    if(!response.ok){
+      throw new Error(`Health data request failed: ${response.status}`);
+    }
+
+    const payload = await response.json();
+
+    if(payload.status !== "success"){
+      throw new Error(
+        payload.message || "Health data API returned an error"
+      );
+    }
+
+    const rows =
+      Array.isArray(payload.data)
+        ? payload.data
+        : [];
+
+    healthData = rows.map(row => ({
+      symbol: row.symbol || "",
+      name: row.company_name || row.symbol || "",
+      isin: row.isin || "",
+      exchange: row.exchange || "NSE",
+
+      healthScore: num(row.health_score),
+
+      label:
+        row.quality_label ||
+        (
+          Number.isFinite(num(row.health_score))
+            ? scoreLabel(num(row.health_score))
+            : "Insufficient Data"
+        ),
+
+      businessQuality: num(row.business_quality),
+
+      roce: num(row.roce),
+
+      roe: num(row.roe),
+
+      pe: num(row.pe_ratio),
+
+      earningsGrowth: num(row.earnings_growth),
+
+      financialScore: null,
+
+      debtEquity: num(row.debt_equity),
+
+      profitability: num(row.profitability),
+
+      // Optional strategy metrics: read only if already supplied by the existing API.
+      roic: num(row.roic ?? row.ROIC ?? row.return_on_invested_capital ?? row.returnOnInvestedCapital),
+      earningsYield: num(row.earnings_yield ?? row.earningsYield ?? row.ey),
+      bookValue: num(row.book_value ?? row.bookValue ?? row.bookvalue),
+      marketCap: num(row.market_cap ?? row.market_capitalization ?? row.marketCap ?? row.marketCapitalization),
+      salesGrowth: num(row.sales_growth ?? row.salesGrowth ?? row.revenue_growth),
+      salesGrowth10Y: num(row.sales_growth_10_years ?? row.sales_growth_10y ?? row.salesGrowth10Years ?? row.sales_growth_10_year),
+      avgRoce10Y: num(row.average_roce_10_years ?? row.avg_roce_10y ?? row.averageROCE10Years ?? row.roce_10y),
+      piotroskiScore: num(row.piotroski_score ?? row.piotroskiScore ?? row.piotroski_f_score ?? row.f_score),
+
+      availableMetrics: Number(row.available_metrics || 0),
+
+      dataStatus: row.data_status || "pending",
+
+      updatedAt: row.updated_at || ""
+    }));
+
+    document.getElementById("dataCount").textContent =
+      healthData.length.toLocaleString();
+
+    status.textContent =
+      `Loaded ${healthData.length.toLocaleString()} stored Health records from StockGyan D1. No live Upstox requests are made by this screener.`;
+
+    updateStats();
+
+  }catch(error){
+    console.error("Health D1 load error:", error);
+
+    healthData = [];
+
+    document.getElementById("dataCount").textContent = "0";
+
+    status.textContent =
+      "Unable to load stored Health data from StockGyan D1.";
+
+    updateStats();
+  }
+
+  renderTable();
+}
+
+/* =========================================================
+   STRATEGY SCANS — CLIENT-SIDE ONLY, NO EXTRA API/D1 CALLS
+   ========================================================= */
+
+const strategyNames = {
+  health:"Health Screener",
+  quality:"Quality",
+  value:"Value",
+  growth:"Growth",
+  lowDebt:"Low Debt",
+  coffeeCan:"Coffee Can",
+  magicFormula:"Magic Formula",
+  piotroski:"Piotroski F-Score > 7"
+};
+
+function metricAvailable(v){ return Number.isFinite(v); }
+function matchesStrategy(row, strategy){
+  const gt = (v, threshold) => metricAvailable(v) && v > threshold;
+  switch(strategy){
+    case "quality":
+      return gt(row.roce, 20) && gt(row.roe, 15);
+    case "value":
+      return metricAvailable(row.pe) && row.pe > 0 && row.pe <= 15;
+    case "growth":
+      return gt(row.earningsGrowth, 10);
+    case "lowDebt":
+      return metricAvailable(row.debtEquity) && row.debtEquity >= 0 && row.debtEquity < 0.5;
+    case "coffeeCan":
+      return gt(row.salesGrowth, readThreshold("f_sales_min", 10)) &&
+        gt(row.salesGrowth10Y, readThreshold("f_sales10_min", 10)) &&
+        gt(row.roe, 15) &&
+        gt(row.avgRoce10Y, readThreshold("f_roce10_min", 15)) &&
+        gt(row.marketCap, readThreshold("f_mcap_min", 1000));
+    case "magicFormula":
+      return gt(row.roic, readThreshold("f_roic_min", 25)) &&
+        gt(row.earningsYield, readThreshold("f_ey_min", 15)) &&
+        gt(row.bookValue, readThreshold("f_bv_min", 0)) &&
+        gt(row.marketCap, readThreshold("f_mcap_min", 500));
+    case "piotroski":
+      return gt(row.piotroskiScore, 7);
+    default:
+      return true;
+  }
+}
+function readThreshold(id, fallback){
+  const el = document.getElementById(id);
+  if(!el || el.value.trim() === "") return fallback;
+  const value = Number(el.value);
+  return Number.isFinite(value) ? value : fallback;
+}
+function setStrategy(strategy){
+  activeStrategy = strategyNames[strategy] ? strategy : "health";
+  if(activeStrategy === "magicFormula"){
+    document.getElementById("f_roic_min").value = 25;
+    document.getElementById("f_ey_min").value = 15;
+    document.getElementById("f_bv_min").value = 0;
+    document.getElementById("f_mcap_min").value = 500;
+  }
+  document.querySelectorAll(".strategy-btn").forEach(btn=>{
+    btn.classList.toggle("active", btn.dataset.strategy === activeStrategy);
+  });
+  const descriptions = {
+    health:"Existing Health Score filters and methodology.",
+    quality:"Illustrative Quality scan: ROCE > 20% and ROE > 15%.",
+    value:"Illustrative Value scan: positive P/E up to 15. This is a simple heuristic, not a sector-adjusted valuation.",
+    growth:"Illustrative Growth scan: earnings growth > 10%.",
+    lowDebt:"Low Debt scan: debt-to-equity below 0.5.",
+    coffeeCan:"Coffee Can: Sales Growth > 10%, 10-year Sales Growth > 10%, ROE > 15%, 10-year average ROCE > 15%, and market cap > ₹1,000 Cr. Missing metrics do not qualify.",
+    magicFormula:"Magic Formula snapshot (Screener.in, 16 Oct 2026): ROIC > 25%, earnings yield > 15%, book value > 0, and market cap > ₹500 Cr. Uses the supplied report snapshot, not live prices.",
+    piotroski:"Piotroski scan: F-Score > 7 (scores 8 or 9). Uses an existing score field only; it does not calculate an F-Score."
+  };
+  document.getElementById("strategyDescription").textContent = descriptions[activeStrategy];
+  const healthFilter = document.getElementById("healthFilter");
+  if(healthFilter) healthFilter.disabled = activeStrategy === "magicFormula";
+  const sortSelect = document.getElementById("sortBy");
+  if(sortSelect && activeStrategy === "magicFormula"){
+    sortSelect.options[0].textContent = "ROIC ↓";
+    sortSelect.options[1].textContent = "ROIC ↑";
+    sortSelect.options[2].textContent = "ROCE ↓";
+    sortSelect.options[3].textContent = "Earnings Yield ↓";
+    sortSelect.options[4].textContent = "P/E ↓";
+    sortSelect.options[5].textContent = "Quarterly Sales Growth ↓";
+    sortSelect.options[6].textContent = "Company A-Z";
+  } else if(sortSelect){
+    sortSelect.options[0].textContent = "Health Score ↓";
+    sortSelect.options[1].textContent = "Health Score ↑";
+    sortSelect.options[2].textContent = "ROE ↓";
+    sortSelect.options[3].textContent = "ROCE ↓";
+    sortSelect.options[4].textContent = "P/E ↑";
+    sortSelect.options[5].textContent = "Earnings Growth ↓";
+    sortSelect.options[6].textContent = "Symbol A-Z";
+  }
+  document.getElementById("strategyStatus").textContent =
+    activeStrategy === "magicFormula"
+      ? `Magic Formula uses ${magicFormulaData.length} supplied Screener.in rows dated ${MAGIC_FORMULA_SNAPSHOT.sourceReportDate}. This is a report snapshot, not live market data; no API or D1 reads are made for this scan.`
+      : `Selected: ${strategyNames[activeStrategy]}. Only metrics already returned by the current API are used; no new API or D1 reads are made.`;
+  updateStats();
+  renderTable();
+}
+function exportFilteredHealthCSV(){
+  const rows = getFilteredData();
+  const columns = [
+    ["Symbol","symbol"],["Company","name"],["Health Score","healthScore"],
+    ["Business Quality","businessQuality"],["ROCE","roce"],["ROE","roe"],["P/E","pe"],
+    ["Earnings Growth","earningsGrowth"],["Debt/Equity","debtEquity"],["Profitability","profitability"],
+    ["ROIC","roic"],["Earnings Yield","earningsYield"],["Book Value","bookValue"],
+    ["Market Cap","marketCap"],["Sales Growth","salesGrowth"],["Sales Growth 10Y","salesGrowth10Y"],
+    ["Average ROCE 10Y","avgRoce10Y"],["Piotroski F-Score","piotroskiScore"],["Data Status","dataStatus"]
+  ];
+  const csvCell = v => `"${String(v ?? "").replace(/"/g,'""')}"`;
+  const csv = [columns.map(c=>csvCell(c[0])).join(","), ...rows.map(row=>columns.map(c=>csvCell(row[c[1]] ?? "")).join(","))].join("\r\n");
+  const blob = new Blob(["\ufeff",csv],{type:"text/csv;charset=utf-8;"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `stockgyan-${activeStrategy}-scan.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+document.querySelectorAll(".strategy-btn").forEach(btn=>{
+  btn.addEventListener("click",()=>setStrategy(btn.dataset.strategy));
+});
+document.getElementById("applyStrategyFilters").addEventListener("click",()=>{
+  updateStats(); renderTable();
+});
+document.getElementById("exportHealthCsv").addEventListener("click",exportFilteredHealthCSV);
+
+/* =========================================================
+   FILTER / SORT
+   ========================================================= */
+
+function getFilteredData(){
+  if(activeStrategy === "magicFormula"){
+    const search = String(document.getElementById("search").value || "").trim().toLowerCase();
+    const minRoic = readThreshold("f_roic_min", 25);
+    const minYield = readThreshold("f_ey_min", 15);
+    const minBook = readThreshold("f_bv_min", 0);
+    const minMarketCap = readThreshold("f_mcap_min", 500);
+    let rows = magicFormulaData.filter(row => {
+      const matchesSearch = !search || row.name.toLowerCase().includes(search);
+      return matchesSearch &&
+        Number.isFinite(row.roic) && row.roic > minRoic &&
+        Number.isFinite(row.earningsYield) && row.earningsYield > minYield &&
+        Number.isFinite(row.bookValue) && row.bookValue > minBook &&
+        Number.isFinite(row.marketCap) && row.marketCap > minMarketCap;
+    });
+    const sort = document.getElementById("sortBy").value;
+    const sortKeys = {
+      healthDesc: "roic", healthAsc: "roic",
+      roeDesc: "roce", roceDesc: "earningsYield",
+      peAsc: "pe", growthDesc: "quarterlySalesChange", symbol: "name"
+    };
+    const key = sortKeys[sort] || "roic";
+    rows.sort((a,b) => {
+      if(key === "name") return a.name.localeCompare(b.name);
+      const av = a[key], bv = b[key];
+      if(!Number.isFinite(av)) return 1;
+      if(!Number.isFinite(bv)) return -1;
+      return sort === "healthAsc" ? av - bv : bv - av;
+    });
+    return rows;
+  }
+  const search =
+    String(
+      document.getElementById("search").value || ""
+    )
+    .trim()
+    .toLowerCase();
+
+  const filter =
+    document.getElementById("healthFilter").value;
+
+  const sort =
+    document.getElementById("sortBy").value;
+
+  let rows = healthData.filter(row => {
+
+    const matchesSearch =
+      !search ||
+      String(row.symbol).toLowerCase().includes(search) ||
+      String(row.name).toLowerCase().includes(search);
+
+    if(!matchesSearch) return false;
+
+    if(!matchesStrategy(row, activeStrategy)) return false;
+
+    if(filter === "all"){
+      return true;
+    }
+
+    const score = row.healthScore;
+
+    if(!Number.isFinite(score)){
+      return false;
+    }
+
+    if(filter === "80") return score >= 80;
+    if(filter === "65") return score >= 65;
+    if(filter === "50") return score >= 50;
+
+    if(filter === "0") return score < 50;
+
+    return true;
+  });
+
+  rows.sort((a,b) => {
+
+    const av = keyValue(a, sort);
+    const bv = keyValue(b, sort);
+
+    if(typeof av === "string" || typeof bv === "string"){
+      return String(av).localeCompare(String(bv));
+    }
+
+    const aValid = Number.isFinite(av);
+    const bValid = Number.isFinite(bv);
+
+    if(!aValid && !bValid) return 0;
+    if(!aValid) return 1;
+    if(!bValid) return -1;
+
+    return sort === "healthAsc" ? av - bv : bv - av;
+  });
+
+  return rows;
+}
+
+function keyValue(row, sort){
+  switch(sort){
+    case "healthAsc":
+    case "healthDesc":
+      return row.healthScore;
+
+    case "roeDesc":
+      return row.roe;
+
+    case "roceDesc":
+      return row.roce;
+
+    case "peAsc":
+      return row.pe;
+
+    case "growthDesc":
+      return row.earningsGrowth;
+
+    case "symbol":
+      return String(row.symbol || "");
+
+    default:
+      return row.healthScore;
+  }
+}
+
+/* =========================================================
+   STATS
+   ========================================================= */
+
+function updateStats(){
+  if(activeStrategy === "magicFormula"){
+    document.getElementById("excellentCount").textContent = "—";
+    document.getElementById("goodCount").textContent = "—";
+    document.getElementById("displayedCount").textContent = getFilteredData().length.toLocaleString();
+    return;
+  }
+  const excellent =
+    healthData.filter(
+      row => Number.isFinite(row.healthScore) &&
+             row.healthScore >= 80
+    ).length;
+
+  const good =
+    healthData.filter(
+      row => Number.isFinite(row.healthScore) &&
+             row.healthScore >= 65 &&
+             row.healthScore < 80
+    ).length;
+
+  document.getElementById("excellentCount").textContent =
+    excellent.toLocaleString();
+
+  document.getElementById("goodCount").textContent =
+    good.toLocaleString();
+
+  const displayed =
+    getFilteredData().length;
+
+  document.getElementById("displayedCount").textContent =
+    displayed.toLocaleString();
+}
+
+/* =========================================================
+   RENDER TABLE
+   ========================================================= */
+
+function renderTable(){
+  const tbody =
+    document.getElementById("stockTable");
+
+  if(!tbody) return;
+
+  const rows = getFilteredData();
+  const title = document.getElementById("tableTitle");
+  const head = document.getElementById("stockTableHead");
+  const resultInfo = document.getElementById("resultInfo");
+
+  if(activeStrategy === "magicFormula"){
+    if(head) head.innerHTML = `<tr>
+      <th>#</th><th>Company</th><th>CMP (₹)</th><th>P/E</th><th>Market Cap (₹ Cr)</th>
+      <th>Div. Yield %</th><th>Net Profit Qtr (₹ Cr)</th><th>Qtr Profit Change %</th>
+      <th>Sales Qtr (₹ Cr)</th><th>Qtr Sales Change %</th><th>ROCE %</th>
+      <th>PAT 12M (₹ Cr)</th><th>ROIC %</th><th>Earnings Yield %</th><th>Book Value (₹)</th>
+    </tr>`;
+    if(title) title.textContent = "StockGyan Magic Formula — Screener.in Snapshot";
+    document.getElementById("displayedCount").textContent = rows.length.toLocaleString();
+    if(resultInfo) resultInfo.textContent = `${rows.length} companies matching all four Magic Formula rules · Report date: ${MAGIC_FORMULA_SNAPSHOT.sourceReportDate}`;
+    if(!rows.length){
+      tbody.innerHTML = `<tr><td colspan="15" class="empty">No companies match the current Magic Formula thresholds.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = rows.map(row => `<tr>
+      <td>${row.snapshotRow}</td><td class="company">${escapeHtml(row.name)}</td>
+      <td>${formatNumber(row.cmp)}</td><td>${formatPE(row.pe)}</td>
+      <td>${formatNumber(row.marketCap)}</td><td>${formatNumber(row.dividendYield)}</td>
+      <td>${formatNumber(row.netProfitQuarter)}</td><td>${formatNumber(row.quarterlyProfitChange)}</td>
+      <td>${formatNumber(row.salesQuarter)}</td><td>${formatNumber(row.quarterlySalesChange)}</td>
+      <td>${formatPercent(row.roce)}</td><td>${formatNumber(row.pat12m)}</td>
+      <td><strong>${formatPercent(row.roic)}</strong></td><td><strong>${formatPercent(row.earningsYield)}</strong></td>
+      <td>${formatNumber(row.bookValue)}</td>
+    </tr>`).join("");
+    return;
+  }
+
+  if(head) head.innerHTML = `<tr>
+    <th>Symbol</th><th>Company</th><th>Health Score</th><th>Business Quality</th><th>ROCE</th>
+    <th>ROE</th><th>P/E</th><th>Earnings Growth</th><th>Financial Strength</th><th>Profitability</th>
+    <th>ROIC</th><th>Earnings Yield</th><th>Book Value</th><th>Market Cap</th><th>Sales Growth</th>
+    <th>Sales Growth 10Y</th><th>Avg ROCE 10Y</th><th>Piotroski</th><th>Data</th>
+  </tr>`;
+
+  if(title) title.textContent = `StockGyan ${strategyNames[activeStrategy] || "Health"} Stocks`;
+
+  document.getElementById("displayedCount").textContent =
+    rows.length.toLocaleString();
+
+  document.getElementById("resultInfo").textContent =
+    `${rows.length.toLocaleString()} stored Health records`;
+
+  if(!rows.length){
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="19" class="empty">
+          ${
+            healthData.length
+              ? "No stocks match the current filters."
+              : "No stored Health data available yet."
+          }
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = rows.map(row => {
+
+    const score = row.healthScore;
+
+    const label =
+      row.label ||
+      scoreLabel(score);
+
+    const scoreText =
+      Number.isFinite(score)
+        ? score.toFixed(2)
+        : "—";
+
+    const businessText =
+      Number.isFinite(row.businessQuality)
+        ? row.businessQuality.toFixed(2)
+        : "—";
+
+    const financialText =
+      Number.isFinite(row.financialScore)
+        ? row.financialScore.toFixed(2)
+        : "—";
+
+    const profitabilityText =
+      formatPercent(row.profitability);
+
+    let dataClass = "status-unavailable";
+    let dataText = "Pending";
+
+    if(row.dataStatus === "complete"){
+      dataClass = "status-ready";
+      dataText = `${row.availableMetrics}/6`;
+    }
+    else if(row.availableMetrics > 0){
+      dataClass = "status-partial";
+      dataText = `${row.availableMetrics}/6`;
+    }
+
+    const growthClass =
+      Number.isFinite(row.earningsGrowth)
+        ? row.earningsGrowth >= 0
+          ? "positive"
+          : "negative"
+        : "muted";
+
+    return `
+      <tr>
+
+        <td class="symbol">
+          ${escapeHtml(row.symbol)}
+        </td>
+
+        <td class="company" title="${escapeHtml(row.name)}">
+          ${escapeHtml(row.name)}
+        </td>
+
+        <td>
+          <span class="score ${scoreClass(score)}">
+            ${scoreText}
+          </span>
+          <div class="muted" style="font-size:10px;margin-top:3px;">
+            ${escapeHtml(label)}
+          </div>
+        </td>
+
+        <td>
+          ${businessText}
+        </td>
+
+        <td>
+          ${
+            Number.isFinite(row.roce)
+              ? formatPercent(row.roce)
+              : "—"
+          }
+        </td>
+
+        <td>
+          ${
+            Number.isFinite(row.roe)
+              ? formatPercent(row.roe)
+              : "—"
+          }
+        </td>
+
+        <td>
+          ${formatPE(row.pe)}
+        </td>
+
+        <td class="${growthClass}">
+          ${formatPercent(row.earningsGrowth)}
+        </td>
+
+        <td>
+          ${
+            financialText !== "—"
+              ? financialText
+              : Number.isFinite(row.debtEquity)
+                ? `D/E ${row.debtEquity.toFixed(2)}`
+                : "—"
+          }
+        </td>
+
+        <td>
+          ${profitabilityText}
+        </td>
+        <td>${formatPercent(row.roic)}</td>
+        <td>${formatPercent(row.earningsYield)}</td>
+        <td>${formatNumber(row.bookValue)}</td>
+        <td>${formatNumber(row.marketCap)}</td>
+        <td>${formatPercent(row.salesGrowth)}</td>
+        <td>${formatPercent(row.salesGrowth10Y)}</td>
+        <td>${formatPercent(row.avgRoce10Y)}</td>
+        <td>${formatNumber(row.piotroskiScore,0)}</td>
+
+        <td>
+          <span class="status-pill ${dataClass}">
+            ${dataText}
+          </span>
+        </td>
+
+      </tr>
+    `;
+  }).join("");
+}
+
+/* =========================================================
+   FILTER RESET
+   ========================================================= */
+
+function clearFilters(){
+  document.getElementById("search").value = "";
+  document.getElementById("healthFilter").value = "all";
+  document.getElementById("sortBy").value = "healthDesc";
+  setStrategy("health");
+
+  updateStats();
+  renderTable();
+}
+
+/* =========================================================
+   EVENTS
+   ========================================================= */
+
+document.getElementById("search")
+  .addEventListener("input", function(){
+    updateStats();
+    renderTable();
+  });
+
+document.getElementById("healthFilter")
+  .addEventListener("change", function(){
+    updateStats();
+    renderTable();
+  });
+
+document.getElementById("sortBy")
+  .addEventListener("change", function(){
+    updateStats();
+    renderTable();
+});
+
+/* =========================================================
+   INITIAL LOAD
+   ========================================================= */
+
+(async function init(){
+
+  document.getElementById("status").textContent =
+    "Loading StockGyan Health data...";
+
+  await Promise.all([
+    loadUniverse(),
+    loadHealthData()
+  ]);
+
+})();
+</script>
+
+</body>
+</html>
