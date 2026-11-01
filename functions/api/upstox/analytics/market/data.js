@@ -111,19 +111,54 @@ export async function onRequest(context) {
       masterSummary[key] = (masterSummary[key] || 0) + 1;
     }
 
-    // STEP 3: Select NSE and BSE equity instruments.
-    const stocks = instruments.filter(stock =>
-      ["NSE_EQ", "BSE_EQ"].includes(stock.segment) &&
-      ["EQ", "BE"].includes(stock.instrument_type) &&
-      stock.instrument_key &&
-      stock.trading_symbol
-    );
+    // STEP 3: Define equity series.
+    const nseEquitySeries = [
+      "EQ",
+      "BE",
+      "BZ",
+      "SM",
+      "ST",
+      "SZ"
+    ];
+
+    const bseEquitySeries = [
+      "A",
+      "B",
+      "T",
+      "X",
+      "XT",
+      "Z"
+    ];
+
+    // STEP 4: Select NSE and BSE equity instruments.
+    const stocks = instruments.filter(stock => {
+      if (
+        !stock.instrument_key ||
+        !stock.trading_symbol
+      ) {
+        return false;
+      }
+
+      if (stock.segment === "NSE_EQ") {
+        return nseEquitySeries.includes(
+          stock.instrument_type
+        );
+      }
+
+      if (stock.segment === "BSE_EQ") {
+        return bseEquitySeries.includes(
+          stock.instrument_type
+        );
+      }
+
+      return false;
+    });
 
     if (!stocks.length) {
       throw new Error("No NSE/BSE equity instruments found");
     }
 
-    // STEP 4: Fetch full market quotes in batches of 500.
+    // STEP 5: Fetch full market quotes in batches of 500.
     const batchSize = 500;
     const quotes = {};
     const errors = [];
@@ -170,7 +205,7 @@ export async function onRequest(context) {
       Object.assign(quotes, result.data || {});
     }
 
-    // STEP 5: Combine stock information with market quotes.
+    // STEP 6: Combine stock information with market quotes.
     const data = stocks.map(stock => {
       const quoteKey =
         `${stock.segment}:${stock.trading_symbol}`;
@@ -209,7 +244,7 @@ export async function onRequest(context) {
       };
     });
 
-    // STEP 6: Exchange-wise summary.
+    // STEP 7: Exchange-wise summary.
     const nseStocks = data.filter(
       stock => stock.exchange === "NSE"
     );
@@ -223,7 +258,6 @@ export async function onRequest(context) {
       provider: "Upstox Analytics Account 2",
       exchange: "NSE + BSE",
 
-      // Diagnostic information.
       master_summary: masterSummary,
 
       summary: {
