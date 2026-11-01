@@ -15,8 +15,8 @@ async function downloadInstrumentFile(url) {
   const buffer = await response.arrayBuffer();
   const bytes = new Uint8Array(buffer);
 
-  // Check whether the response is GZIP compressed.
-  const isGzip = bytes.length >= 2 &&
+  const isGzip =
+    bytes.length >= 2 &&
     bytes[0] === 0x1f &&
     bytes[1] === 0x8b;
 
@@ -24,7 +24,7 @@ async function downloadInstrumentFile(url) {
 
   if (isGzip) {
     if (typeof DecompressionStream === "undefined") {
-      throw new Error("GZIP decompression is not supported in this runtime");
+      throw new Error("GZIP decompression is not supported");
     }
 
     const stream = new Blob([buffer])
@@ -33,7 +33,6 @@ async function downloadInstrumentFile(url) {
 
     jsonText = await new Response(stream).text();
   } else {
-    // Some servers automatically decompress the response.
     jsonText = new TextDecoder().decode(buffer);
   }
 
@@ -50,11 +49,11 @@ async function getInstrumentMaster() {
   const base =
     "https://assets.upstox.com/market-quote/instruments/exchange/";
 
-  // Try the complete master first.
   try {
-    return await downloadInstrumentFile(base + "complete.json.gz");
+    return await downloadInstrumentFile(
+      base + "complete.json.gz"
+    );
   } catch (completeError) {
-    // If complete fails, try separate NSE and BSE masters.
     const results = await Promise.allSettled([
       downloadInstrumentFile(base + "NSE.json.gz"),
       downloadInstrumentFile(base + "BSE.json.gz")
@@ -68,19 +67,20 @@ async function getInstrumentMaster() {
       return combined;
     }
 
-    const errors = results
-      .map((result, index) => {
-        const exchange = index === 0 ? "NSE" : "BSE";
-        return `${exchange}: ${
-          result.status === "rejected"
-            ? result.reason.message
-            : "Unknown error"
-        }`;
-      })
-      .join("; ");
+    const errors = results.map((result, index) => {
+      const exchange = index === 0 ? "NSE" : "BSE";
+
+      return `${exchange}: ${
+        result.status === "rejected"
+          ? result.reason.message
+          : "Unknown error"
+      }`;
+    }).join("; ");
 
     throw new Error(
-      `Instrument master download failed. Complete: ${completeError.message}. ${errors}`
+      `Instrument master download failed. Complete: ${
+        completeError.message
+      }. ${errors}`
     );
   }
 }
@@ -96,10 +96,22 @@ export async function onRequest(context) {
   }
 
   try {
-    // STEP 1: Download and decompress the official instrument master.
+    // STEP 1: Download instrument master.
     const instruments = await getInstrumentMaster();
 
-    // STEP 2: Select NSE and BSE equity instruments.
+    // STEP 2: Diagnostic summary of all instrument types.
+    const masterSummary = {};
+
+    for (const stock of instruments) {
+      const key =
+        `${stock.segment || "UNKNOWN"} | ${
+          stock.instrument_type || "UNKNOWN"
+        }`;
+
+      masterSummary[key] = (masterSummary[key] || 0) + 1;
+    }
+
+    // STEP 3: Select NSE and BSE equity instruments.
     const stocks = instruments.filter(stock =>
       ["NSE_EQ", "BSE_EQ"].includes(stock.segment) &&
       ["EQ", "BE"].includes(stock.instrument_type) &&
@@ -111,7 +123,7 @@ export async function onRequest(context) {
       throw new Error("No NSE/BSE equity instruments found");
     }
 
-    // STEP 3: Fetch full market quotes in batches of 500.
+    // STEP 4: Fetch full market quotes in batches of 500.
     const batchSize = 500;
     const quotes = {};
     const errors = [];
@@ -120,6 +132,7 @@ export async function onRequest(context) {
       const batch = stocks.slice(i, i + batchSize);
 
       const params = new URLSearchParams();
+
       params.set(
         "instrument_key",
         batch.map(stock => stock.instrument_key).join(",")
@@ -157,16 +170,21 @@ export async function onRequest(context) {
       Object.assign(quotes, result.data || {});
     }
 
-    // STEP 4: Combine stock information with market quotes.
+    // STEP 5: Combine stock information with market quotes.
     const data = stocks.map(stock => {
-      const quoteKey = `${stock.segment}:${stock.trading_symbol}`;
+      const quoteKey =
+        `${stock.segment}:${stock.trading_symbol}`;
+
       const quote = quotes[quoteKey] || {};
       const ohlc = quote.ohlc || {};
 
       return {
         company: stock.name || stock.trading_symbol,
         symbol: stock.trading_symbol,
-        exchange: stock.segment === "NSE_EQ" ? "NSE" : "BSE",
+
+        exchange:
+          stock.segment === "NSE_EQ" ? "NSE" : "BSE",
+
         segment: stock.segment,
         instrument_key: stock.instrument_key,
         instrument_type: stock.instrument_type,
@@ -179,34 +197,48 @@ export async function onRequest(context) {
         open: ohlc.open ?? null,
         high: ohlc.high ?? null,
         low: ohlc.low ?? null,
-        previous_close: quote.prev_close_price ?? ohlc.close ?? null,
+
+        previous_close:
+          quote.prev_close_price ?? ohlc.close ?? null,
 
         year_high: quote.year_high ?? null,
         year_low: quote.year_low ?? null,
 
-        market_data_available: quote.last_price != null
+        market_data_available:
+          quote.last_price != null
       };
     });
 
-    // STEP 5: Exchange-wise summary.
-    const nseStocks = data.filter(stock => stock.exchange === "NSE");
-    const bseStocks = data.filter(stock => stock.exchange === "BSE");
+    // STEP 6: Exchange-wise summary.
+    const nseStocks = data.filter(
+      stock => stock.exchange === "NSE"
+    );
+
+    const bseStocks = data.filter(
+      stock => stock.exchange === "BSE"
+    );
 
     return Response.json({
       success: true,
       provider: "Upstox Analytics Account 2",
       exchange: "NSE + BSE",
 
+      // Diagnostic information.
+      master_summary: masterSummary,
+
       summary: {
         total_instruments: data.length,
         nse_instruments: nseStocks.length,
         bse_instruments: bseStocks.length,
+
         quoted_instruments: data.filter(
           stock => stock.market_data_available
         ).length,
+
         unquoted_instruments: data.filter(
           stock => !stock.market_data_available
         ).length,
+
         failed_batches: errors.length
       },
 
@@ -217,7 +249,8 @@ export async function onRequest(context) {
   } catch (error) {
     return Response.json({
       success: false,
-      message: error.message || "Unable to fetch market data"
+      message:
+        error.message || "Unable to fetch market data"
     }, { status: 500 });
   }
 }
