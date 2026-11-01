@@ -5,21 +5,20 @@ export async function onRequest(context) {
   if (!token) {
     return Response.json({
       success: false,
-      message: "UPSTOX_ANALYTICS_TOKEN2 secret not found"
+      message: "Analytics token secret not found"
     }, { status: 500 });
   }
 
   try {
-    const response = await fetch(
-      "https://api.upstox.com/v2/user/profile",
-      {
-        method: "GET",
-        headers: {
-          "Accept": "application/json",
-          "Authorization": `Bearer ${token}`
-        }
+    const url =
+      "https://api.upstox.com/v2/market-quote/ltp?instrument_key=NSE_EQ%7CINE002A01018";
+
+    const response = await fetch(url, {
+      headers: {
+        "Accept": "application/json",
+        "Authorization": `Bearer ${token}`
       }
-    );
+    });
 
     const result = await response.json();
 
@@ -27,15 +26,15 @@ export async function onRequest(context) {
       return Response.json({
         success: false,
         status: response.status,
-        message: result.message || "Upstox API authentication failed"
+        message: result.message || "Market data request failed",
+        details: result.errors || null
       }, { status: response.status });
     }
 
     return Response.json({
       success: true,
-      message: "Second Upstox account connected successfully",
-      user_name: result.data?.user_name || "Connected",
-      user_id: result.data?.user_id || "Verified"
+      message: "Second Upstox Analytics connection working",
+      data: result.data
     });
 
   } catch (error) {
