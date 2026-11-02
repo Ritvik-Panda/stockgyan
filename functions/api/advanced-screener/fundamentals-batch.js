@@ -1,23 +1,68 @@
-
 import { validSession, json } from "../admin/auth.js";
 
 const BATCH_SIZE = 10;
 const REFRESH_DAYS = 10;
-
 const ELIGIBLE_TYPES = ["EQ", "BE", "BZ", "SM"];
+const BASE_URL = "https://api.upstox.com/v2/fundamentals";
+
+function parseNumber(value) {
+  if (value === null || value === undefined || value === "") return null;
+  const parsed = Number(String(value).replace(/,/g, "").replace(/%/g, "").trim());
+  return Number.isFinite(parsed) ? parsed : null;
+}
 
 function getRatio(ratios, name) {
-  const item = ratios.find(
+  const item = (ratios || []).find(
     r => r.name?.trim().toLowerCase() === name.toLowerCase()
   );
+  return parseNumber(item?.company_value);
+}
 
-  if (!item || item.company_value == null) return null;
-
-  const value = Number(
-    String(item.company_value).replace("%", "").trim()
+function getHistoryValue(rows, category) {
+  const item = (rows || []).find(
+    row => row.category?.trim().toLowerCase() === category.toLowerCase()
   );
+  return Array.isArray(item?.history) ? item.history : [];
+}
 
-  return Number.isFinite(value) ? value : null;
+function latestValue(history) {
+  return history.length ? parseNumber(history[0]?.value) : null;
+}
+
+function growthPercent(history) {
+  if (!Array.isArray(history) || history.length < 2) return null;
+  const current = parseNumber(history[0]?.value);
+  const previous = parseNumber(history[1]?.value);
+  if (current === null || previous === null || previous <= 0) return null;
+  return ((current - previous) / previous) * 100;
+}
+
+function getBalanceValue(history, key) {
+  return history.length ? parseNumber(history[0]?.[key]) : null;
+}
+
+async function fetchJson(url, token, required = false) {
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    const result = await response.json().catch(() => null);
+    if (!response.ok || result?.status !== "success") {
+      if (required) {
+        throw new Error(result?.message || `Upstox HTTP ${response.status}`);
+      }
+      return null;
+    }
+    return result.data ?? null;
+  } catch (error) {
+    if (required) throw error;
+    return null;
+  }
 }
 
 async function saveFailure(db, companyId, error) {
@@ -34,42 +79,57 @@ async function saveFailure(db, companyId, error) {
 }
 
 async function fetchAndSave(db, token, company) {
-  const response = await fetch(
-    `https://api.upstox.com/v2/fundamentals/${encodeURIComponent(company.isin)}/key-ratios`,
-    {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-        Authorization: `Bearer ${token}`
-      }
-    }
+  const isin = encodeURIComponent(company.isin);
+
+  // Key ratios remain the required source for the existing working screeners.
+  const ratiosData = await fetchJson(
+    `${BASE_URL}/${isin}/key-ratios`,
+    token,
+    true
   );
 
-  let result;
+  const ratios = Array.isArray(ratiosData) ? ratiosData : [];
+  const pe = getRatio(ratios, "P/E");
+  const pb = getRatio(ratios, "P/B");
+  const roa = getRatio(ratios, "ROA");
+  const roe = getRatio(ratios, "ROE");
+  const roce = getRatio(ratios, "ROCE");
+  const evEbitda = getRatio(ratios, "EV/EBITDA");
 
-  try {
-    result = await response.json();
-  } catch {
-    throw new Error(`Invalid Upstox response: HTTP ${response.status}`);
+  if ([pe, roe, roce, pb, roa, evEbitda].every(value => value === null)) {
+    throw new Error("No usable Upstox key-ratio values returned");
   }
 
-  if (
-    !response.ok ||
-    result.status !== "success" ||
-    !Array.isArray(result.data)
-  ) {
-    throw new Error(
-      result.message || `Upstox HTTP ${response.status}`
-    );
-  }
+  // These supplementary endpoints are optional. A failure here must not
+  // block P/E, ROE or ROCE from being saved.
+  const incomeData = await fetchJson(
+    `${BASE_URL}/${isin}/income-statement?type=consolidated&time_period=yearly`,
+    token
+  );
+  const cashData = await fetchJson(
+    `${BASE_URL}/${isin}/cash-flow?type=consolidated`,
+    token
+  );
+  const balanceData = await fetchJson(
+    `${BASE_URL}/${isin}/balance-sheet?type=consolidated`,
+    token
+  );
 
-  const pe = getRatio(result.data, "P/E");
-  const roe = getRatio(result.data, "ROE");
-  const roce = getRatio(result.data, "ROCE");
+  const incomeRows = incomeData?.income_statement || [];
+  const revenueHistory = getHistoryValue(incomeRows, "revenue");
+  const operatingProfitHistory = getHistoryValue(incomeRows, "operating_profit");
+  const netProfitHistory = getHistoryValue(incomeRows, "net_profit");
+  const cashHistory = getHistoryValue(cashData?.cash_flow || [], "operating");
+  const balanceHistory = balanceData?.history || [];
 
-  if (pe === null && roe === null && roce === null) {
-    throw new Error("No usable P/E, ROE or ROCE values returned");
-  }
+  const annualRevenue = latestValue(revenueHistory);
+  const operatingProfit = latestValue(operatingProfitHistory);
+  const annualNetProfit = latestValue(netProfitHistory);
+  const operatingCashFlow = latestValue(cashHistory);
+  const totalAssets = getBalanceValue(balanceHistory, "total_asset");
+  const totalLiabilities = getBalanceValue(balanceHistory, "total_liability");
+  const salesGrowth = growthPercent(revenueHistory);
+  const profitGrowth = growthPercent(netProfitHistory);
 
   const asOfDate = new Date().toLocaleDateString(
     "en-CA",
@@ -78,25 +138,41 @@ async function fetchAndSave(db, token, company) {
 
   await db.prepare(`
     INSERT INTO fundamentals (
-      company_id, as_of_date, pe, roe_pct, roce_pct,
+      company_id, as_of_date,
+      pe, pb, roa_pct, roe_pct, roce_pct, ev_ebitda,
+      annual_revenue_cr, operating_profit_cr, annual_net_profit_cr,
+      operating_cash_flow_cr, total_assets_cr, total_liabilities_cr,
+      sales_growth_pct, profit_growth_pct,
       source, updated_at
     )
-    VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
 
     ON CONFLICT(company_id, as_of_date)
     DO UPDATE SET
       pe = COALESCE(excluded.pe, fundamentals.pe),
+      pb = COALESCE(excluded.pb, fundamentals.pb),
+      roa_pct = COALESCE(excluded.roa_pct, fundamentals.roa_pct),
       roe_pct = COALESCE(excluded.roe_pct, fundamentals.roe_pct),
       roce_pct = COALESCE(excluded.roce_pct, fundamentals.roce_pct),
+      ev_ebitda = COALESCE(excluded.ev_ebitda, fundamentals.ev_ebitda),
+      annual_revenue_cr = COALESCE(excluded.annual_revenue_cr, fundamentals.annual_revenue_cr),
+      operating_profit_cr = COALESCE(excluded.operating_profit_cr, fundamentals.operating_profit_cr),
+      annual_net_profit_cr = COALESCE(excluded.annual_net_profit_cr, fundamentals.annual_net_profit_cr),
+      operating_cash_flow_cr = COALESCE(excluded.operating_cash_flow_cr, fundamentals.operating_cash_flow_cr),
+      total_assets_cr = COALESCE(excluded.total_assets_cr, fundamentals.total_assets_cr),
+      total_liabilities_cr = COALESCE(excluded.total_liabilities_cr, fundamentals.total_liabilities_cr),
+      sales_growth_pct = COALESCE(excluded.sales_growth_pct, fundamentals.sales_growth_pct),
+      profit_growth_pct = COALESCE(excluded.profit_growth_pct, fundamentals.profit_growth_pct),
       source = excluded.source,
       updated_at = CURRENT_TIMESTAMP
   `).bind(
     company.id,
     asOfDate,
-    pe,
-    roe,
-    roce,
-    "Upstox Fundamentals Key Ratios"
+    pe, pb, roa, roe, roce, evEbitda,
+    annualRevenue, operatingProfit, annualNetProfit,
+    operatingCashFlow, totalAssets, totalLiabilities,
+    salesGrowth, profitGrowth,
+    "Upstox Fundamentals APIs"
   ).run();
 
   await db.prepare(`
@@ -107,9 +183,16 @@ async function fetchAndSave(db, token, company) {
   return {
     symbol: company.symbol,
     success: true,
-    pe,
-    roe_pct: roe,
-    roce_pct: roce
+    pe, pb, roa_pct: roa, roe_pct: roe, roce_pct: roce,
+    ev_ebitda: evEbitda,
+    annual_revenue_cr: annualRevenue,
+    operating_profit_cr: operatingProfit,
+    annual_net_profit_cr: annualNetProfit,
+    operating_cash_flow_cr: operatingCashFlow,
+    total_assets_cr: totalAssets,
+    total_liabilities_cr: totalLiabilities,
+    sales_growth_pct: salesGrowth,
+    profit_growth_pct: profitGrowth
   };
 }
 
@@ -118,7 +201,6 @@ async function countFailures(db) {
     SELECT COUNT(*) AS total
     FROM fundamentals_sync_failures
   `).first();
-
   return Number(row?.total || 0);
 }
 
@@ -134,11 +216,7 @@ async function finishCycle(db) {
           updated_at = CURRENT_TIMESTAMP
       WHERE id = 1
     `).run();
-
-    return {
-      status: "completed",
-      failed_pending: 0
-    };
+    return { status: "completed", failed_pending: 0 };
   }
 
   await db.prepare(`
@@ -149,10 +227,7 @@ async function finishCycle(db) {
     WHERE id = 1
   `).bind(failures).run();
 
-  return {
-    status: "retry_pending",
-    failed_pending: failures
-  };
+  return { status: "retry_pending", failed_pending: failures };
 }
 
 async function getEligibleCount(db, afterId = 0) {
@@ -165,16 +240,12 @@ async function getEligibleCount(db, afterId = 0) {
       AND instrument_type IN ('EQ', 'BE', 'BZ', 'SM')
       AND id > ?
   `).bind(afterId).first();
-
   return Number(row?.total || 0);
 }
 
 export async function onRequestPost({ request, env }) {
   if (!(await validSession(request, env.SESSION_SECRET))) {
-    return json({
-      success: false,
-      message: "Unauthorized"
-    }, 401);
+    return json({ success: false, message: "Unauthorized" }, 401);
   }
 
   const db = env.ADVANCED_DB;
@@ -200,12 +271,11 @@ export async function onRequestPost({ request, env }) {
       }, 500);
     }
 
-    // Start the next full cycle only after 10 days.
+    // Start a new full cycle only after the existing 10-day interval.
     if (state.status === "completed" && state.last_completed_at) {
       const completedTime = Date.parse(
         state.last_completed_at.replace(" ", "T") + "Z"
       );
-
       const interval = REFRESH_DAYS * 86400000;
       const age = Date.now() - completedTime;
 
@@ -214,9 +284,7 @@ export async function onRequestPost({ request, env }) {
           success: true,
           message: "Fundamentals refresh is not due yet",
           last_completed_at: state.last_completed_at,
-          next_refresh_in_days: Math.ceil(
-            (interval - age) / 86400000
-          )
+          next_refresh_in_days: Math.ceil((interval - age) / 86400000)
         });
       }
 
@@ -257,9 +325,7 @@ export async function onRequestPost({ request, env }) {
       companies = retryResult.results || [];
 
       if (companies.length === 0) {
-        // Keep retry_pending while failures await their retry time.
         const pending = await countFailures(db);
-
         await db.prepare(`
           UPDATE fundamentals_sync_state
           SET status = 'retry_pending',
@@ -286,16 +352,12 @@ export async function onRequestPost({ request, env }) {
           AND id > ?
         ORDER BY id ASC
         LIMIT ?
-      `).bind(
-        state.last_company_id || 0,
-        BATCH_SIZE
-      ).all();
+      `).bind(state.last_company_id || 0, BATCH_SIZE).all();
 
       companies = companyResult.results || [];
 
       if (companies.length === 0) {
         const completion = await finishCycle(db);
-
         return json({
           success: true,
           message: "Initial company scan finished",
@@ -308,30 +370,26 @@ export async function onRequestPost({ request, env }) {
     let failed = 0;
     const results = [];
 
-    // Sequential requests keep Upstox API usage controlled.
+    // Sequential company processing: at most four fundamentals requests per
+    // company, without parallel bursts. Supplementary failures remain NULL.
     for (const company of companies) {
       try {
         if (!company.isin || !company.isin.startsWith("INE")) {
           throw new Error("Invalid company ISIN");
         }
-
         if (!ELIGIBLE_TYPES.includes(company.instrument_type)) {
           throw new Error("Ineligible instrument type");
         }
 
-        const result = await fetchAndSave(db, token, company);
-
-        results.push(result);
+        results.push(await fetchAndSave(db, token, company));
         successful++;
       } catch (error) {
         await saveFailure(db, company.id, error.message);
-
         results.push({
           symbol: company.symbol,
           success: false,
           message: error.message
         });
-
         failed++;
       }
     }
@@ -339,7 +397,6 @@ export async function onRequestPost({ request, env }) {
     // Retry batches do not move the main company cursor.
     if (retryMode) {
       const completion = await finishCycle(db);
-
       return json({
         success: true,
         message: "Failed-company retry batch processed",
@@ -351,18 +408,10 @@ export async function onRequestPost({ request, env }) {
       });
     }
 
-    const lastCompanyId = Math.max(
-      ...companies.map(company => company.id)
-    );
-
-    const remainingCompanies = await getEligibleCount(
-      db,
-      lastCompanyId
-    );
-
+    const lastCompanyId = Math.max(...companies.map(company => company.id));
+    const remainingCompanies = await getEligibleCount(db, lastCompanyId);
     const pendingFailures = await countFailures(db);
     const scanFinished = remainingCompanies === 0;
-
     const nextStatus = scanFinished
       ? (pendingFailures > 0 ? "retry_pending" : "completed")
       : "running";
@@ -403,7 +452,6 @@ export async function onRequestPost({ request, env }) {
       status: nextStatus,
       results
     });
-
   } catch (error) {
     return json({
       success: false,
