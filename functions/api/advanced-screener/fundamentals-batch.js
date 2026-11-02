@@ -3,6 +3,7 @@ import { validSession, json } from "../admin/auth.js";
 
 const BATCH_SIZE = 10;
 const REFRESH_DAYS = 10;
+
 const ELIGIBLE_TYPES = ["EQ", "BE", "BZ", "SM"];
 
 function getRatio(ratios, name) {
@@ -36,6 +37,7 @@ async function fetchAndSave(db, token, company) {
   const response = await fetch(
     `https://api.upstox.com/v2/fundamentals/${encodeURIComponent(company.isin)}/key-ratios`,
     {
+      method: "GET",
       headers: {
         Accept: "application/json",
         Authorization: `Bearer ${token}`
@@ -44,15 +46,21 @@ async function fetchAndSave(db, token, company) {
   );
 
   let result;
+
   try {
     result = await response.json();
   } catch {
     throw new Error(`Invalid Upstox response: HTTP ${response.status}`);
   }
 
-  if (!response.ok || result.status !== "success" ||
-      !Array.isArray(result.data)) {
-    throw new Error(result.message || `Upstox HTTP ${response.status}`);
+  if (
+    !response.ok ||
+    result.status !== "success" ||
+    !Array.isArray(result.data)
+  ) {
+    throw new Error(
+      result.message || `Upstox HTTP ${response.status}`
+    );
   }
 
   const pe = getRatio(result.data, "P/E");
@@ -60,31 +68,40 @@ async function fetchAndSave(db, token, company) {
   const roce = getRatio(result.data, "ROCE");
 
   if (pe === null && roe === null && roce === null) {
-    throw new Error("Upstox returned no usable P/E, ROE or ROCE values");
+    throw new Error("No usable P/E, ROE or ROCE values returned");
   }
 
-  // Use Indian market date.
-  const asOfDate = new Date()
-    .toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+  const asOfDate = new Date().toLocaleDateString(
+    "en-CA",
+    { timeZone: "Asia/Kolkata" }
+  );
 
   await db.prepare(`
     INSERT INTO fundamentals (
-      company_id, as_of_date, pe, roe_pct, roce_pct, source, updated_at
+      company_id, as_of_date, pe, roe_pct, roce_pct,
+      source, updated_at
     )
     VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-    ON CONFLICT(company_id, as_of_date) DO UPDATE SET
+
+    ON CONFLICT(company_id, as_of_date)
+    DO UPDATE SET
       pe = COALESCE(excluded.pe, fundamentals.pe),
       roe_pct = COALESCE(excluded.roe_pct, fundamentals.roe_pct),
       roce_pct = COALESCE(excluded.roce_pct, fundamentals.roce_pct),
       source = excluded.source,
       updated_at = CURRENT_TIMESTAMP
   `).bind(
-    company.id, asOfDate, pe, roe, roce,
+    company.id,
+    asOfDate,
+    pe,
+    roe,
+    roce,
     "Upstox Fundamentals Key Ratios"
   ).run();
 
   await db.prepare(`
-    DELETE FROM fundamentals_sync_failures WHERE company_id = ?
+    DELETE FROM fundamentals_sync_failures
+    WHERE company_id = ?
   `).bind(company.id).run();
 
   return {
@@ -98,8 +115,10 @@ async function fetchAndSave(db, token, company) {
 
 async function countFailures(db) {
   const row = await db.prepare(`
-    SELECT COUNT(*) AS total FROM fundamentals_sync_failures
+    SELECT COUNT(*) AS total
+    FROM fundamentals_sync_failures
   `).first();
+
   return Number(row?.total || 0);
 }
 
@@ -116,10 +135,12 @@ async function finishCycle(db) {
       WHERE id = 1
     `).run();
 
-    return { status: "completed", failed_pending: 0 };
+    return {
+      status: "completed",
+      failed_pending: 0
+    };
   }
 
-  // Do not mark completion while failed companies await retry.
   await db.prepare(`
     UPDATE fundamentals_sync_state
     SET status = 'retry_pending',
@@ -128,12 +149,32 @@ async function finishCycle(db) {
     WHERE id = 1
   `).bind(failures).run();
 
-  return { status: "retry_pending", failed_pending: failures };
+  return {
+    status: "retry_pending",
+    failed_pending: failures
+  };
+}
+
+async function getEligibleCount(db, afterId = 0) {
+  const row = await db.prepare(`
+    SELECT COUNT(*) AS total
+    FROM companies
+    WHERE exchange = 'NSE'
+      AND active = 1
+      AND isin LIKE 'INE%'
+      AND instrument_type IN ('EQ', 'BE', 'BZ', 'SM')
+      AND id > ?
+  `).bind(afterId).first();
+
+  return Number(row?.total || 0);
 }
 
 export async function onRequestPost({ request, env }) {
   if (!(await validSession(request, env.SESSION_SECRET))) {
-    return json({ success: false, message: "Unauthorized" }, 401);
+    return json({
+      success: false,
+      message: "Unauthorized"
+    }, 401);
   }
 
   const db = env.ADVANCED_DB;
@@ -148,7 +189,8 @@ export async function onRequestPost({ request, env }) {
 
   try {
     let state = await db.prepare(`
-      SELECT * FROM fundamentals_sync_state WHERE id = 1
+      SELECT * FROM fundamentals_sync_state
+      WHERE id = 1
     `).first();
 
     if (!state) {
@@ -158,20 +200,23 @@ export async function onRequestPost({ request, env }) {
       }, 500);
     }
 
-    // A successful full cycle is refreshed every 10 days.
+    // Start the next full cycle only after 10 days.
     if (state.status === "completed" && state.last_completed_at) {
-      const completed = Date.parse(
+      const completedTime = Date.parse(
         state.last_completed_at.replace(" ", "T") + "Z"
       );
-      const interval = REFRESH_DAYS * 86400000;
-      const age = Date.now() - completed;
 
-      if (Number.isFinite(completed) && age < interval) {
+      const interval = REFRESH_DAYS * 86400000;
+      const age = Date.now() - completedTime;
+
+      if (Number.isFinite(completedTime) && age < interval) {
         return json({
           success: true,
-          message: "Refresh is not due yet",
+          message: "Fundamentals refresh is not due yet",
           last_completed_at: state.last_completed_at,
-          next_refresh_in_days: Math.ceil((interval - age) / 86400000)
+          next_refresh_in_days: Math.ceil(
+            (interval - age) / 86400000
+          )
         });
       }
 
@@ -188,7 +233,8 @@ export async function onRequestPost({ request, env }) {
       `).run();
 
       state = await db.prepare(`
-        SELECT * FROM fundamentals_sync_state WHERE id = 1
+        SELECT * FROM fundamentals_sync_state
+        WHERE id = 1
       `).first();
     }
 
@@ -196,10 +242,10 @@ export async function onRequestPost({ request, env }) {
       state.status === "retry_pending" ||
       state.status === "completed_with_failures";
 
-    let companies;
+    let companies = [];
 
     if (retryMode) {
-      const result = await db.prepare(`
+      const retryResult = await db.prepare(`
         SELECT c.id, c.symbol, c.isin, c.instrument_type
         FROM fundamentals_sync_failures f
         JOIN companies c ON c.id = f.company_id
@@ -208,18 +254,29 @@ export async function onRequestPost({ request, env }) {
         LIMIT ?
       `).bind(BATCH_SIZE).all();
 
-      companies = result.results || [];
+      companies = retryResult.results || [];
 
       if (companies.length === 0) {
-        const completion = await finishCycle(db);
+        // Keep retry_pending while failures await their retry time.
+        const pending = await countFailures(db);
+
+        await db.prepare(`
+          UPDATE fundamentals_sync_state
+          SET status = 'retry_pending',
+              total_failed = ?,
+              updated_at = CURRENT_TIMESTAMP
+          WHERE id = 1
+        `).bind(pending).run();
+
         return json({
           success: true,
-          message: "Failed companies are waiting for retry",
-          ...completion
+          message: "Waiting for failed companies retry time",
+          status: "retry_pending",
+          failed_pending: pending
         });
       }
     } else {
-      const result = await db.prepare(`
+      const companyResult = await db.prepare(`
         SELECT id, symbol, isin, instrument_type
         FROM companies
         WHERE exchange = 'NSE'
@@ -229,12 +286,16 @@ export async function onRequestPost({ request, env }) {
           AND id > ?
         ORDER BY id ASC
         LIMIT ?
-      `).bind(state.last_company_id || 0, BATCH_SIZE).all();
+      `).bind(
+        state.last_company_id || 0,
+        BATCH_SIZE
+      ).all();
 
-      companies = result.results || [];
+      companies = companyResult.results || [];
 
       if (companies.length === 0) {
         const completion = await finishCycle(db);
+
         return json({
           success: true,
           message: "Initial company scan finished",
@@ -247,32 +308,41 @@ export async function onRequestPost({ request, env }) {
     let failed = 0;
     const results = [];
 
+    // Sequential requests keep Upstox API usage controlled.
     for (const company of companies) {
       try {
         if (!company.isin || !company.isin.startsWith("INE")) {
           throw new Error("Invalid company ISIN");
         }
 
+        if (!ELIGIBLE_TYPES.includes(company.instrument_type)) {
+          throw new Error("Ineligible instrument type");
+        }
+
         const result = await fetchAndSave(db, token, company);
+
         results.push(result);
         successful++;
       } catch (error) {
         await saveFailure(db, company.id, error.message);
+
         results.push({
           symbol: company.symbol,
           success: false,
           message: error.message
         });
+
         failed++;
       }
     }
 
+    // Retry batches do not move the main company cursor.
     if (retryMode) {
       const completion = await finishCycle(db);
 
       return json({
         success: true,
-        message: "Retry batch processed",
+        message: "Failed-company retry batch processed",
         batch_size: companies.length,
         successful,
         failed,
@@ -281,20 +351,16 @@ export async function onRequestPost({ request, env }) {
       });
     }
 
-    const lastCompanyId = Math.max(...companies.map(c => c.id));
+    const lastCompanyId = Math.max(
+      ...companies.map(company => company.id)
+    );
 
-    const remaining = await db.prepare(`
-      SELECT COUNT(*) AS total
-      FROM companies
-      WHERE exchange = 'NSE'
-        AND active = 1
-        AND isin LIKE 'INE%'
-        AND instrument_type IN ('EQ', 'BE', 'BZ', 'SM')
-        AND id > ?
-    `).bind(lastCompanyId).first();
+    const remainingCompanies = await getEligibleCount(
+      db,
+      lastCompanyId
+    );
 
-    const remainingCompanies = Number(remaining?.total || 0);
-    const pendingFailures = await countFailures();
+    const pendingFailures = await countFailures(db);
     const scanFinished = remainingCompanies === 0;
 
     const nextStatus = scanFinished
@@ -309,7 +375,8 @@ export async function onRequestPost({ request, env }) {
           total_failed = ?,
           status = ?,
           last_completed_at = CASE
-            WHEN ? = 1 AND ? = 0 THEN CURRENT_TIMESTAMP
+            WHEN ? = 1 AND ? = 0
+            THEN CURRENT_TIMESTAMP
             ELSE last_completed_at
           END,
           updated_at = CURRENT_TIMESTAMP
