@@ -4,11 +4,9 @@ import { validSession, json } from "../admin/auth.js";
 const BATCH_SIZE = 10;
 const REFRESH_DAYS = 10;
 
-const ELIGIBLE_TYPES = ["EQ", "BE", "BZ", "SM"];
-
 function getRatio(ratios, name) {
   const item = ratios.find(
-    r => r.name?.trim().toLowerCase() === name.toLowerCase()
+    r => r.name?.toLowerCase() === name.toLowerCase()
   );
 
   if (!item || item.company_value == null) return null;
@@ -46,27 +44,19 @@ async function fetchAndSave(db, token, company) {
     }
   );
 
-  let result;
+  const result = await response.json();
 
-  try {
-    result = await response.json();
-  } catch {
-    throw new Error(`Invalid Upstox response: HTTP ${response.status}`);
-  }
-
-  if (
-    !response.ok ||
-    result.status !== "success" ||
-    !Array.isArray(result.data)
-  ) {
+  if (!response.ok || result.status !== "success" ||
+      !Array.isArray(result.data)) {
     throw new Error(
       result.message || `Upstox HTTP ${response.status}`
     );
   }
 
-  const pe = getRatio(result.data, "P/E");
-  const roe = getRatio(result.data, "ROE");
-  const roce = getRatio(result.data, "ROCE");
+  const ratios = result.data;
+  const pe = getRatio(ratios, "P/E");
+  const roe = getRatio(ratios, "ROE");
+  const roce = getRatio(ratios, "ROCE");
 
   const asOfDate = new Date().toISOString().slice(0, 10);
 
@@ -103,76 +93,23 @@ async function fetchAndSave(db, token, company) {
     WHERE company_id = ?
   `).bind(company.id).run();
 
-  return {
-    symbol: company.symbol,
-    instrument_type: company.instrument_type,
-    success: true,
-    pe,
-    roe_pct: roe,
-    roce_pct: roce
-  };
-}
-
-async function countFailures(db) {
-  const row = await db.prepare(`
-    SELECT COUNT(*) AS total
-    FROM fundamentals_sync_failures
-  `).first();
-
-  return row?.total || 0;
-}
-
-async function completeCycle(db) {
-  const failures = await countFailures(db);
-
-  if (failures === 0) {
-    await db.prepare(`
-      UPDATE fundamentals_sync_state
-      SET status = 'completed',
-          last_completed_at = CURRENT_TIMESTAMP,
-          total_failed = 0,
-          updated_at = CURRENT_TIMESTAMP
-      WHERE id = 1
-    `).run();
-
-    return {
-      status: "completed",
-      failed_pending: 0
-    };
-  }
-
-  await db.prepare(`
-    UPDATE fundamentals_sync_state
-    SET status = 'retry_pending',
-        total_failed = ?,
-        updated_at = CURRENT_TIMESTAMP
-    WHERE id = 1
-  `).bind(failures).run();
-
-  return {
-    status: "retry_pending",
-    failed_pending: failures
-  };
+  return { symbol: company.symbol, success: true, pe, roe_pct: roe, roce_pct: roce };
 }
 
 export async function onRequestPost(context) {
   const { request, env } = context;
+  const db = env.ADVANCED_DB;
+  const token = env.UPSTOX_ANALYTICS_TOKEN2;
 
-  // Existing StockGyan admin authentication.
+  // Reuse StockGyan's existing admin login.
   const authenticated = await validSession(
     request,
     env.SESSION_SECRET
   );
 
   if (!authenticated) {
-    return json({
-      success: false,
-      message: "Unauthorized"
-    }, 401);
+    return json({ success: false, message: "Unauthorized" }, 401);
   }
-
-  const db = env.ADVANCED_DB;
-  const token = env.UPSTOX_ANALYTICS_TOKEN2;
 
   if (!db || !token) {
     return json({
@@ -182,38 +119,42 @@ export async function onRequestPost(context) {
   }
 
   try {
-    let state = await db.prepare(`
+    const stateResult = await db.prepare(`
       SELECT * FROM fundamentals_sync_state WHERE id = 1
     `).first();
 
-    if (!state) {
+    if (!stateResult) {
       return json({
         success: false,
         message: "Fundamentals sync state is missing"
       }, 500);
     }
 
-    // Start a new full cycle only after 10 days
-    // from the previous completely successful cycle.
+    const state = stateResult;
+
+    // Once a full import is complete, wait 10 days
+    // before starting the next full refresh.
     if (state.status === "completed" && state.last_completed_at) {
       const completedTime = Date.parse(
         state.last_completed_at.replace(" ", "T") + "Z"
       );
 
-      const interval = REFRESH_DAYS * 24 * 60 * 60 * 1000;
-      const elapsed = Date.now() - completedTime;
+      const age = Date.now() - completedTime;
+      const refreshInterval = REFRESH_DAYS * 24 * 60 * 60 * 1000;
 
-      if (Number.isFinite(completedTime) && elapsed < interval) {
+      if (Number.isFinite(completedTime) &&
+          age < refreshInterval) {
         return json({
           success: true,
-          message: "Next fundamentals refresh is not due yet",
+          message: "Fundamentals refresh is not due yet",
           last_completed_at: state.last_completed_at,
           next_refresh_in_days: Math.ceil(
-            (interval - elapsed) / (24 * 60 * 60 * 1000)
+            (refreshInterval - age) / (24 * 60 * 60 * 1000)
           )
         });
       }
 
+      // Start a fresh 10-day refresh cycle.
       await db.prepare(`
         UPDATE fundamentals_sync_state
         SET last_company_id = 0,
@@ -225,18 +166,18 @@ export async function onRequestPost(context) {
             updated_at = CURRENT_TIMESTAMP
         WHERE id = 1
       `).run();
-
-      state = await db.prepare(`
-        SELECT * FROM fundamentals_sync_state WHERE id = 1
-      `).first();
     }
 
+    // If the full company list has already been scanned,
+    // process failed companies whose retry time has arrived.
     let companies = [];
-    let retryMode = state.status === "retry_pending";
 
-    if (retryMode) {
+    if (
+      state.status === "completed_with_failures" ||
+      state.status === "retry_pending"
+    ) {
       const retryResult = await db.prepare(`
-        SELECT c.id, c.symbol, c.isin, c.instrument_type
+        SELECT c.id, c.symbol, c.isin
         FROM fundamentals_sync_failures f
         JOIN companies c ON c.id = f.company_id
         WHERE f.next_retry_at <= datetime('now')
@@ -246,25 +187,26 @@ export async function onRequestPost(context) {
 
       companies = retryResult.results || [];
 
-      if (companies.length === 0) {
-        const completion = await completeCycle(db);
+      if (!companies.length) {
+        const remaining = await db.prepare(`
+          SELECT COUNT(*) AS total
+          FROM fundamentals_sync_failures
+        `).first();
 
         return json({
           success: true,
-          message: completion.failed_pending
-            ? "Waiting for failed companies to become eligible for retry"
-            : "Fundamentals import completed",
-          ...completion
+          message: "No failed companies are due for retry yet",
+          retry_pending: remaining?.total || 0
         });
       }
     } else {
       const companyResult = await db.prepare(`
-        SELECT id, symbol, isin, instrument_type
+        SELECT id, symbol, isin
         FROM companies
         WHERE exchange = 'NSE'
           AND active = 1
-          AND isin LIKE 'INE%'
-          AND instrument_type IN ('EQ', 'BE', 'BZ', 'SM')
+          AND isin IS NOT NULL
+          AND isin != ''
           AND id > ?
         ORDER BY id ASC
         LIMIT ?
@@ -274,23 +216,39 @@ export async function onRequestPost(context) {
       ).all();
 
       companies = companyResult.results || [];
+    }
 
-      if (companies.length === 0) {
-        const completion = await completeCycle(db);
+    if (!companies.length) {
+      const failed = await db.prepare(`
+        SELECT COUNT(*) AS total
+        FROM fundamentals_sync_failures
+      `).first();
 
-        return json({
-          success: true,
-          message: "Initial company scan finished",
-          ...completion
-        });
-      }
+      const status = failed?.total > 0
+        ? "completed_with_failures"
+        : "completed";
+
+      await db.prepare(`
+        UPDATE fundamentals_sync_state
+        SET status = ?,
+            last_completed_at = CURRENT_TIMESTAMP,
+            total_failed = ?,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = 1
+      `).bind(status, failed?.total || 0).run();
+
+      return json({
+        success: true,
+        message: "Fundamentals import completed",
+        status,
+        failed_companies: failed?.total || 0
+      });
     }
 
     const results = [];
     let successful = 0;
     let failed = 0;
 
-    // Sequential requests to keep API usage controlled.
     for (const company of companies) {
       try {
         const result = await fetchAndSave(db, token, company);
@@ -298,60 +256,43 @@ export async function onRequestPost(context) {
         successful++;
       } catch (error) {
         await saveFailure(db, company.id, error.message);
-
         results.push({
           symbol: company.symbol,
           success: false,
           message: error.message
         });
-
         failed++;
       }
     }
 
-    let remainingCompanies = 0;
+    const lastCompanyId = Math.max(
+      ...companies.map(company => company.id)
+    );
 
-    if (!retryMode) {
-      const remaining = await db.prepare(`
-        SELECT COUNT(*) AS total
-        FROM companies
-        WHERE exchange = 'NSE'
-          AND active = 1
-          AND isin LIKE 'INE%'
-          AND instrument_type IN ('EQ', 'BE', 'BZ', 'SM')
-          AND id > ?
-      `).bind(
-        Math.max(...companies.map(c => c.id))
-      ).first();
+    const remainingCompanies = await db.prepare(`
+      SELECT COUNT(*) AS total
+      FROM companies
+      WHERE exchange = 'NSE'
+        AND active = 1
+        AND isin IS NOT NULL
+        AND isin != ''
+        AND id > ?
+    `).bind(lastCompanyId).first();
 
-      remainingCompanies = remaining?.total || 0;
-    }
+    const failureCount = await db.prepare(`
+      SELECT COUNT(*) AS total
+      FROM fundamentals_sync_failures
+    `).first();
 
-    const pendingFailures = await countFailures();
+    const isInitialScanComplete = remainingCompanies?.total === 0;
 
-    if (retryMode) {
-      const completion = await completeCycle(db);
-
-      return json({
-        success: true,
-        message: "Failed-company retry batch processed",
-        batch_size: companies.length,
-        successful,
-        failed,
-        failed_pending: completion.failed_pending,
-        status: completion.status,
-        results
-      });
-    }
-
-    const lastCompanyId = Math.max(...companies.map(c => c.id));
-    const scanFinished = remainingCompanies === 0;
-
-    const nextStatus = scanFinished
-      ? (pendingFailures > 0 ? "retry_pending" : "completed")
+    const newStatus = isInitialScanComplete
+      ? (failureCount?.total > 0
+          ? "completed_with_failures"
+          : "completed")
       : "running";
 
-    await db.prepare(`
+    const updateState = await db.prepare(`
       UPDATE fundamentals_sync_state
       SET last_company_id = ?,
           total_processed = total_processed + ?,
@@ -359,8 +300,7 @@ export async function onRequestPost(context) {
           total_failed = ?,
           status = ?,
           last_completed_at = CASE
-            WHEN ? = 1 AND ? = 0
-            THEN CURRENT_TIMESTAMP
+            WHEN ? = 1 THEN CURRENT_TIMESTAMP
             ELSE last_completed_at
           END,
           updated_at = CURRENT_TIMESTAMP
@@ -369,10 +309,9 @@ export async function onRequestPost(context) {
       lastCompanyId,
       companies.length,
       successful,
-      pendingFailures,
-      nextStatus,
-      scanFinished ? 1 : 0,
-      pendingFailures
+      failureCount?.total || 0,
+      newStatus,
+      isInitialScanComplete ? 1 : 0
     ).run();
 
     return json({
@@ -382,9 +321,9 @@ export async function onRequestPost(context) {
       batch_size: companies.length,
       successful,
       failed,
-      remaining_companies: remainingCompanies,
-      total_failed_pending: pendingFailures,
-      status: nextStatus,
+      remaining_companies: remainingCompanies?.total || 0,
+      total_failed_pending: failureCount?.total || 0,
+      status: newStatus,
       results
     });
 
